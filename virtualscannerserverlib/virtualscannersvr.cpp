@@ -246,8 +246,7 @@ namespace DROWNINGLIU
 			reqPackHead_t  *tmpHead = NULL;		//请求报头
 			reqTemplateErrHead_t  *Head = NULL;	//下载模板请求报头
 
-
-												//1.获取接收数据包的命令字
+			//1.获取接收数据包的命令字
 			cmd = *((uint8_t *)tmpContent);
 
 			//2.进行命令字的选择
@@ -384,7 +383,8 @@ namespace DROWNINGLIU
 			}
 
 			//3.获取文件大小
-			if (fileSizeSrc)			 *fileSizeSrc = filesize;
+			if (fileSizeSrc)
+				*fileSizeSrc = filesize;
 
 			return ret;
 		}
@@ -401,7 +401,6 @@ namespace DROWNINGLIU
 				ret = -1;
 				goto End;
 			}
-
 
 			const char *tmpInData = inData;
 			const char *tmp = ++inData;
@@ -494,8 +493,6 @@ namespace DROWNINGLIU
 			//socket_log( SocketLevel[2], ret, "func escape() end");
 			return ret;
 		}
-
-		
 
 		void assign_serverSubPack_head(resSubPackHead_t *head, uint8_t cmd, int contentLenth, int currentIndex, int totalNumber)
 		{
@@ -737,7 +734,7 @@ namespace DROWNINGLIU
 		{
 			int ret = 0, outDataLenth = 0;
 			resSubPackHead_t 	head;					//应答数据包报头
-			char *tmp = NULL, *sendBufStr = data_.data();
+			char *tmp = NULL, *sendBufStr = NULL;// data_.data();
 			int contentLenth = 0;
 			int checkNum = 0, nRead = 0;				//校验码和 读取字节数
 			char tmpSendBuf[1400] = { 0 };				//临时缓冲区
@@ -781,6 +778,10 @@ namespace DROWNINGLIU
 			//5. read The file content	
 			while (!feof(fp))
 			{
+				type_data_t	data;
+
+				sendBufStr = data.data();
+
 				//6. get The part of The file conTent	And package The body News
 				memset(tmpSendBuf, 0, sizeof(tmpSendBuf));
 				tmp = tmpSendBuf + sizeof(resSubPackHead_t);
@@ -826,7 +827,15 @@ namespace DROWNINGLIU
 				}
 				*(sendBufStr + outDataLenth + 1) = PACKSIGN; 	 //flag 
 
-				nLen2Write_ = outDataLenth + sizeof(char) * 2;
+				//nLen2Write_ = outDataLenth + sizeof(char) * 2;
+
+				{
+
+					std::lock_guard<std::mutex> lock(_mtxData);
+					_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
+
+				}
+
 				//5.7 push The sendData addr and sendLenth in queuebuf
 				/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + sizeof(char) * 2, DOWNFILEZRESPON)) < 0)
 				{
@@ -1221,24 +1230,44 @@ namespace DROWNINGLIU
 					if (0 > find_whole_package(data_.data(), length, 0))
 						return;//do_read();
 
-					////获得需要写的长度
-					//int nSockFD = getSocketFD();
-					//int nlen2write = 0;
+					if(0)
+					{
+						//int nSockFD = getSocketFD();
+						int nlen2write = 0;
 
-					//{
-					//	//只有自己的socket，因为buffer是跟session、socket绑定的。
-					//	std::lock_guard<std::mutex> lock(_mtxSock2Data);
-					//	auto itr = _mapSock2Data.find(nSockFD);
-					//	if (itr == std::end(_mapSock2Data))
-					//		return;	//结束，没有可写的了
+						////只有自己的socket，因为buffer是跟session、socket绑定的。
+						//std::lock_guard<std::mutex> lock(_mtxSock2Data);
+						//auto itr = _mapSock2Data.find(nSockFD);
+						//if (itr == std::end(_mapSock2Data))
+						//	return;	//结束，没有可写的了
 
-					//	auto &data = itr->second.second;
-					//	nlen2write = itr->second.first;
-					//	data_ = data;
-					//	_mapSock2Data.erase(itr);
-					//}
+						/*auto &data = itr->second.second;
+						nlen2write = itr->second.first;
+						data_ = data;
+						_mapSock2Data.erase(itr);*/
 
-					do_write(nLen2Write_);
+						std::lock_guard<std::mutex> lock(_mtxData);
+						
+						//这里投递多次无效吧？或者说buffer拷贝走的太多了，能保证顺序吗？
+						//或者这里投递一次，在do_write里继续投递一次，循环。
+						//那索性这里投递0，统一在dowrite中投递一次
+						while (!_deqData.empty())
+						{
+							auto &pair = _deqData.front();
+
+							nlen2write = pair.first;
+							auto &data = pair.second;
+							data_.swap(data);
+
+							nLen2Write_ = nlen2write;
+
+							_deqData.pop_front();
+
+							do_write(nLen2Write_);
+						}
+					}
+					else
+						do_write(nLen2Write_);
 #endif
 				}
 			}));
@@ -1255,8 +1284,29 @@ namespace DROWNINGLIU
 				if (!ec)
 				{
 					//assert(typeid(socket_.get_io_service()) == typeid(boost::asio::stream_socket_service<tcp>));
+					if (0)
+					{
+						int nlen2write = 0;
+						std::lock_guard<std::mutex> lock(_mtxData);
 
-					do_read();
+						//这里投递多次无效吧？
+						while (!_deqData.empty())
+						{
+							auto &pair = _deqData.front();
+
+							nlen2write = pair.first;
+							auto &data = pair.second;
+							data_.swap(data);
+
+							nLen2Write_ = nlen2write;
+
+							_deqData.pop_front();
+
+							do_write(nLen2Write_);
+						}
+					}
+					else
+						do_read();
 				}
 			}));
 		}

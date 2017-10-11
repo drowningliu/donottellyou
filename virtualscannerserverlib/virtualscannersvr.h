@@ -180,10 +180,13 @@ namespace DROWNINGLIU
 			std::unordered_map<boost::asio::detail::socket_type, deq_data_t> _mapSock2Data;
 #else
 			//每个socket对应的收/发数据
-			std::unordered_map<boost::asio::detail::socket_type, pair_data_t> _mapSock2Data;
+			//std::unordered_map<boost::asio::detail::socket_type, pair_data_t> _mapSock2Data;
+			typedef std::deque<pair_data_t> deq_data_t;
+			deq_data_t	_deqData;
 #endif
 			//std::lock_guard<std::mutex> lock(_mtxXLH);
-			mutable std::mutex	_mtxSock2Data;	//consider using rwlock
+			//mutable std::mutex	_mtxSock2Data;	//consider using rwlock
+			mutable std::mutex	_mtxData;	//consider using rwlock
 
 			// The allocator to use for handler-based custom memory allocation.
 			handler_allocator allocator_;
