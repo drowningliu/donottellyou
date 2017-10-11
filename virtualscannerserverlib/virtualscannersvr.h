@@ -253,6 +253,10 @@ namespace DROWNINGLIU
 			int read_data_proce(char *recvBuf, int recvLen, int index);
 
 			int exit_func_reply(char *recvBuf, int recvLen, int index);
+
+			int downLoad_template_func_reply(char *recvBuf, int recvLen, int index);
+			int get_FileNewestID_reply(char *recvBuf, int recvLen, int index);
+			int upload_func_reply(char *recvBuf, int recvLen, int index);
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>
@@ -308,6 +312,16 @@ namespace DROWNINGLIU
 
 #pragma pack(pop)
 
+#define PACKMAXLENTH  	1400		 //报文的最大长度;		报文结构：标识 1， 头 26，体， 校验 4， 标识 1
+#define COMREQDATABODYLENTH 	PACKMAXLENTH - sizeof(reqPackHead_t) - sizeof(char) * 2 - sizeof(int)         //报体长度最大: 1400-25-2-4 = 1369;  当传输图片时, 图片名在消息体中占46个字节
+#define REQTEMPERRBODYLENTH		PACKMAXLENTH - sizeof(reqTemplateErrHead_t) - sizeof(char) * 2 - sizeof(int)
+#define COMRESBODYLENTH			PACKMAXLENTH - sizeof(resCommonHead_t) - sizeof(char) * 2 - sizeof(int)
+#define RESTEMSUBBODYLENTH		PACKMAXLENTH - sizeof(resSubPackHead_t) - sizeof(char) * 2 - sizeof(int)
+#define FILENAMELENTH 	46			//文件名称
+#define PACKSIGN      	0x7e		//标识符
+#define PERROUNDNUMBER	50			//每轮发送的数据包最大数目
+#define OUTTIMEPACK 	5			//客户端接收应答的超时时间
+
 		enum Cmd {
 			ERRORFLAGMY = 0x00,		//出错
 			LOGINCMDREQ = 0x01,		//登录
@@ -345,5 +359,15 @@ namespace DROWNINGLIU
 			SUBPACK = 1			//子包
 		};
 #define PACKSIGN      	0x7e		//标识符
+
+		typedef struct _reqTemplateErrHead_t {
+			uint8_t     cmd;                //命令字
+			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
+			uint8_t     isSubPack;          //判断是否为子包, 0 不是, 1 是;
+			uint8_t     machineCode[12];    //机器码
+			uint32_t    seriaNumber;        //流水号
+			uint8_t     failPackNumber;     //是否失败
+			uint16_t    failPackIndex;      //失败数据包的序列号
+		}reqTemplateErrHead_t;
 	}
 }
