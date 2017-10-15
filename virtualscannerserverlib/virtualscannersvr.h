@@ -1,6 +1,6 @@
-#pragma once
+ï»¿#pragma once
 
-//±ØĞëÔÚwindows.hÖ®Ç° £¡£¡£¡£¡
+//å¿…é¡»åœ¨windows.hä¹‹å‰ ï¼ï¼ï¼ï¼
 #include <WinSock2.h>
 #include <windows.h>
 
@@ -27,6 +27,16 @@ namespace DROWNINGLIU
 			Read_MSG = 1,
 			Write_MSG = 2
 		};
+
+
+#define SERVER_IP		"192.168.1.196"	//æœåŠ¡å™¨IP
+#define SERVER_PORT		8009			//æœåŠ¡å™¨ç«¯ï¿½?
+#define	KEY				0x1234			//æ¶ˆæ¯é˜Ÿåˆ—é”®ï¿½?
+#define FILEDIR			"/home/lsh/share/NH_1200/soure"			//æŒ‡å®šç›®å½•
+		//#define UPLOADDIRPATH	"/home/yyx/work/openssl-FTP-TCP/project/uploadTest"		//ä¸Šä¼ æ–‡ä»¶åŠ ç›®ï¿½?
+#define UPLOADDIRPATH	"./uploadTest"		//ä¸Šä¼ æ–‡ä»¶åŠ ç›®ï¿½?
+#define RMFILEPATH 		"/home/lsh/share/NH_1200/Common_image"	
+#define FILEFORMAT 		".jpg"			//æŒ‡å®šæ ¼å¼
 
 		// Class to manage the memory to be used for handler-based custom allocation.
 		// It contains a single block of memory which may be returned for allocation
@@ -173,15 +183,18 @@ namespace DROWNINGLIU
 			
 			type_data_t data_;
 			int nLen2Write_ = 0;
-
+			int cmd_ = 0;
+			//cmd len data
+			typedef std::tuple<int, int, type_data_t> tuple_data_t;
 			typedef std::pair<int, type_data_t> pair_data_t;
 #if IF_USE_ASYNC
 			typedef std::deque<pair_data_t> deq_data_t;
 			std::unordered_map<boost::asio::detail::socket_type, deq_data_t> _mapSock2Data;
 #else
-			//Ã¿¸ösocket¶ÔÓ¦µÄÊÕ/·¢Êı¾İ
+			//æ¯ä¸ªsocketå¯¹åº”çš„æ”¶/å‘æ•°æ®
 			//std::unordered_map<boost::asio::detail::socket_type, pair_data_t> _mapSock2Data;
-			typedef std::deque<pair_data_t> deq_data_t;
+			//typedef std::deque<pair_data_t> deq_data_t;
+			typedef std::deque<tuple_data_t> deq_data_t;
 			deq_data_t	_deqData;
 #endif
 			//std::lock_guard<std::mutex> lock(_mtxXLH);
@@ -233,9 +246,11 @@ namespace DROWNINGLIU
 
 			}
 
+			int init();
+
 			virtual  void do_read() override;
 			virtual void do_write(std::size_t length) override;
-
+			void do_multiwrite(std::size_t length);
 		public:
 			int getSocketFD()
 			{
@@ -251,15 +266,20 @@ namespace DROWNINGLIU
 				return t.socket_;
 			}
 
-			int	find_whole_package(const char *recvBuf, int recvLenth, int index);
+			int	find_whole_package(const char *recvBuf, int recvLenth, int index, int &nCmd);
 			int login_func_reply(char *recvBuf, int recvLen, int index);
-			int read_data_proce(char *recvBuf, int recvLen, int index);
+			int read_data_proce(char *recvBuf, int recvLen, int index, int &nCmd);
 
 			int exit_func_reply(char *recvBuf, int recvLen, int index);
 
 			int downLoad_template_func_reply(char *recvBuf, int recvLen, int index);
 			int get_FileNewestID_reply(char *recvBuf, int recvLen, int index);
 			int upload_func_reply(char *recvBuf, int recvLen, int index);
+			int delete_func_reply(char *recvBuf, int recvLen, int index);
+			int template_extend_element_reply(char *recvBuf, int recvLen, int index);
+			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
+
+			int push_info_toUi(int index, int fileType);
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>
@@ -278,99 +298,102 @@ namespace DROWNINGLIU
 #pragma pack(push)
 #pragma pack(1)
 
-		//É¨ÃèÒÇÇëÇóÊı¾İ°ü±¨Í·
+		//æ‰«æä»ªè¯·æ±‚æ•°æ®åŒ…æŠ¥å¤´
 		typedef struct _reqPackHead_t {
-			uint8_t         cmd;                //ÃüÁî×Ö
-			uint16_t        contentLenth;       //³¤¶È£» °üº¬£º±¨Í·ºÍÏûÏ¢Ìå³¤¶È
-			uint8_t         isSubPack;          //ÅĞ¶ÏÊÇ·ñÎª×Ó°ü, 0 ²»ÊÇ, 1 ÊÇ;
-			uint8_t         machineCode[12];    //»úÆ÷Âë
-			uint32_t        seriaNumber;        //Á÷Ë®ºÅ
-			uint16_t        currentIndex;       //µ±Ç°°üĞòºÅ
-			uint16_t        totalPackage;       //×Ü°üÊı
-			uint8_t         perRoundNumber;     //±¾ÂÖ´«ÊäµÄÊı¾İ°ü¸öÊı
+			uint8_t         cmd;                //å‘½ä»¤å­—
+			uint16_t        contentLenth;       //é•¿åº¦ï¼› åŒ…å«ï¼šæŠ¥å¤´å’Œæ¶ˆæ¯ä½“é•¿åº¦
+			uint8_t         isSubPack;          //åˆ¤æ–­æ˜¯å¦ä¸ºå­åŒ…, 0 ä¸æ˜¯, 1 æ˜¯;
+			uint8_t         machineCode[12];    //æœºå™¨ç 
+			uint32_t        seriaNumber;        //æµæ°´å·
+			uint16_t        currentIndex;       //å½“å‰åŒ…åºå·
+			uint16_t        totalPackage;       //æ€»åŒ…æ•°
+			uint8_t         perRoundNumber;     //æœ¬è½®ä¼ è¾“çš„æ•°æ®åŒ…ä¸ªæ•°
 		}reqPackHead_t;
 		//1 + 2 + 1 + 12 + 4 + 2 + 2 + 1 = 25;
 
-		//·şÎñÆ÷µÄÆÕÍ¨Ó¦´ğ
+		//æœåŠ¡å™¨çš„æ™®é€šåº”ç­”
 		typedef struct _resCommonHead_t {
-			uint8_t     cmd;                //ÃüÁî×Ö
-			uint16_t    contentLenth;       //³¤¶È£» °üº¬£º±¨Í·ºÍÏûÏ¢Ìå³¤¶È
-			uint8_t     isSubPack;          //ÅĞ¶ÏÊÇ·ñÎª×Ó°ü, 			0 ²»ÊÇ, 1 ÊÇ;
-			uint32_t    seriaNumber;        //Á÷Ë®ºÅ
-			uint8_t     isFailPack;     	//ÊÇ·ñÊ§°Ü					0³É¹¦, 1 Ê§°Ü
-			uint16_t    failPackIndex;      //Ê§°ÜÊı¾İ°üµÄĞòÁĞºÅ
-			uint8_t		isRespondClient;	//ÊÇ·ñĞèÒª¿Í»§¶Ë×÷³ö½çÃæÏìÓ¦,  0 ²»ĞèÒª, 1 ĞèÒª×÷³ö½çÃæÏìÓ¦	
+			uint8_t     cmd;                //å‘½ä»¤å­—
+			uint16_t    contentLenth;       //é•¿åº¦ï¼› åŒ…å«ï¼šæŠ¥å¤´å’Œæ¶ˆæ¯ä½“é•¿åº¦
+			uint8_t     isSubPack;          //åˆ¤æ–­æ˜¯å¦ä¸ºå­åŒ…, 			0 ä¸æ˜¯, 1 æ˜¯;
+			uint32_t    seriaNumber;        //æµæ°´å·
+			uint8_t     isFailPack;     	//æ˜¯å¦å¤±è´¥					0æˆåŠŸ, 1 å¤±è´¥
+			uint16_t    failPackIndex;      //å¤±è´¥æ•°æ®åŒ…çš„åºåˆ—å·
+			uint8_t		isRespondClient;	//æ˜¯å¦éœ€è¦å®¢æˆ·ç«¯ä½œå‡ºç•Œé¢å“åº”,  0 ä¸éœ€è¦, 1 éœ€è¦ä½œå‡ºç•Œé¢å“åº”	
 		}resCommonHead_t;
 		//1 + 2 + 1 + 4 + 1 + 2 + 1 = 12
 
-		//´Ó·şÎñÆ÷ÏÂÔØÎÄ¼şÓ¦´ğ
+		//ä»æœåŠ¡å™¨ä¸‹è½½æ–‡ä»¶åº”ç­”
 		typedef struct _resSubPackHead_t {
-			uint8_t     cmd;                //ÃüÁî×Ö
-			uint16_t    contentLenth;       //³¤¶È£» °üº¬£º±¨Í·ºÍÏûÏ¢Ìå³¤¶È
-			uint32_t    seriaNumber;        //Á÷Ë®ºÅ
-			uint16_t    currentIndex;       //µ±Ç°°üĞòºÅ
-			uint16_t    totalPackage;       //×Ü°üÊı
+			uint8_t     cmd;                //å‘½ä»¤å­—
+			uint16_t    contentLenth;       //é•¿åº¦ï¼› åŒ…å«ï¼šæŠ¥å¤´å’Œæ¶ˆæ¯ä½“é•¿åº¦
+			uint32_t    seriaNumber;        //æµæ°´å·
+			uint16_t    currentIndex;       //å½“å‰åŒ…åºå·
+			uint16_t    totalPackage;       //æ€»åŒ…æ•°
 		}resSubPackHead_t;
 		//1 + 2 + 4 + 2 + 2 = 11;
 
 #pragma pack(pop)
 
-#define PACKMAXLENTH  	1400		 //±¨ÎÄµÄ×î´ó³¤¶È;		±¨ÎÄ½á¹¹£º±êÊ¶ 1£¬ Í· 26£¬Ìå£¬ Ğ£Ñé 4£¬ ±êÊ¶ 1
-#define COMREQDATABODYLENTH 	PACKMAXLENTH - sizeof(reqPackHead_t) - sizeof(char) * 2 - sizeof(int)         //±¨Ìå³¤¶È×î´ó: 1400-25-2-4 = 1369;  µ±´«ÊäÍ¼Æ¬Ê±, Í¼Æ¬ÃûÔÚÏûÏ¢ÌåÖĞÕ¼46¸ö×Ö½Ú
+#define PACKMAXLENTH  	1400		 //æŠ¥æ–‡çš„æœ€å¤§é•¿åº¦;		æŠ¥æ–‡ç»“æ„ï¼šæ ‡è¯† 1ï¼Œ å¤´ 26ï¼Œä½“ï¼Œ æ ¡éªŒ 4ï¼Œ æ ‡è¯† 1
+#define COMREQDATABODYLENTH 	PACKMAXLENTH - sizeof(reqPackHead_t) - sizeof(char) * 2 - sizeof(int)         //æŠ¥ä½“é•¿åº¦æœ€å¤§: 1400-25-2-4 = 1369;  å½“ä¼ è¾“å›¾ç‰‡æ—¶, å›¾ç‰‡ååœ¨æ¶ˆæ¯ä½“ä¸­å 46ä¸ªå­—èŠ‚
 #define REQTEMPERRBODYLENTH		PACKMAXLENTH - sizeof(reqTemplateErrHead_t) - sizeof(char) * 2 - sizeof(int)
 #define COMRESBODYLENTH			PACKMAXLENTH - sizeof(resCommonHead_t) - sizeof(char) * 2 - sizeof(int)
 #define RESTEMSUBBODYLENTH		PACKMAXLENTH - sizeof(resSubPackHead_t) - sizeof(char) * 2 - sizeof(int)
-#define FILENAMELENTH 	46			//ÎÄ¼şÃû³Æ
-#define PACKSIGN      	0x7e		//±êÊ¶·û
-#define PERROUNDNUMBER	50			//Ã¿ÂÖ·¢ËÍµÄÊı¾İ°ü×î´óÊıÄ¿
-#define OUTTIMEPACK 	5			//¿Í»§¶Ë½ÓÊÕÓ¦´ğµÄ³¬Ê±Ê±¼ä
+#define FILENAMELENTH 	46			//æ–‡ä»¶åç§°
+#define PACKSIGN      	0x7e		//æ ‡è¯†ç¬¦
+#define PERROUNDNUMBER	50			//æ¯è½®å‘é€çš„æ•°æ®åŒ…æœ€å¤§æ•°ç›®
+#define OUTTIMEPACK 	5			//å®¢æˆ·ç«¯æ¥æ”¶åº”ç­”çš„è¶…æ—¶æ—¶é—´
 
 		enum Cmd {
-			ERRORFLAGMY = 0x00,		//³ö´í
-			LOGINCMDREQ = 0x01,		//µÇÂ¼
+			ERRORFLAGMY = 0x00,		//å‡ºé”™
+			LOGINCMDREQ = 0x01,		//ç™»å½•
 			LOGINCMDRESPON = 0x81,
-			LOGOUTCMDREQ = 0x02,		//µÇ³ö
+			LOGOUTCMDREQ = 0x02,		//ç™»å‡º
 			LOGOUTCMDRESPON = 0x82,
-			HEARTCMDREQ = 0x03,		//ĞÄÌø
+			HEARTCMDREQ = 0x03,		//å¿ƒè·³
 			HEARTCMDRESPON = 0x83,
-			DOWNFILEREQ = 0x04,		//ÏÂÔØÄ£°å
+			DOWNFILEREQ = 0x04,		//ä¸‹è½½æ¨¡æ¿
 			DOWNFILEZRESPON = 0x84,
-			NEWESCMDREQ = 0x05,		//»ñÈ¡Ä£°å×îĞÂ±àºÅ
+			NEWESCMDREQ = 0x05,		//è·å–æ¨¡æ¿æœ€æ–°ç¼–å·
 			NEWESCMDRESPON = 0x85,
-			UPLOADCMDREQ = 0x06,		//ÉÏ´«Í¼Æ¬
+			UPLOADCMDREQ = 0x06,		//ä¸Šä¼ å›¾ç‰‡
 			UPLOADCMDRESPON = 0x86,
-			PUSHINFOREQ = 0x07, 	//ÏûÏ¢ÍÆËÍ
+			PUSHINFOREQ = 0x07, 	//æ¶ˆæ¯æ¨é€
 			PUSHINFORESPON = 0x87,
-			ACTCLOSEREQ = 0x08, 	//Ö÷¶¯¹Ø±Õ
+			ACTCLOSEREQ = 0x08, 	//ä¸»åŠ¨å…³é—­
 			ACTCLOSERESPON = 0x88,
-			DELETECMDREQ = 0x09, 	//É¾³ıÍ¼Æ¬
+			DELETECMDREQ = 0x09, 	//åˆ é™¤å›¾ç‰‡
 			DELETECMDRESPON = 0x89,
-			CONNECTCMDREQ = 0x0A, 	//Á´½Ó·şÎñÆ÷
+			CONNECTCMDREQ = 0x0A, 	//é“¾æ¥æœåŠ¡å™¨
 			CONNECTCMDRESPON = 0x8A,
-			MODIFYCMDREQ = 0x0B, 	//ĞŞ¸ÄÅäÖÃÎÄ¼ş
+			MODIFYCMDREQ = 0x0B, 	//ä¿®æ”¹é…ç½®æ–‡ä»¶
 			MODIFYCMDRESPON = 0x8B,
-			TEMPLATECMDREQ = 0x0C, 	//Ä£°åÊı¾İ°ü
+			TEMPLATECMDREQ = 0x0C, 	//æ¨¡æ¿æ•°æ®åŒ…
 			TEMPLATECMDRESPON = 0x8C,
-			MUTIUPLOADCMDREQ = 0x0D, 	//¶àÕÅÍ¼Æ¬´«Êä
+			MUTIUPLOADCMDREQ = 0x0D, 	//å¤šå¼ å›¾ç‰‡ä¼ è¾“
 			MUTIUPLOADCMDRESPON = 0x8D,
-			ENCRYCMDREQ = 0x0E, 	//¼ÓÃÜ´«Êä
+			ENCRYCMDREQ = 0x0E, 	//åŠ å¯†ä¼ è¾“
 			ENCRYCMDRESPON = 0x8E
 		};
 
 		enum HeadNews {
-			NOSUBPACK = 0,		//·Ç×Ó°ü
-			SUBPACK = 1			//×Ó°ü
+			NOSUBPACK = 0,		//éå­åŒ…
+			SUBPACK = 1			//å­åŒ…
 		};
-#define PACKSIGN      	0x7e		//±êÊ¶·û
+#define PACKSIGN      	0x7e		//æ ‡è¯†ç¬¦
 
 		typedef struct _reqTemplateErrHead_t {
-			uint8_t     cmd;                //ÃüÁî×Ö
-			uint16_t    contentLenth;       //³¤¶È£» °üº¬£º±¨Í·ºÍÏûÏ¢Ìå³¤¶È
-			uint8_t     isSubPack;          //ÅĞ¶ÏÊÇ·ñÎª×Ó°ü, 0 ²»ÊÇ, 1 ÊÇ;
-			uint8_t     machineCode[12];    //»úÆ÷Âë
-			uint32_t    seriaNumber;        //Á÷Ë®ºÅ
-			uint8_t     failPackNumber;     //ÊÇ·ñÊ§°Ü
-			uint16_t    failPackIndex;      //Ê§°ÜÊı¾İ°üµÄĞòÁĞºÅ
+			uint8_t     cmd;                //å‘½ä»¤å­—
+			uint16_t    contentLenth;       //é•¿åº¦ï¼› åŒ…å«ï¼šæŠ¥å¤´å’Œæ¶ˆæ¯ä½“é•¿åº¦
+			uint8_t     isSubPack;          //åˆ¤æ–­æ˜¯å¦ä¸ºå­åŒ…, 0 ä¸æ˜¯, 1 æ˜¯;
+			uint8_t     machineCode[12];    //æœºå™¨ç 
+			uint32_t    seriaNumber;        //æµæ°´å·
+			uint8_t     failPackNumber;     //æ˜¯å¦å¤±è´¥
+			uint16_t    failPackIndex;      //å¤±è´¥æ•°æ®åŒ…çš„åºåˆ—å·
 		}reqTemplateErrHead_t;
+
+#define 	NUMBER		15											//åŒä¸€æ—¶é—´å¯ä»¥æ¥æ”¶çš„å®¢æˆ·ç«¯æ•°
+#define     SCAN_TIME 	15											//æ‰«æé—´éš”æ—¶é—´ 15s
 	}
 }
