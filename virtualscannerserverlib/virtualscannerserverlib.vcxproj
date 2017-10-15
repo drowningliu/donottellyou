@@ -92,13 +92,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;ASIO_STANDALONE;WIN32;_DEBUG;_WINDOWS;_USRDLL;VIRTUALSCANNERSERVERLIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../../CCodeForNewGa7/boost_1_65_1;d:\boost_1_65_1</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../../CCodeForNewGa7/boost_1_65_1;d:\boost_1_65_1;e:\boost_1_65_1;</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_WIN32_WINNT=0x1001 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>../../CCodeForNewGa7/boost_1_65_1/stage\lib;d:\boost_1_65_1/stage\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../../CCodeForNewGa7/boost_1_65_1/stage\lib;d:\boost_1_65_1/stage\lib;e:\boost_1_65_1/stage\lib</AdditionalLibraryDirectories>
       <OutputFile>$(TargetPath)</OutputFile>
       <ImportLibrary>../lib/$(TargetName).lib</ImportLibrary>
     </Link>

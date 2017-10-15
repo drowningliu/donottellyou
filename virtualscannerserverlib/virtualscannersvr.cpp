@@ -127,6 +127,111 @@ namespace DROWNINGLIU
 
 		//保存图片
 		//recvBuf : 转义之后的数据:  包含 : 消息头 + 消息体 + 校验码     (只是去除了, 两个表示符);  recvLen : 长度为 buf 的内容 长度
+		int save_multiPicture_func(char *recvBuf, int recvLen)
+		{
+			char *tmp = NULL;
+			int lenth = 0, ret = 0;
+			char TmpfileName[100] = { 0 };
+			char fileName[100] = { 0 };
+			char cmdBuf[1024] = { 0 };
+			static FILE *fp = NULL;
+			reqPackHead_t *tmpHead = NULL;
+			int nWrite = 0;				//已经写的数据长度
+			int perWrite = 0; 			//每次写入的数据长度
+
+			//0. 获取数据包信息
+			tmpHead = (reqPackHead_t *)recvBuf;
+			lenth = recvLen - sizeof(reqPackHead_t) - sizeof(int) - FILENAMELENTH - sizeof(char) * 2;
+			tmp = recvBuf + sizeof(reqPackHead_t) + FILENAMELENTH + sizeof(char) * 2;
+			//myprint("picDataLenth : %d, currentIndex : %d, totalNumber : %d, recvLen : %d ...", lenth, tmpHead->currentIndex, tmpHead->totalPackage, recvLen);
+
+			if (tmpHead->currentIndex != 0 && tmpHead->currentIndex + 1 < tmpHead->totalPackage)
+			{
+				//1.本图片的中间数据包, 将 指针指向 图片内容的部分, 将数据写入文件
+				while (nWrite < lenth)
+				{
+					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					{
+						//myprint("Err : func fopen() : fileName : %s !!!", fileName);
+						goto End;
+					}
+					nWrite += perWrite;
+				}
+			}
+			else if (tmpHead->currentIndex == 0)
+			{
+				//2.本图片的第一包数据, 获取文件名称
+				memcpy(TmpfileName, recvBuf + sizeof(reqPackHead_t) + sizeof(char) * 2, 46);
+				sprintf(fileName, "%s/%s", g_DirPath, TmpfileName);
+
+				//3.查看文件是否存在, 存在即删除	
+				if (if_file_exist(fileName))
+				{
+					sprintf(cmdBuf, "rm %s", fileName);
+					if (pox_system(cmdBuf) < 0)
+					{
+						//myprint("Err : func pox_system()");
+						ret = -1;
+						goto End;
+					}
+				}
+
+				//4.创建文件, 向文件中写入内容
+				if ((fp = fopen(fileName, "ab")) == NULL)
+				{
+					//myprint("Err : func fopen() : fileName : %s !!!", fileName);
+					ret = -1;
+					goto End;
+				}
+
+				//5.将 指针指向 图片内容的部分, 将数据写入文件
+				while (nWrite < lenth)
+				{
+					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					{
+						//("Err : func fopen() : fileName : %s !!!", fileName);
+						goto End;
+					}
+					nWrite += perWrite;
+				}
+			}
+			else if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
+			{
+				//6.本图片的最后一包数据		
+				while (nWrite < lenth)
+				{
+					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					{
+						//myprint("Err : func fopen() : fileName : %s !!!", fileName);
+						goto End;
+					}
+					nWrite += perWrite;
+				}
+
+				fflush(fp);
+				fclose(fp);
+				fp = NULL;
+			}
+			else
+			{
+				//myprint("Error : The package index is : %d, totalPackage : %d, !!! ",tmpHead->currentIndex, tmpHead->totalPackage);
+				ret = -1;
+				goto End;
+			}
+
+
+		End:
+
+			if (ret < 0)
+			{
+				if (fp)			fclose(fp);		fp = NULL;
+			}
+
+			return ret;
+		}
+
+		//保存图片
+		//recvBuf : 转义之后的数据:  包含 : 消息头 + 消息体 + 校验码     (只是去除了, 两个表示符);  recvLen : 长度为 buf 的内容 长度
 		int save_picture_func(char *recvBuf, int recvLen)
 		{
 			char *tmp = NULL;
@@ -436,8 +541,6 @@ namespace DROWNINGLIU
 
 			}
 
-
-
 			*outDataLenth = lenth;
 		End:
 			//socket_log( SocketLevel[2], ret, "func anti_escape() end");
@@ -514,6 +617,281 @@ namespace DROWNINGLIU
 			head->failPackIndex = failPackIndex;
 			head->isRespondClient = isRespond;
 			head->seriaNumber = g_sendSerial++;
+		}
+
+		//模板图片集合 数据包	13号数据包应答		
+		//recvBuf : 转义之后的数据:  包含 : 消息头 + 消息体 + 校验码     (只是去除了, 两个表示符);  recvLen : 长度为 buf 的内容 长度
+		int VirtualScannerSession::upload_template_set_reply(char *recvBuf, int recvLen, int index)
+		{
+			int  ret = 0, outDataLenth = 0; 				//发送数据的长度
+			int  checkNum = 0;								//校验码
+			char tmpSendBuf[1500] = { 0 };					//临时数据缓冲区
+			char *sendBufStr = data_.data();						//发送数据地址
+			char *tmp = NULL;
+			resCommonHead_t head;							//应答数据报头
+			reqPackHead_t  *tmpHead = NULL; 				//请求报头信息
+			static bool latePackFlag = false;				//true : 本模板最后一包图片,最后一个数据包, false 非最后一包数据,  
+			static int recvSuccessSubNumber = 0;			//每轮成功接收的数据包数目
+
+
+			//1.打印接收图片的信息
+			//printf_comPack_news(recvBuf); 				
+
+			//3.获取报头信息
+			tmpHead = (reqPackHead_t *)recvBuf;
+
+			//4.进行请求信息类型判断
+			if (tmpHead->isSubPack == 1)
+			{
+				//5.子包, 进行数据包信息判断
+				if ((ret = compare_recvData_correct_server(recvBuf, recvLen)) == 0)
+				{
+					//6.数据正确, 进行图片数据的存储, 记录本轮成功接收的子包数量
+					recvSuccessSubNumber += 1;
+#if 1
+					if ((ret = save_multiPicture_func(recvBuf, recvLen)) < 0)
+					{
+						printf("error: func save_picture_func() !!! [%d], [%s] \n", __LINE__, __FILE__);
+						goto End;
+					}
+#endif
+					tmp = recvBuf + sizeof(reqPackHead_t);
+					if (tmpHead->currentIndex + 1 == tmpHead->totalPackage && *tmp + 1 == *(tmp + 1))
+					{
+						latePackFlag = true;
+					}
+
+					if (recvSuccessSubNumber < tmpHead->perRoundNumber)
+					{
+						//7.标识每轮成功接收到的子包数目小于发送数目, 不需要进行进行回复				
+						ret = 0;
+						goto End;
+					}
+					else if (recvSuccessSubNumber == tmpHead->perRoundNumber)
+					{
+						//8.标识每轮所有的子包成功接收, 进行判断该回复哪种应答(该图片成功接收应答还是本轮成功接收应答)
+						recvSuccessSubNumber = 0;
+						if (latePackFlag == false)
+						{
+							//本轮成功接收					
+							outDataLenth = sizeof(resCommonHead_t);
+							assign_comPack_head(&head, MUTIUPLOADCMDRESPON, outDataLenth, SUBPACK, 0, 0, 0);
+						}
+						else if (latePackFlag == true)
+						{
+							//所有图片都成功接收
+							latePackFlag = false;
+							tmp = tmpSendBuf + sizeof(resCommonHead_t);
+							*tmp++ = 0x00;
+							outDataLenth = sizeof(resCommonHead_t) + 1;
+							assign_comPack_head(&head, MUTIUPLOADCMDRESPON, outDataLenth, SUBPACK, 0, 0, 1);
+						}
+					}
+
+				}
+				else if (ret == -1)
+				{
+					//9.需要重发			
+					outDataLenth = sizeof(resCommonHead_t);
+					assign_comPack_head(&head, MUTIUPLOADCMDRESPON, outDataLenth, SUBPACK, 1, tmpHead->currentIndex, 0);
+				}
+				else
+				{
+					//10.不需要重发
+					ret = 0;
+					goto End;
+				}
+			}
+			else
+			{
+				//11.总包, 立即回应.
+				outDataLenth = sizeof(resCommonHead_t);
+				assign_comPack_head(&head, MUTIUPLOADCMDRESPON, outDataLenth, NOSUBPACK, 0, 0, 0);
+			}
+
+			//12.申请内存
+			/*if ((sendBufStr = mem_pool_alloc(g_memoryPool)) == NULL)
+			{
+				myprint("Err : func mem_pool_alloc()");
+				goto End;
+			}*/
+
+			//13. 拷贝报头数据, 计算校验码
+			memcpy(tmpSendBuf, &head, sizeof(resCommonHead_t));
+			checkNum = crc326((const char *)tmpSendBuf, head.contentLenth);
+			tmp = tmpSendBuf + head.contentLenth;
+			memcpy(tmp, (char *)&checkNum, sizeof(checkNum));
+
+			//14. 转义数据内容
+			if ((ret = escape(0x7e, tmpSendBuf, head.contentLenth + sizeof(int), sendBufStr + 1, &outDataLenth)) < 0)
+			{
+				//myprint("Error : func escape() escape() !!!!");
+				goto End;
+			}
+
+			//15. 组合发送的内容
+			*sendBufStr = 0x7e;
+			*(sendBufStr + 1 + outDataLenth) = 0x7e;
+
+			nLen2Write_ = outDataLenth + 2;
+			/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + 2, MUTIUPLOADCMDRESPON)) < 0)
+			{
+				myprint("Err : func push_queue_send_block()");
+				goto End;
+			}
+
+			sem_post(&(g_thid_sockfd_block[index].sem_send));*/
+
+		End:
+			//if (ret < 0 && sendBufStr)		mem_pool_free(g_memoryPool, sendBufStr);
+
+			return ret;
+		}
+
+		//模板扩展数据包 数据包			12 号数据包应答
+		/*@param : recvBuf : 转义之后的数据:  包含 : 消息头 + 消息体 + 校验码     (只是去除了, 两个表示符);
+		*@param :  recvLen : 长度为 buf 的内容 长度
+		*@param :  sendBuf : 发送 client 的数据内容
+		*@param :  sendLen : 发送 数据内容的长度
+		*/
+		int VirtualScannerSession::template_extend_element_reply(char *recvBuf, int recvLen, int index)
+		{
+			int ret = 0, outDataLenth = 0;				//发送数据包长度
+			resCommonHead_t head;						//发送数据报头
+			char *tmp = NULL, *sendBufStr = data_.data();		//发送地址
+			unsigned int contentLenth = 0;				//发送数据包长度
+			int checkNum = 0;							//校验码
+			char tmpSendBuf[1500] = { 0 };				//临时缓冲区
+
+			//1. 打印接收图片的信息, 申请内存
+			/*printf_template_news(recvBuf);
+
+			if ((sendBufStr = mem_pool_alloc(g_memoryPool)) == NULL)
+			{
+				ret = -1;
+				myprint("Err : func mem_pool_alloc()");
+				goto End;
+			}*/
+
+			//2. 组包消息头
+			contentLenth = sizeof(resCommonHead_t) + sizeof(char) * 1;
+			assign_comPack_head(&head, TEMPLATECMDRESPON, contentLenth, NOSUBPACK, 0, 0, 1);
+
+			//3. 组包消息体, 按接收成功处理
+			tmp = tmpSendBuf + sizeof(resCommonHead_t);
+			memcpy(tmpSendBuf, &head, sizeof(resCommonHead_t));
+			*tmp++ = 0;
+
+			//4. 组合校验码
+			checkNum = crc326((const char *)tmpSendBuf, head.contentLenth);
+			memcpy(tmp, (char *)&checkNum, sizeof(checkNum));
+
+			//5. 转义数据内容
+			if ((ret = escape(0x7e, tmpSendBuf, contentLenth + sizeof(uint32_t), sendBufStr + 1, &outDataLenth)) < 0)
+			{
+				printf("Error : func escape() escape() !!!!; [%d], [%s]\n", __LINE__, __FILE__);
+				goto End;
+			}
+
+			//6. 组合发送的内容
+			*sendBufStr = 0x7e;
+			*(sendBufStr + 1 + outDataLenth) = 0x7e;
+			
+			nLen2Write_ = outDataLenth + 2;
+			/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + 2, TEMPLATECMDRESPON)) < 0)
+			{
+				myprint("Err : func push_queue_send_block()");
+				goto End;
+			}
+
+			sem_post(&(g_thid_sockfd_block[index].sem_send));*/
+		End:
+		//	if (ret < 0 && sendBufStr)   	mem_pool_free(g_memoryPool, sendBufStr);
+
+			return ret;
+		}
+
+		//删除图片应答 数据包			9 号数据包
+		//recvBuf : 转义之后的数据:  包含 : 消息头 + 消息体 + 校验码     (只是去除了, 两个表示符);  recvLen : 长度为 buf 的内容 长度
+		int VirtualScannerSession::delete_func_reply(char *recvBuf, int recvLen, int index)
+		{
+			int ret = 0, outDataLenth = 0;					//发送数据包长度
+			int checkNum = 48848748;						//校验码
+			char tmpSendBuf[1500] = { 0 };					//临时缓冲区
+			char *tmp = NULL, *sendBufStr = data_.data();			//发送数据包地址
+			char fileName[128] = { 0 };						//文件名称
+			char rmFilePath[512] = { 0 };					//删除命令
+			resCommonHead_t head;							//应答数据报头
+
+			//1. 打印数据包内容
+			//printf_comPack_news(recvBuf);
+
+			//2. 申请内存
+			/*if ((sendBufStr = mem_pool_alloc(g_memoryPool)) == NULL)
+			{
+				ret = -1;
+				myprint("Err : func mem_pool_alloc()");
+				goto End;
+			}*/
+
+			//3. 获取文件信息, 并删除
+			memcpy(fileName, recvBuf + sizeof(reqPackHead_t), recvLen - sizeof(reqPackHead_t) - sizeof(int));
+			sprintf(rmFilePath, "rm %s/%s", g_DirPath, fileName);
+			ret = system(rmFilePath);
+			//myprint("rmFilePath : %s", rmFilePath);
+			
+			//4. 组装数据包信息
+			tmp = tmpSendBuf + sizeof(resCommonHead_t);
+			if (ret < 0 || ret == 127)
+			{
+				*tmp++ = 0x01;
+				*tmp++ = 0;
+				outDataLenth = sizeof(resCommonHead_t) + 2;
+			}
+			else
+			{
+				*tmp++ = 0x00;
+				outDataLenth = sizeof(resCommonHead_t) + 1;
+			}
+
+			//5. 组装报头
+			assign_comPack_head(&head, DELETECMDRESPON, outDataLenth, NOSUBPACK, 0, 0, 1);
+			memcpy(tmpSendBuf, &head, sizeof(resCommonHead_t));
+
+			//6. 组合校验码
+			checkNum = crc326((const char *)tmpSendBuf, head.contentLenth);
+			memcpy(tmp, (char *)&checkNum, sizeof(checkNum));
+
+			//7. 转义数据内容
+			if ((ret = escape(0x7e, tmpSendBuf, head.contentLenth + sizeof(int), sendBufStr + 1, &outDataLenth)) < 0)
+			{
+				//printf("Error : func escape() escape() !!!!; [%d], [%s]\n", __LINE__, __FILE__);
+				goto End;
+			}
+
+			//6. 组合发送的内容
+			*sendBufStr = 0x7e;
+			*(sendBufStr + 1 + outDataLenth) = 0x7e;
+
+			nLen2Write_ = outDataLenth + 2;
+			/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + 2, DELETECMDRESPON)) < 0)
+			{
+				myprint("Err : func push_queue_send_block()");
+				goto End;
+			}
+
+			sem_post(&(g_thid_sockfd_block[index].sem_send));*/
+
+		End:
+			//if (ret < 0 && sendBufStr)   	mem_pool_free(g_memoryPool, sendBufStr);
+
+			return ret;
+		}
+
+		int push_info_toUi_reply(char *recvBuf, int recvLen, int index)
+		{
+			//myprint("push infomation OK ... ");
+			return 0;
 		}
 
 		//上传图片应答 数据包;  服务器收一包 回复一包.
@@ -758,7 +1136,6 @@ namespace DROWNINGLIU
 			tmp++;
 			//myprint("downLoadFileName : %s", fileName);
 
-
 			//3. open The template file
 			if ((fp = fopen(fileName, "rb+")) == NULL)
 			{
@@ -825,15 +1202,16 @@ namespace DROWNINGLIU
 					//myprint("Error: func escape()");
 					goto End;
 				}
+
 				*(sendBufStr + outDataLenth + 1) = PACKSIGN; 	 //flag 
 
 				//nLen2Write_ = outDataLenth + sizeof(char) * 2;
 
 				{
-
 					std::lock_guard<std::mutex> lock(_mtxData);
-					_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
-
+					
+					//_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
+					_deqData.push_back(std::make_tuple(DOWNFILEREQ, outDataLenth + sizeof(char) * 2, std::move(data)));
 				}
 
 				//5.7 push The sendData addr and sendLenth in queuebuf
@@ -847,7 +1225,6 @@ namespace DROWNINGLIU
 
 				nRead = 0;
 				//sem_post(&(g_thid_sockfd_block[index].sem_send));
-
 			}
 
 
@@ -991,13 +1368,14 @@ namespace DROWNINGLIU
 
 		//接收客户端的数据包, recvBuf: 包含: 标识符 + 报头 + 报体 + 校验码 + 标识符;   recvLen : recvBuf数据的长度
 		//				sendBuf : 处理数据包, 将要发送的数据;  sendLen : 发送数据的长度
-		int VirtualScannerSession::read_data_proce(char *recvBuf, int recvLen, int index)
+		int VirtualScannerSession::read_data_proce(char *recvBuf, int recvLen, int index, int &nCmd)
 		{
 			int ret = 0;
 			uint8_t  cmd = 0;
 
 			//1.获取命令字
 			cmd = *((uint8_t *)recvBuf);
+			nCmd = cmd;
 
 			//2.选择处理方式
 			switch (cmd) {
@@ -1025,22 +1403,22 @@ namespace DROWNINGLIU
 				if ((ret = upload_func_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func upload_func_reply() ");
 				break;
-			//case PUSHINFOREQ:		//消息推送
-			//	if ((ret = data_un_packge(push_info_toUi_reply, recvBuf, recvLen, index)) < 0)
-			//		myprint("Error: func push_info_toUi_reply() ");
-			//	break;
-			//case DELETECMDREQ: 		//删除图片数据包
-			//	if ((ret = data_un_packge(delete_func_reply, recvBuf, recvLen, index)) < 0)
-			//		myprint("Error: func delete_func_reply() ");
-			//	break;
-			//case TEMPLATECMDREQ:		//上传模板
-			//	if ((ret = data_un_packge(template_extend_element_reply, recvBuf, recvLen, index)) < 0)
-			//		myprint("Error: func template_extend_element() ");
-			//	break;
-			//case MUTIUPLOADCMDREQ:		//上传图片集
-			//	if ((ret = data_un_packge(upload_template_set_reply, recvBuf, recvLen, index)) < 0)
-			//		myprint("Error: func upload_template_set ");
-			//	break;
+			case PUSHINFOREQ:		//消息推送
+				if ((ret = push_info_toUi_reply(recvBuf, recvLen, index)) < 0)
+					return -1;//myprint("Error: func push_info_toUi_reply() ");
+				break;
+			case DELETECMDREQ: 		//删除图片数据包
+				if ((ret = delete_func_reply(recvBuf, recvLen, index)) < 0)
+					return -1;//myprint("Error: func delete_func_reply() ");
+				break;
+			case TEMPLATECMDREQ:		//上传模板
+				if ((ret = template_extend_element_reply(recvBuf, recvLen, index)) < 0)
+					return -1;//myprint("Error: func template_extend_element() ");
+				break;
+			case MUTIUPLOADCMDREQ:		//上传图片集
+				if ((ret = upload_template_set_reply(recvBuf, recvLen, index)) < 0)
+					return -1;//myprint("Error: func upload_template_set ");
+				break;
 #if 0	
 			case ENCRYCMDREQ:
 				if ((ret = data_un_packge(encryp_or_cancelEncrypt_transfer, recvBuf, recvLen, index)) < 0)
@@ -1057,7 +1435,7 @@ namespace DROWNINGLIU
 		}
 
 		//function: find  the whole packet; retval maybe error
-		int	VirtualScannerSession::find_whole_package(const char *recvBuf, int recvLenth, int index)
+		int	VirtualScannerSession::find_whole_package(const char *recvBuf, int recvLenth, int index, int &nCmd)
 		{
 			int ret = 0, i = 0;
 			int  tmpContentLenth = 0;			//转义后的数据长度
@@ -1091,7 +1469,7 @@ namespace DROWNINGLIU
 					reqPackHead_t	&req = *(reqPackHead_t *)tmpContent;
 
 					//3.将转义后的数据包进行处理
-					if ((ret = read_data_proce(tmpContent, tmpContentLenth, index)) < 0)
+					if ((ret = read_data_proce(tmpContent, tmpContentLenth, index, nCmd)) < 0)
 					{
 						//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
 						goto End;
@@ -1226,11 +1604,12 @@ namespace DROWNINGLIU
 					else
 						do_write(length);
 #else
+					int cmd = 0;
 					//解析包内容，并写入缓存。
-					if (0 > find_whole_package(data_.data(), length, 0))
+					if (0 > find_whole_package(data_.data(), length, 0, cmd))
 						return;//do_read();
 
-					if(0)
+					if(cmd == DOWNFILEREQ)
 					{
 						//int nSockFD = getSocketFD();
 						int nlen2write = 0;
@@ -1246,12 +1625,12 @@ namespace DROWNINGLIU
 						data_ = data;
 						_mapSock2Data.erase(itr);*/
 
-						std::lock_guard<std::mutex> lock(_mtxData);
+						//std::lock_guard<std::mutex> lock(_mtxData);
 						
 						//这里投递多次无效吧？或者说buffer拷贝走的太多了，能保证顺序吗？
 						//或者这里投递一次，在do_write里继续投递一次，循环。
 						//那索性这里投递0，统一在dowrite中投递一次
-						while (!_deqData.empty())
+					/*	while (!_deqData.empty())
 						{
 							auto &pair = _deqData.front();
 
@@ -1264,11 +1643,59 @@ namespace DROWNINGLIU
 							_deqData.pop_front();
 
 							do_write(nLen2Write_);
-						}
+						}*/
+						//cmd_ = DOWNFILEREQ;
+						do_multiwrite(0);
+						//do_read();
 					}
 					else
 						do_write(nLen2Write_);
 #endif
+				}
+			}));
+		}
+
+		void VirtualScannerSession::do_multiwrite(std::size_t length)
+		{
+			//boost::asio::async_write
+			auto self(shared_from_this());
+			boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
+				make_custom_alloc_handler(allocator_,
+					[this, self](boost::system::error_code ec, std::size_t length2)
+			{
+				if (!ec)
+				{
+					//assert(typeid(socket_.get_io_service()) == typeid(boost::asio::stream_socket_service<tcp>));
+					//if (/*length2 == 0 && */cmd_ == DOWNFILEREQ)
+					{
+						int nlen2write = 0;
+						std::lock_guard<std::mutex> lock(_mtxData);
+
+						//dowrite中，每写完一个再投递下一个，似乎还是无法保证顺序
+						//莫非要用其他方法
+
+						//这里投递多次无效吧？
+						//while (!_deqData.empty())
+						if (!_deqData.empty())
+						{
+							auto &t = _deqData.front();
+
+							int cmd = std::get<0>(t);
+							nlen2write = std::get<1>(t);
+							auto &data = std::get<2>(t);
+							data_.swap(data);
+
+							nLen2Write_ = nlen2write;
+
+							_deqData.pop_front();
+
+							do_multiwrite(nLen2Write_);
+						}
+						else
+						{
+							do_read();
+						}
+					}
 				}
 			}));
 		}
@@ -1279,23 +1706,28 @@ namespace DROWNINGLIU
 			auto self(shared_from_this());
 			boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
 				make_custom_alloc_handler(allocator_,
-					[this, self](boost::system::error_code ec, std::size_t /*length*/)
+					[this, self](boost::system::error_code ec, std::size_t length2)
 			{
 				if (!ec)
 				{
 					//assert(typeid(socket_.get_io_service()) == typeid(boost::asio::stream_socket_service<tcp>));
-					if (0)
+					if (/*length2 == 0 && */cmd_ == DOWNFILEREQ)
 					{
 						int nlen2write = 0;
 						std::lock_guard<std::mutex> lock(_mtxData);
 
-						//这里投递多次无效吧？
-						while (!_deqData.empty())
-						{
-							auto &pair = _deqData.front();
+						//dowrite中，每写完一个再投递下一个，似乎还是无法保证顺序
+						//莫非要用其他方法
 
-							nlen2write = pair.first;
-							auto &data = pair.second;
+						//这里投递多次无效吧？
+						//while (!_deqData.empty())
+						if (!_deqData.empty())
+						{
+							auto &t = _deqData.front();
+
+							int cmd = std::get<0>(t);
+							nlen2write = std::get<1>(t);
+							auto &data = std::get<2>(t);
 							data_.swap(data);
 
 							nLen2Write_ = nlen2write;
@@ -1303,6 +1735,11 @@ namespace DROWNINGLIU
 							_deqData.pop_front();
 
 							do_write(nLen2Write_);
+						}
+						else
+						{
+							cmd_ = 0;
+							do_read();
 						}
 					}
 					else
