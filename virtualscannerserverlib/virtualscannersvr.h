@@ -277,21 +277,12 @@ namespace DROWNINGLIU
 			int downLoad_template_func_reply(char *recvBuf, int recvLen, int index);
 			int get_FileNewestID_reply(char *recvBuf, int recvLen, int index);
 			int upload_func_reply(char *recvBuf, int recvLen, int index);
-<<<<<<< .mine
+
 			int delete_func_reply(char *recvBuf, int recvLen, int index);
-=======
-			int delete_func_reply(char *recvBuf, int recvLen, int index);
->>>>>>> .theirs
 			int template_extend_element_reply(char *recvBuf, int recvLen, int index);
-<<<<<<< .mine
 			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
 
 			int push_info_toUi(int index, int fileType);
-=======
-			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
-
-
->>>>>>> .theirs
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>
