@@ -251,6 +251,8 @@ namespace DROWNINGLIU
 			virtual  void do_read() override;
 			virtual void do_write(std::size_t length) override;
 			void do_multiwrite(std::size_t length);
+			void do_multiwrite(std::size_t length);
+
 		public:
 			int getSocketFD()
 			{
@@ -275,11 +277,21 @@ namespace DROWNINGLIU
 			int downLoad_template_func_reply(char *recvBuf, int recvLen, int index);
 			int get_FileNewestID_reply(char *recvBuf, int recvLen, int index);
 			int upload_func_reply(char *recvBuf, int recvLen, int index);
+<<<<<<< .mine
 			int delete_func_reply(char *recvBuf, int recvLen, int index);
+=======
+			int delete_func_reply(char *recvBuf, int recvLen, int index);
+>>>>>>> .theirs
 			int template_extend_element_reply(char *recvBuf, int recvLen, int index);
+<<<<<<< .mine
 			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
 
 			int push_info_toUi(int index, int fileType);
+=======
+			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
+
+
+>>>>>>> .theirs
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>

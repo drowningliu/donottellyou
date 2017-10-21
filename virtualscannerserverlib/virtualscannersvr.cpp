@@ -1737,6 +1737,11 @@ namespace DROWNINGLIU
 
 							do_write(nLen2Write_);
 						}
+						else
+						{
+							cmd_ = 0;
+							do_read();
+						}
 					}
 					else
 						do_read();
