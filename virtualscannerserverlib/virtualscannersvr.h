@@ -29,13 +29,13 @@ namespace DROWNINGLIU
 		};
 
 
-#define SERVER_IP		"192.168.1.196"	//服务器IP
+#define SERVER_IP		"127.0.0.1"	//服务器IP
 #define SERVER_PORT		8009			//服务器端�?
 #define	KEY				0x1234			//消息队列键�?
-#define FILEDIR			"/home/lsh/share/NH_1200/soure"			//指定目录
+#define FILEDIR			"d:\\home\\lsh\\share\\NH_1200\\soure"			//指定目录
 		//#define UPLOADDIRPATH	"/home/yyx/work/openssl-FTP-TCP/project/uploadTest"		//上传文件加目�?
-#define UPLOADDIRPATH	"./uploadTest"		//上传文件加目�?
-#define RMFILEPATH 		"/home/lsh/share/NH_1200/Common_image"	
+#define UPLOADDIRPATH	"d:\\uploadTest"		//上传文件加目�?
+#define RMFILEPATH 		"d:\\home\\lsh\\share\\NH_1200\\Common_image"	
 #define FILEFORMAT 		".jpg"			//指定格式
 
 		// Class to manage the memory to be used for handler-based custom allocation.
@@ -216,16 +216,45 @@ namespace DROWNINGLIU
 				do_accept();
 			}
 
+			std::deque<std::shared_ptr<T>>	_deqSessions;
+			mutable std::mutex	_mtxSessions;	//consider using rwlock
 		private:
 			void do_accept()
 			{
+				std::cout << "do_accept\r\n";
+
 				acceptor_.async_accept(socket_,
 					[this](boost::system::error_code ec)
 				{
 					if (!ec)
 					{
+						std::cout << "on_accept\r\n";
+
 						//std::make_shared<session>(std::move(socket_))->start();
-						std::make_shared<T>(std::move(socket_))->start();
+						auto session = std::make_shared<T>(std::move(socket_));
+						int count = session.use_count();
+						session->start();
+
+						_deqSessions.push_back(session);
+						/*std::for_each(std::begin(_deqSessions), std::end(_deqSessions), [](auto &s) {
+							s->
+							t.use_count();
+						});*/
+
+						{
+							std::lock_guard<std::mutex> lock(_mtxSessions);
+							//清理一个不再引用的session
+							auto itr = _deqSessions.begin();
+							for (; itr != _deqSessions.end(); ++itr)
+							{
+								if (itr->use_count() == 1)
+								{
+									_deqSessions.erase(itr);
+									std::cout << "erase session\r\n";
+									break;
+								}
+							}
+						}
 					}
 
 					do_accept();
@@ -245,14 +274,14 @@ namespace DROWNINGLIU
 			{
 
 			}
+			virtual void start() override
+			{
+				do_read();
+			}
 
-			int init();
-
-			virtual  void do_read() override;
+			virtual void do_read() override;
 			virtual void do_write(std::size_t length) override;
 			void do_multiwrite(std::size_t length);
-			void do_multiwrite(std::size_t length);
-
 		public:
 			int getSocketFD()
 			{
@@ -282,6 +311,7 @@ namespace DROWNINGLIU
 			int template_extend_element_reply(char *recvBuf, int recvLen, int index);
 			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
 
+			int heart_beat_func_reply(char *recvBuf, int recvLen, int index);
 			int push_info_toUi(int index, int fileType);
 		};
 
@@ -295,8 +325,7 @@ namespace DROWNINGLIU
 			}
 
 			int init();
-
-			
+			void find_directory_file();
 		};
 #pragma pack(push)
 #pragma pack(1)
@@ -398,5 +427,6 @@ namespace DROWNINGLIU
 
 #define 	NUMBER		15											//同一时间可以接收的客户端数
 #define     SCAN_TIME 	15											//扫描间隔时间 15s
+
 	}
 }
