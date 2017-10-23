@@ -137,6 +137,12 @@ namespace DROWNINGLIU
 
 			if (tmpHead->currentIndex != 0 && tmpHead->currentIndex + 1 < tmpHead->totalPackage)
 			{
+				if (fp == NULL)
+				{
+					ret = -1;
+					goto End;
+				}
+
 				//1.本图片的中间数据包, 将 指针指向 图片内容的部分, 将数据写入文件
 				while (nWrite < lenth)
 				{
@@ -188,6 +194,12 @@ namespace DROWNINGLIU
 			}
 			else if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
 			{
+				if (fp == NULL)
+				{
+					ret = -1;
+					goto End;
+				}
+
 				//6.本图片的最后一包数据		
 				while (nWrite < lenth)
 				{
@@ -246,6 +258,12 @@ namespace DROWNINGLIU
 				//1.本图片的中间数据包, 将 指针指向 图片内容的部分, 将数据写入文件
 				while (nWrite < lenth)
 				{
+					if (fp == NULL)
+					{
+						ret = -1;
+						goto End;
+					}
+
 					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
 					{
 						//myprint("Err : func fopen() : fileName : %s !!!", fileName);
@@ -294,6 +312,12 @@ namespace DROWNINGLIU
 			}
 			else if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
 			{
+				if (fp == NULL)
+				{
+					ret = -1;
+					goto End;
+				}
+
 				//6.本图片的最后一包数据		
 				while (nWrite < lenth)
 				{
@@ -914,11 +938,11 @@ namespace DROWNINGLIU
 			//sprintf(rmFilePath, "rm %s/%s", g_DirPath, fileName);
 			//ret = system(rmFilePath);
 			//myprint("rmFilePath : %s", rmFilePath);
-			DeleteFileA(rmFilePath);
+			BOOL bSuccess = DeleteFileA(rmFilePath);
 
 			//4. 组装数据包信息
 			tmp = tmpSendBuf + sizeof(resCommonHead_t);
-			if (ret < 0 || ret == 127)
+			if (!bSuccess)
 			{
 				*tmp++ = 0x01;
 				*tmp++ = 0;
@@ -1566,14 +1590,35 @@ namespace DROWNINGLIU
 		{
 			int ret = -1, i = 0;
 			int  tmpContentLenth = 0;			//转义后的数据长度
-			char tmpContent[1400] = { 0 }; 		//转义后的数据
-			int flag = 0;				//flag 标识找到标识符的数量;
-			int lenth = 0; 				//lenth : 缓存的数据包内容长度
-			char content[2800] = { 0 };	//缓存完整包数据内容, 		
-			char *tmp = NULL;
+			//char tmpContent[1400] = { 0 }; 		//转义后的数据
+			char tmpContent[2800] = { 0 }; 		//转义后的数据
+			//int flag = 0;				//flag 标识找到标识符的数量;
+			//int length = 0; 				//lenth : 缓存的数据包内容长度
+			//char content[2800] = { 0 };	//缓存完整包数据内容, 		
+			//char *tmp = NULL;
 
+			//recvLenth可以大于1400，tmpContentLenth不行
+			if (recvBuf[0] != 0x7e || recvBuf[recvLenth - 1] != 0x7e)
+				return -1;
 
-			tmp = content + lenth;
+			//2. 查找数据报尾, 获取到完整数据包, 将数据包进行反转义 
+			if ((ret = anti_escape(recvBuf + 1, recvLenth - 2, tmpContent, &tmpContentLenth)) < 0 || tmpContentLenth > 1400)
+			{
+				//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
+				ret = -1;
+				goto End;
+			}
+
+			reqPackHead_t	&req = *(reqPackHead_t *)tmpContent;
+
+			//3.将转义后的数据包进行处理
+			if ((ret = read_data_proce(tmpContent, tmpContentLenth, index, nCmd)) < 0)
+			{
+				//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
+				goto End;
+			}
+#if 0
+			tmp = content + length;
 			for (i = 0; i < recvLenth; i++)
 			{
 				//1. 查找数据报头
@@ -1587,7 +1632,7 @@ namespace DROWNINGLIU
 					//return 1;
 					
 					//2. 查找数据报尾, 获取到完整数据包, 将数据包进行反转义 
-					if ((ret = anti_escape(content, lenth, tmpContent, &tmpContentLenth)) < 0)
+					if ((ret = anti_escape(content, length, tmpContent, &tmpContentLenth)) < 0 || tmpContentLenth > 1400)
 					{
 						//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
 						goto End;
@@ -1606,21 +1651,20 @@ namespace DROWNINGLIU
 						//4. 数据包处理成功, 清空临时变量
 						memset(content, 0, sizeof(content));
 						memset(tmpContent, 0, sizeof(tmpContent));
-						lenth = 0;
+						length = 0;
 						flag = 0;
-						tmp = content + lenth;
+						tmp = content + length;
 					}
-
 				}
 				else
 				{
 					//5.取出数据包内容, 去除起始标识符
 					*tmp++ = recvBuf[i];
-					lenth += 1;
+					length += 1;
 					continue;
 				}
 			}
-
+#endif
 		End:
 
 			return ret;
@@ -1637,7 +1681,11 @@ namespace DROWNINGLIU
 			const char *pBuf = static_cast<const char *>(boost::asio::detail::buffer_cast_helper(buffer));
 
 			int  tmpContentLenth = 0;			//转义后的数据长度
-			char tmpContent[1400] = { 0 }; 		//转义后的数据
+			//比1400长一倍，以防溢出
+			char tmpContent[2800] = { 0 }; 		//转义后的数据
+
+			if (*pBuf != 0x7e)
+				return 0;
 
 			//2. 跳过第一个标志位， 将数据包进行反转义 
 			int ret = 0;
@@ -1647,6 +1695,9 @@ namespace DROWNINGLIU
 				return 0;
 			}
 
+			if (tmpContentLenth > 1400)
+				return 0;
+
 			//包头可能包含转移字符，因此实际长度会大于sizeof(reqPackHead_t)
 			if (tmpContentLenth < sizeof(reqPackHead_t))
 				return sizeof(reqPackHead_t) - tmpContentLenth;
@@ -1654,7 +1705,7 @@ namespace DROWNINGLIU
 			//继续收满包内容、校验和（int）、结束标志
 			const reqPackHead_t &req = *(reqPackHead_t *)(tmpContent);
 			int contLen = req.contentLenth;
-			if (contLen == 0)
+			if (contLen == 0 || contLen > 1400)
 				return 0;
 
 			int all = 1 + contLen + sizeof(int) + 1;
@@ -1662,6 +1713,9 @@ namespace DROWNINGLIU
 				return all -bytes;
 			else
 				return 0;*/
+			if (all > 1400)
+				return 0;
+
 			//包体中包含转移字符，因此实际长度会大于all
 			if (tmpContentLenth + 1 < all)
 				return all - tmpContentLenth - 1;
@@ -1748,9 +1802,11 @@ namespace DROWNINGLIU
 					if (0 > find_whole_package(data_.data(), length, 0, cmd))
 					{
 						std::cout << "find_whole_package failed\r\n";
-						do_read();
+						//发送重连包。
+						return;
+						//do_read();
 					}
-					else if (1)//cmd == DOWNFILEREQ)
+					else//cmd == DOWNFILEREQ)
 					{
 						/*	//这里投递多次无效吧？或者说buffer拷贝走的太多了，能保证顺序吗？
 						//或者这里投递一次，在do_write里继续投递一次，循环。
@@ -1770,24 +1826,26 @@ namespace DROWNINGLIU
 							do_write(nLen2Write_);
 						}*/
 						//cmd_ = DOWNFILEREQ;
-						/*bool hasData = false;
-						{
-							std::lock_guard<std::mutex> lock(_mtxData);
-							hasData = !_deqData.empty();
-							if (hasData)
-								do_multiwrite(1);
-						}*/
-
-						//read完继续read？no
-						//if (!hasData)
-						//	do_read();
 						std::cout << cmd;
 						std::cout << "find_whole_package succeed\r\n";
 
-						do_multiwrite(0);
+						bool hasData = false;
+						{
+							std::lock_guard<std::mutex> lock(_mtxData);
+							hasData = !_deqData.empty();
+						}
+
+						if (hasData)
+							do_multiwrite(1);
+						else
+							do_read();
+						//read完继续read？no
+						//if (!hasData)
+						//	do_read();
+						
+
+						//do_multiwrite(1);
 					}
-					else
-						return;// do_write(nLen2Write_);
 #endif
 				}
 			}));
@@ -1811,10 +1869,10 @@ namespace DROWNINGLIU
 						std::lock_guard<std::mutex> lock(_mtxData);
 
 						hasData = !_deqData.empty();
-						if (hasData)
+						/*if (hasData)
 						{
 							do_multiwrite(std::get<1>(_deqData.front()));
-						}
+						}*/
 					}
 
 					if (!hasData)
@@ -1827,27 +1885,57 @@ namespace DROWNINGLIU
 						//std::this_thread::sleep_for(std::chrono::milliseconds(200));
 						//do_multiwrite(0);
 					}
+					else
+						do_multiwrite(1);
 				}
 			};
 		
-			if (length != 0)
 			{
-				boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
-					make_custom_alloc_handler(allocator_, func));
+				std::lock_guard<std::mutex> lock(_mtxData);
 
 				if (!_deqData.empty())
+				{
+					boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
+						make_custom_alloc_handler(allocator_, func));
+
 					_deqData.pop_front();
+					return;
+				}
+				else
+				{
+					assert(0);
+					std::cout << "do_multiwrite no data!\r\n";
+					//do_read();
+					return;
+				}
+			}
+
+			/*if (length != 0)
+			{
+				{
+					std::lock_guard<std::mutex> lock(_mtxData);
+
+					if (!_deqData.empty())
+					{
+						boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
+							make_custom_alloc_handler(allocator_, func));
+
+						_deqData.pop_front();
+					}
+				}
 			}
 			else
 			{
 				std::array<char, 1> data;
 				boost::asio::async_write(socket_, boost::asio::buffer(data, 0),
 					make_custom_alloc_handler(allocator_, func));
-			}
+			}*/
 		}
 
 		void VirtualScannerSession::do_write(std::size_t length)
 		{
+			assert(0);
+			return;
 			//boost::asio::async_write
 			auto self(shared_from_this());
 			boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
