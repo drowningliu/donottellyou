@@ -1,0 +1,37 @@
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaasssssssssaaaaaaaaaaaaaaaaaashuoid *thied_func(void *arg)
+{aaaaaaaa
+    sleep(1);
+    pthread_detach(pthread_self());
+
+    system("ifconfig eth0 192.168.1.157");
+    printf("The ifconfig --------OK \n");
+
+    system("route add default gw 192.168.1.2");
+    printf("The route --------OK \n");
+    pthread_exit(NULL);
+    return NULL;
+}
+
+int main()
+{
+    int ret = 0;
+    
+    pthread_t ptid;
+    pthread_create(&ptid, NULL, thied_func, NULL);
+
+    
+    ret = select(5, NULL, NULL, NULL, NULL);
+    if(ret < 0)
+    {
+        if(errno == EINTR)
+        {
+            printf("select errno == EINTR\n");
+            return ret;
+        }
+    }
+        
+
+            printf("select *********************\n");
+    
+    return ret; 
+}
