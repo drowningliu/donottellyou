@@ -151,6 +151,8 @@ int get_file_size(const char *filePath, int *number, int contentLenth, unsigned 
 	//1.获取文件大小
 	if(stat(filePath, &statbuff) < 0)
 	{
+extern int errno;
+printf("errno=%d\n",errno);
 		ret = -1;
 		socket_log( SocketLevel[4], ret, "Error: func stat() %s", strerror(errno));
 		return -1;
