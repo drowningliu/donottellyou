@@ -63,7 +63,7 @@
 #define ACCOUTLENTH 			11							//
 #define CAPACITY    			110							//
 #define WAIT_SECONDS 			2							//
-#define HEART_TIME				300							//
+#define HEART_TIME				3							//
 #undef 	BUFSIZE
 #define BUFSIZE					250							//
 #define DOWNTEMPLATENAME		"NHi1200_TEMPLATE_NAME"		//
@@ -376,6 +376,10 @@ static int init_global_value()
 	int numsaw = PERROUNDNUMBER * COMREQDATABODYLENTH;
 	if((g_sendFileContent = malloc(numsaw)) == NULL)			assert(0);
 		
+g_downLoadPath = "/home/tirvideo/Desktop/网络通讯源代码及文档/源代码/project_two_edition_last_ok/download/";
+fileName = "C_16_01_04_10_16_10_030_B_L.jpg";
+tableName = "downLoadTemplateNewestFromServer_17_05_08.pdf";
+/*
 	if((fileName = getenv(DOWNTEMPLATENAME)) == NULL)
 	{
 		myprint( "Error: func getenv() NHi1200_TEMPLATE_NAME == NULL");
@@ -394,6 +398,7 @@ static int init_global_value()
 		ret = -1;
 		assert(0);
 	}
+*/
 	sprintf(g_downLoadTableName, "%s%s",g_downLoadPath, tableName);
 	sprintf(g_downLoadTemplateName, "%s%s",g_downLoadPath, fileName);
 	
@@ -429,11 +434,11 @@ End:
 		 goto End;
 	 }
 	 //
-	 if((ret = pthread_create(&g_thid_time, NULL, thid_server_func_time, NULL)) < 0)
+	 /*if((ret = pthread_create(&g_thid_time, NULL, thid_server_func_time, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
 		 goto End;
-	 } 
+	 } */
 	 //
 	 if((ret = pthread_create(&g_thid_unpack, NULL, thid_unpack_thread, NULL)) < 0)
 	 {
@@ -441,7 +446,7 @@ End:
 		 goto End;
 	 }
  
-#if 0
+#if 1
 	 //
 	 if((ret = pthread_create(&g_thid_heartTime, NULL, thid_hreat_beat_time, NULL)) < 0)
 	 {
@@ -494,12 +499,12 @@ static int get_config_file_para()
 
 	if(g_sockfd <= 0)
 	{
-		if((ret = chose_setip_method()) < 0)
+		/*if((ret = chose_setip_method()) < 0)
 		{
 			myprint( "Error : func chose_setip_method() ");
 			goto End;
+		}*/
 		}
-	}
 
  End:
  	return ret;
@@ -689,7 +694,7 @@ int  recv_ui_data(const char *news)
 				myprint("Error : push_buffer_queue() full");
 			}
 			num += 1;
-			sleep(1);
+			sleep(10);
 		}		
 		else if(ret == -1)
 		{
@@ -4129,7 +4134,8 @@ int heart_beat_reply_program( char *news, char **outDataNews)
 		return -1;
 	}
 
-	return 1;
+	//
+	return 0;
 }
 
 
