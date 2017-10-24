@@ -58,15 +58,15 @@
 #endif
 
 
-//ºê¶¨Òå
+//
 #define DIVISIONSIGN 			'~'
-#define ACCOUTLENTH 			11							//¿Í»§¶ËÕË»§³¤¶È
-#define CAPACITY    			110							//¶ÓÁĞ, Á´±íµÄÈİÁ¿
-#define WAIT_SECONDS 			2							//Á´½Ó·şÎñÆ÷µÄ³¬Ê±Ê±¼ä
-#define HEART_TIME				300							//ĞÄÌøÊ±¼ä
+#define ACCOUTLENTH 			11							//
+#define CAPACITY    			110							//
+#define WAIT_SECONDS 			2							//
+#define HEART_TIME				300							//
 #undef 	BUFSIZE
-#define BUFSIZE					250							//ÃüÁî¶ÓÁĞµÄ ½Úµã´óĞ¡
-#define DOWNTEMPLATENAME		"NHi1200_TEMPLATE_NAME"		//The env for downtemplate PATHKEY
+#define BUFSIZE					250							//
+#define DOWNTEMPLATENAME		"NHi1200_TEMPLATE_NAME"		//
 #define DOWNTABLENAME           "NHi1200_DATABASE_NAME"
 #define DOWNLOADPATH			"NHi1200_TEMPLATE_DIR"
 #define CERT_FILE 				"/home/yyx/nanhao/client/client-cert.pem" 
@@ -74,86 +74,86 @@
 #define CA_FILE  				"/home/yyx/nanhao/ca/ca-cert.pem" 
 #define CIPHER_LIST	 			"AES128-SHA"
 #define	MY_MIN(x, y)			((x) < (y) ? (x) : (y))	
-#define TIMEOUTRETURNFLAG		-5							//³¬Ê±·µ»ØÖµ
+#define TIMEOUTRETURNFLAG		-5							//
 
 
-//ÄÚ´æ³Ø, ¶ÓÁĞ, Á´±í×ÊÔ´
-mem_pool_t  				*g_memPool = NULL;				//ÄÚ´æ³Ø
-queue       				*g_queueRecv = NULL;			//¸øUI»Ø¸´Êı¾İ´æ´¢µÄ¶ÓÁĞ
-queue_send_dataBLock 		g_queue_sendDataBlock = NULL;	//The sendData Addr and dataLenth ´æ´¢·¢ËÍÊı¾İºÍ³¤¶ÈµÄ¶ÓÁĞ
-fifo_type					*g_fifo = NULL;					//´æ´¢½ÓÊÕÏß³Ì Êı¾İµÄ¶ÓÁĞ
-queue_buffer 				*g_que_buf = NULL;				//´æ´¢½ÓÊÕUIÃüÁîµÄ¶ÓÁĞ
-LListSendInfo				*g_list_send_dataInfo = NULL;	//´¢´æËùÓĞ·¢ËÍµÄÊı¾İ°üĞÅÏ¢(µØÖ·, ³¤¶È, ÃüÁî×Ö)
+//
+mem_pool_t  				*g_memPool = NULL;				//
+queue       				*g_queueRecv = NULL;			//
+queue_send_dataBLock 		g_queue_sendDataBlock = NULL;	//
+fifo_type					*g_fifo = NULL;					//
+queue_buffer 				*g_que_buf = NULL;				//
+LListSendInfo				*g_list_send_dataInfo = NULL;	//
 
-//ĞÅºÅÁ¿, ÓÃ×÷Í¬²½
-sem_t 			g_sem_cur_read;		 					//Í¨Öª¸øUI »Ø¸´ÏûÏ¢µÄĞÅºÅÁ¿
-sem_t 			g_sem_cur_write;		 				//Í¨Öª·¢ËÍÏß³ÌµÄĞÅºÅÁ¿
-sem_t 			g_sem_send;								//Í¬²½·¢ËÍÏß³ÌÓë½â°üÏß³ÌµÄĞÅºÅÁ¿
-sem_t 			g_sem_read_open;						//Í¨Öª½ÓÊÕÏß³Ì½øĞĞÊı¾İ½ÓÊÕĞÅºÅÁ¿
-sem_t 			g_sem_business;							//Í¨ÖªÃüÁîÏß³ÌµÄĞÅºÅÁ¿
-sem_t 			g_sem_unpack;							//need between In read_thid And unpack_thid;½â°üÊı¾İĞÅºÅÁ¿
-sem_t 			g_sem_sequence;							//Ã¿´Î·¢ËÍ±ØĞëµÈÉÏÒ»¸öÃüÁî»ØÓ¦¸øUIºó, ²ÅÔÊĞí·¢ËÍÏÂÒ»Ìõ½ÓÊÕµÄUIÃüÁî
+//
+sem_t 			g_sem_cur_read;		 					//
+sem_t 			g_sem_cur_write;		 				//
+sem_t 			g_sem_send;								//
+sem_t 			g_sem_read_open;						//
+sem_t 			g_sem_business;							//
+sem_t 			g_sem_unpack;							//
+sem_t 			g_sem_sequence;							//
 
 
 
-//»¥³âËø,Ëø×¡È«¾Ö×ÊÔ´
+//
 pthread_mutex_t	 g_mutex_client = PTHREAD_MUTEX_INITIALIZER; 			
-pthread_mutex_t	 g_mutex_memPool = PTHREAD_MUTEX_INITIALIZER; 			//ÄÚ´æ³ØËø(ÄÚ´æ¿éÎª ·¢ËÍµÄÊı¾İÄÚÈİ)
-pthread_mutex_t	 g_mutex_list = PTHREAD_MUTEX_INITIALIZER; 				//Á´±íËø
-pthread_mutex_t  g_mutex_serial = PTHREAD_MUTEX_INITIALIZER;			//Ëø×¡¿Í»§¶ËÁ÷Ë®ºÅ±ä»¯
+pthread_mutex_t	 g_mutex_memPool = PTHREAD_MUTEX_INITIALIZER; 			//
+pthread_mutex_t	 g_mutex_list = PTHREAD_MUTEX_INITIALIZER; 				//
+pthread_mutex_t  g_mutex_serial = PTHREAD_MUTEX_INITIALIZER;			//
 
-//È«¾Ö±äÁ¿
-pthread_t  			g_thid_read = -1, g_thid_unpack = -1, g_thid_business = -1, g_thid_heartTime = -1, g_thid_time = -1,  g_thid_write = -1;	//net The thread ID 
-int  				g_close_net = 0;					//0 connect server OK; 1 destroy connect sockfd; 2 active shutdown sockfd
-int  				g_sockfd = 0;						//connet the server socket
-char 				g_filePath[128] = { 0 };			//ÅäÖÃÎÄ¼şÂ·¾¶
-bool 				g_err_flag = false;					//true : ³ö´í; false : Î´³ö´í
-pid_t 				g_dhcp_process = -1;				//DHCP ½ø³Ì
-uploadWholeSet 		g_upload_set[10];					//ÉÏ´«ÕûÌ×Í¼Æ¬¼¯ºÏ
-uploadWholeSet 		g_upload_error_set[10];				//ÉÏ´«ÕûÌ×Í¼Æ¬³ö´íĞÅÏ¢¼¯ºÏ
+//
+pthread_t  			g_thid_read = -1, g_thid_unpack = -1, g_thid_business = -1, g_thid_heartTime = -1, g_thid_time = -1,  g_thid_write = -1;	//
+int  				g_close_net = 0;					//
+int  				g_sockfd = 0;						//
+char 				g_filePath[128] = { 0 };			//
+bool 				g_err_flag = false;					//
+pid_t 				g_dhcp_process = -1;				//
+uploadWholeSet 		g_upload_set[10];					//
+uploadWholeSet 		g_upload_error_set[10];				//
 char 				*g_downLoadTemplateName = NULL, *g_downLoadTableName = NULL, *g_downLoadPath = NULL;//
-int 				g_send_package_cmd = -1;			//current send package cmd
-bool  				g_encrypt = false, g_encrypt_data_recv = false;				//true : encrypt Data transfer with sever; false : No encrypt transfer
-char 				*g_machine = "21212111233";			//»úÆ÷Âë
-unsigned int 		g_seriaNumber = 0;					//·¢ËÍÊı¾İ°üµÄĞòÁĞºÅ
-unsigned int	 	g_recvSerial = 0;					//µ±Ç°½ÓÊÕ·şÎñÆ÷Ö÷¶¯·¢ËÍÊı¾İ°üµÄĞòÁĞºÅ
-SendDataBlockNews	g_lateSendPackNews;					//×îºó·¢ËÍµÄÊı¾İ°üĞÅÏ¢
-bool 				g_perIsRecv = false;				//Ã¿ÂÖ·¢ËÍµÄÊı¾İ°üÊÇ·ñÒÑ¾­ÓĞ»ØÓ¦, false : ÎŞ»ØÓ¦, ³¬Ê±ºó, ¸ÃÂÖÊı¾İ°üÈ«²¿ÖØ·¢; true : ÓĞ»ØÓ¦, ³¬Ê±ºó,Ö»ÖØ·¢×îºóÒ»ÌõÃüÁî  
-char 				*g_sendFileContent = NULL;			//store The perRoundAll Src content will send to server	
-bool 				g_residuePackNoNeedSend = false;	//ture : ±êÊ¶Ê£ÓàµÄ²»ĞèÒª·¢ËÍ, false : ¼ÌĞøÊ£ÓàÊı¾İ°üµÄ·¢ËÍ, Ö»ÔÚ ½â°üÏß³ÌºÍ »ØÓ¦UI Ïß³ÌÊ¹ÓÃ
-bool 				g_modify_config_file = false;		//true : have modify The config file. need set IP; false: not need set IP And don't modify The config file
-bool 				g_template_uploadErr = false;		//true : ³öÏÖĞ­ÒéĞÔ´íÎó, Í¼Æ¬Êı¾İ²»ÓÃÔÙÉÏ´«, false : Õı³£
-bool 				g_subResPonFlag = false;			//true : ±¾ÂÖÊı¾İ°ü,ÓĞÓ¦´ğ»Ø¸´(ÎŞÂÛÓ¦´ğÊÇÊ²Ã´), false : ±¾ÂÖÊı¾İ°ü, ÎŞÈÎºÎÓ¦´ğ
-bool 				g_isSendPackCurrent = false;		//³ö´íºó, ÅĞ¶ÏÊÇ·ñµ±Ç°ÊÇ·ñÕıÔÚµÈ´ı½ÓÊÕµÄ·¢ËÍÊı¾İ°ü»Ø¸´, true : ÔÚµÈ´ı; false : Î´µÈ´ı
+int 				g_send_package_cmd = -1;			//
+bool  				g_encrypt = false, g_encrypt_data_recv = false;				//
+char 				*g_machine = "21212111233";			//
+unsigned int 		g_seriaNumber = 0;					//
+unsigned int	 	g_recvSerial = 0;					//
+SendDataBlockNews	g_lateSendPackNews;					//
+bool 				g_perIsRecv = false;				//
+char 				*g_sendFileContent = NULL;			//
+bool 				g_residuePackNoNeedSend = false;	//
+bool 				g_modify_config_file = false;		//
+bool 				g_template_uploadErr = false;		//
+bool 				g_subResPonFlag = false;			//
+bool 				g_isSendPackCurrent = false;		//
 #if 0
 SSL_CTX 			*g_sslCtx = NULL;
 SSL  				*g_sslHandle = NULL;
 #endif
 
 typedef void (*sighandler_t)(int);
-//int ssl_init_handle(int socketfd, SSL_CTX **srcCtx, SSL **srcSsl);
+//
 
 
-//ĞÅºÅ²¶×½º¯Êı
+//
 void pipe_func(int sig)
 {
 	myprint( "\nthread:%lu, SIGPIPIE appear %d", pthread_self(), sig);
 }
 
-//ĞÅºÅ²¶×½º¯Êı
+//
 void sign_handler(int sign)
 {	
 	myprint(  "\nthread:%lu, receive signal:%u---", pthread_self(), sign);
 	pthread_exit(NULL);
 }
 
-//ĞÅºÅ²¶×½º¯Êı
+//
 void sign_usr2(int sign)
 {
 	myprint("\nthread:%lu, receive signal:%u---", pthread_self(), sign);
 }
 
-//ĞÅºÅ²¶×½º¯Êı
+//
 void sign_child(int sign)
 {
 	while((waitpid(-1, NULL, WNOHANG)) > 0)
@@ -163,7 +163,7 @@ void sign_child(int sign)
 		   
 }
 
-//Á´±í»Øµ÷º¯Êı,²éÕÒÖ¸¶¨µØÖ·µÄ½Úµã
+//
 int my_compare_packIndex(int nodeIndex, int packageIndex)
 {
 	return  nodeIndex == packageIndex;
@@ -181,7 +181,7 @@ void freeMapToMemPool(node *rmNode)
 }
 
 
-//³õÊ¼»¯; filePath : ÅäÖÃÎÄ¼şÂ·¾¶
+//
 int init_client_net(char * filePath)
 {
 	int ret = 0;
@@ -197,9 +197,9 @@ int init_client_net(char * filePath)
 	printf( "func init_client() begin, [%d],[%s]\n", __LINE__, __FILE__);
 	socket_log( SocketLevel[2], ret, "func init_client() begin");
 	
-	//1.ĞÅºÅ×¢²á
+	//
     memset(&actions, 0, sizeof(actions));  
-    sigemptyset(&actions.sa_mask); /* ½«²ÎÊısetĞÅºÅ¼¯³õÊ¼»¯²¢Çå¿Õ */  
+    sigemptyset(&actions.sa_mask); /* å°†å‚æ•°setä¿¡å·é›†åˆå§‹åŒ–å¹¶æ¸…ç©º */  
     actions.sa_flags = 0;  
     actions.sa_handler = pipe_func;  
     ret = sigaction(SIGPIPE,&actions,NULL);  
@@ -214,7 +214,7 @@ int init_client_net(char * filePath)
 	ret = sigaction(SIGCHLD,&actions,NULL);  
 
 	memcpy(g_filePath, filePath, strlen(filePath));
-	//2 É¾³ıLOGÄ¿Â¼ÏÂµÄËùÓĞÎÄ¼ş
+	//
 	if((if_file_exist("LOG")) == true)
 	{
 		sprintf(cmdBuf, "rm %s", "LOG/*");
@@ -224,21 +224,21 @@ int init_client_net(char * filePath)
 		}
 	}
 
-	//2.³õÊ¼»¯È«¾Ö±äÁ¿
+	//
 	if((ret = init_global_value()) < 0)
 	{
 		myprint( "Error: func pthread_create()");
 		goto End;
 	}
-	//socket_log( SocketLevel[2], ret, "func init_global_value() OK");
+	//
 
-	//3. ³õÊ¼»¯Ïß³Ì
+	//
  	if((ret = init_pthread_create()) < 0)
 	{
 		myprint( "Error: func init_pthread_create()");
 		goto End;
 	}
-	//socket_log( SocketLevel[2], ret, "func init_client() end");
+	//
 
 End:
 	printf("func init_client() end, [%d],[%s]\n", __LINE__, __FILE__);
@@ -247,12 +247,12 @@ End:
 
 
 
-//ÉèÖÃIP
+//
 static int set_local_ip_gate(char *loaclIp, char *gate)
 {
 	int ret = 0;
 	char buf[512] = { 0 };
-	//socket_log( SocketLevel[3], ret, " begin func set_local_ip_gate()");
+	//
 		
 	sprintf(buf, "ifconfig eth0 %s",  loaclIp);
 	ret = pox_system(buf);
@@ -285,54 +285,54 @@ static int set_local_ip_gate(char *loaclIp, char *gate)
 	}
 	
 End:	
-	//socket_log( SocketLevel[3], ret, " end func set_local_ip_gate()");
+	//
 	return ret;
 }
 
 
-//³õÊ¼»¯È«¾Ö±äÁ¿
+//
 static int init_global_value()
 {
 	int ret = 0;
 	char *fileName = NULL;
 	char *tableName = NULL;
 
-	//1.´¢´æÒªËÍÊı¾İµÄµØÖ·ºÍÊı¾İ³¤¶È, Ê¹ÓÃÏß³Ì: ×é°üÏß³ÌºÍ·¢ËÍÏß³Ì
+	//
 	if((g_queue_sendDataBlock = queue_init_send_block(CAPACITY)) == NULL)
 	{
 		ret = -1;
 		myprint( "Error: func queue_init_send_block()");
 		goto End;
 	}	
-	//2.´¢´æ½â°üºóµÄÊı¾İµØÖ·, Ê¹ÓÃÏß³Ì: ·¢ËÍUIÖ÷Ïß³ÌºÍ½â°üÏß³Ì
+	//
 	if((g_queueRecv = queue_init(CAPACITY)) == NULL)		
 	{
 		ret = -1;
 		myprint(  "Error: func queue_init()");
 		goto End;
 	}
-	//3.ÄÚ´æ³Ø, ÄÚ´æ¿éÎª ½«Òª·¢ËÍ¸ø·şÎñÆ÷µÄÊı¾İ»ò´Ó·şÎñÆ÷½ÓÊÕµÄÊı¾İ
+	//
 	if((g_memPool = mem_pool_init(CAPACITY, PACKMAXLENTH * 2, &g_mutex_memPool)) == NULL)
 	{
 		ret = -1;
 		myprint(  "Error: func mem_pool_init()");
 		goto End;
 	}
-	//4.½ÓÊÕ·şÎñÆ÷Êı¾İµÄ¶ÓÁĞ,  Ê¹ÓÃÏß³Ì: ½ÓÊÕÏß³ÌºÍ½â°üÏß³Ì
+	//
 	if((g_fifo = fifo_init(CAPACITY * 1024 * 2)) == NULL)
 	{
 		ret = -1;
 		socket_log( SocketLevel[4], ret, "Error: func fifo_init()");
 		goto End;
 	}	
-	//5.´¢´æUIÃüÁîµÄ¶ÓÁĞ,     Ê¹ÓÃÏß³Ì: Ö÷Ïß³ÌºÍ×é°üÏß³Ì
+	//
 	if((g_que_buf = queue_buffer_init(BUFSIZE, BUFSIZE)) == NULL)
 	{
 		ret = -1;
 		myprint( "Error: func queue_buffer_init()");
 		goto End;
 	}
-	//6.´´½¨Á´±í,´¢´æ±¾ÂÖËùÓĞ·¢ËÍÊı¾İ°üµÄĞÅÏ¢
+	//
 	if((g_list_send_dataInfo = Create_index_listSendInfo(PERROUNDNUMBER * 3, &g_mutex_list)) == NULL)
 	{
 		ret = -1;
@@ -340,7 +340,7 @@ static int init_global_value()
 		goto End;
 
 	}
-	//7.¶ÁÈ¡ÅäÖÃÎÄ¼ş²¢ÉèÖÃIP 
+	//
 	if((ret = get_config_file_para()) < 0)
 	{
 		myprint( "Error: func get_config_file_para()");
@@ -354,7 +354,7 @@ static int init_global_value()
 	}
 #endif	
 		
-	//8.ĞÅºÅÁ¿³õÊ¼»¯
+	//
 	sem_init(&g_sem_cur_read, 0, 0);			
 	sem_init(&g_sem_cur_write, 0, 0);			
 	sem_init(&g_sem_send, 0, 0);				
@@ -364,11 +364,11 @@ static int init_global_value()
 	sem_init(&g_sem_sequence, 0, 1);			
 
 
-	//9.init The global
+	//
 	memset(g_upload_error_set, 0, sizeof(g_upload_error_set));
 	memset(g_upload_set, 0, sizeof(g_upload_set));
 
-	//10. get The path And Name for downLoad Template And table
+	//
 	if((g_downLoadTableName = malloc(1024 )) == NULL)			assert(0);
 	if((g_downLoadTemplateName = malloc(1024 )) == NULL)		assert(0);
 	memset(g_downLoadTableName, 0, 1024);
@@ -408,33 +408,33 @@ End:
  {
 	 int ret = 0;
 	 
-	 //1.´´½¨ÃüÁîÏß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_business, NULL, thid_business, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
 		 goto End;
 	 }
  
-	 //2.´´½¨½ÓÊÕÊı¾İÏß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_read, NULL, thid_server_func_read, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create() thid_server_func_read");
 		 goto End;
 	 }
  
-	 //3.´´½¨·¢ËÍÊı¾İÏß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_write, NULL, thid_server_func_write, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
 		 goto End;
 	 }
-	 //4.´´½¨¼ì²â³¬Ê±Ïß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_time, NULL, thid_server_func_time, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
 		 goto End;
 	 } 
-	 //5.´´½¨½â°üÏß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_unpack, NULL, thid_unpack_thread, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
@@ -442,7 +442,7 @@ End:
 	 }
  
 #if 0
-	 //6.´´½¨ĞÄÌøÏß³Ì
+	 //
 	 if((ret = pthread_create(&g_thid_heartTime, NULL, thid_hreat_beat_time, NULL)) < 0)
 	 {
 		 myprint( "Error: func pthread_create()");
@@ -456,14 +456,14 @@ End:
 }
 
 
- //»ñÈ¡ÅäÖÃÎÄ¼şÄÚÈİ
+ //
 static int get_config_file_para()
 {
  	int ret = 0;
  	char *localIp = NULL, *gateTmp = NULL, *ServerIpTmp = NULL, *doMainNameTmp = NULL;
  	dictionary  *ini ;
 
- 	//1.init The config file
+ 	//
  	if((ini = iniparser_load(g_filePath)) == NULL)
  	{
  		ret = -1;
@@ -471,7 +471,7 @@ static int get_config_file_para()
  		goto End;
     }
 
-    //2.get The appoint content
+    //
     conten.dhcp = iniparser_getboolean(ini, "local:DHCP", -1);				
 
     localIp = iniparser_getstring(ini, "local:IP", NULL);				
@@ -506,13 +506,13 @@ static int get_config_file_para()
 }
 
 
-//choose The method to set local IP and gate;
-//1. DHCP, 2. manual set IP And gate
+//
+//
 int chose_setip_method()
 {
 	int ret = 0;
 	
-	if(conten.dhcp)		//¸ù¾İÑ¡Ïî½øĞĞÉèÖÃ, DHCP 
+	if(conten.dhcp)		//
 	{		
 		if(g_dhcp_process > 0)
 		{
@@ -525,7 +525,7 @@ int chose_setip_method()
 			goto End;
 		}
 	}
-	else				//ÉèÖÃ±¾µØIP
+	else				//
 	{		
 		if((ret = set_local_ip_gate(conten.loaclIp, conten.gate)) < 0)
 		{
@@ -546,41 +546,41 @@ End:
 
 
 
-//Ïú»Ù
+//
 int destroy_client_net()
 {
 	int ret = 0;
 
-	//1.ĞŞ¸Ä±êÊ¶, ±êÊ¶Ïú»Ù·şÎñ
+	//
 	g_close_net = 1;					
 	sem_post(&g_sem_cur_read);			 
 	sleep(1);
 
-	//2.Ïú»Ù½ÓÊÕÊı¾İÏß³Ì
+	//
 	if((ret = pthread_kill(g_thid_read, SIGUSR1)) < 0)
 	{
 		myprint("Error: func pthread_kill() recvData Thread");
 	}
 
-	//3.Ïú»Ù·¢ËÍÊı¾İÏß³Ì
+	//
 	if((ret = pthread_kill(g_thid_write, SIGUSR1)) < 0)
 	{
 		myprint("Error: func pthread_kill() sendData Thread");
 	}
 
-	//4.Ïú»Ù³¬Ê±Ïß³Ì
+	//
 	if((ret = pthread_kill(g_thid_time, SIGUSR1)) < 0)
 	{
 		myprint("Error: func pthread_kill() timeOut Thread");
 	}	
 
-	//5.Ïú»Ù´¦ÀíÃüÁîÏß³Ì
+	//
 	if((ret = pthread_kill(g_thid_business, SIGUSR1)) < 0)
 	{
 		myprint("Error: func pthread_kill() cmd Thread");
 	}
 
-	//6.Ïú»Ù½â°üÏß³Ì
+	//
 	if((ret = pthread_kill(g_thid_unpack, SIGUSR1)) < 0)
 	{
 		myprint("Error: func pthread_kill() unpack Thread");
@@ -593,20 +593,20 @@ int destroy_client_net()
 	}
 #endif	
 
-	//8.Ïú»ÙÄÚ´æ³Ø
+	//
 	if(g_memPool)					mem_pool_destroy(g_memPool);			
 
-	//9.Ïú»Ù¶ÓÁĞ: ·¢ËÍÊı¾İ, ½ÓÊÕÊı¾İ, ÃüÁî¶ÓÁĞ, ÍÆËÍ¸øUI
+	//
 	if(g_queue_sendDataBlock)		destroy_queue_send_block(g_queue_sendDataBlock);	
 	if(g_queueRecv)					destroy_queue(g_queueRecv);				
 	if(g_fifo)						destroy_fifo_queue(g_fifo);								
 	if(g_que_buf)					destroy_buffer_queue(g_que_buf);
 
-	//10.Ïú»ÙÈ«¾Ö±äÁ¿: Ä£°åÃû³ÆºÍÊı¾İ¿âÃû³Æ
+	//
 	if(g_downLoadTableName)			free(g_downLoadTableName);
 	if(g_downLoadTemplateName)		free(g_downLoadTemplateName);
 	
-	//11.Ïú»ÙĞÅºÅÁ¿
+	//
 	sem_destroy(&g_sem_cur_read);
 	sem_destroy(&g_sem_cur_write);
 	sem_destroy(&g_sem_send);
@@ -615,21 +615,21 @@ int destroy_client_net()
 	sem_destroy(&g_sem_sequence);
 	sem_destroy(&g_sem_unpack);
 	
-	//12.Ïú»Ù»¥³âËø
+	//
 	pthread_mutex_destroy(&g_mutex_client);
 	pthread_mutex_destroy(&g_mutex_list);
 	pthread_mutex_destroy(&g_mutex_memPool);
 	pthread_mutex_destroy(&g_mutex_serial);
 	
 
-	//13.Ïú»ÙÍ¨ĞÅÌ×½Ó×Ö
+	//
 	if(g_sockfd > 0)
 	{
 		close(g_sockfd);
 		g_sockfd = -1;
 	}
 
-	//14.Ïú»Ùdhcp½ø³Ì
+	//
 	if(g_dhcp_process > 0)
 	{
 		kill(g_dhcp_process, SIGKILL);
@@ -640,7 +640,7 @@ int destroy_client_net()
 
 
 
-//½ÓÊÕUI µÄÃüÁî
+//
 int  recv_ui_data(const char *news)
 {
 	int ret = 0, num = 0;
@@ -656,11 +656,11 @@ int  recv_ui_data(const char *news)
 		goto End;
 	}
 
-	//1. get The cmd  of packet in news.
+	//
 	sscanf(news, "%[^~]", cmdBuf);
 	cmd = atoi(cmdBuf);
 
-	//2.choose the cmd
+	//
 	if(cmd == 0x0c )
 	{
 		if((tmpNews = copy_the_ui_cmd_news(news)) == NULL)
@@ -676,7 +676,7 @@ int  recv_ui_data(const char *news)
 		tmpNews = news;
 	}
 
-	//3.½«ÃüÁî´æ´¢½ø¶ÓÁĞÖĞ
+	//
 	do{		
 		if((ret = push_buffer_queue(g_que_buf, (char *)tmpNews)) == -2)
 		{			
@@ -699,10 +699,10 @@ int  recv_ui_data(const char *news)
 		
 	}while(ret == -2 && num < 3);		
 
-	//4.Í¨ÖªÃüÁîÏß³Ì, 
+	//
 	if(ret == 0)
 	{	
-		//myprint("recv news : %s ", news);
+		//
 		sem_post(&g_sem_business);		
 	}
 	
@@ -710,7 +710,7 @@ End:
 	return ret;
 }
 
-//·¢ËÍĞÅÏ¢¸øUI
+//
 int send_ui_data(char **buf)
 {
 	int ret = 0;
@@ -723,13 +723,13 @@ int send_ui_data(char **buf)
 		goto End;
 	}
 
-	//1.½øÈë²Ù×÷Á÷³Ì
+	//
 	while(1)
 	{
 		sem_wait(&g_sem_cur_read);	
 		if(g_close_net == 0 || g_close_net == 2)
 		{
-			//2.´¦Àí¶ÓÁĞÊı¾İ,²¢»ñÈ¡·¢ËÍ¸ø UI µÄÊı¾İ
+			//
 			if((ret = data_process(buf)) == -1)
 			{
 				myprint("Error: func data_process() index : %d", index++);			
@@ -737,20 +737,20 @@ int send_ui_data(char **buf)
 			}
 			else if(ret == 1)
 			{
-				//socket_log(SocketLevel[2], ret, " *buf : %p, index : %d", *buf, index++);
+				//
 				continue;
 			}
 			else if(ret == 0)
 			{
-				//socket_log(SocketLevel[2], ret, " *buf : %s, addr : %p, index : %d", *buf, *buf, index++);
+				//
 				break;
 			}
 
 		}
 	#if 0	
-		else if(g_close_net == 1)		//Ïú»ÙÍøÂç·şÎñ
+		else if(g_close_net == 1)		//
 		{
-			sprintf(g_request_reply_content, "%s", " ");				//¸ø³öĞÅÏ¢, Ëæ±ã
+			sprintf(g_request_reply_content, "%s", " ");				//
 			*buf = g_request_reply_content;
 			break;
 		}
@@ -759,7 +759,7 @@ int send_ui_data(char **buf)
 	
 	sem_post(&g_sem_sequence);	
 	
-	//socket_log(SocketLevel[2], ret, "send Data to UI is %s, %p, index : %d", *buf, *buf, index++);
+	//
 
 End:
 	return ret;
@@ -767,25 +767,25 @@ End:
 
 
 
-//¸øUI »Ø¸´Ê±µÄÊı¾İ´¦Àí; 0: ĞèÒª»Ø¸´;  -1: ³ö´í;  1: ²»ĞèÒª¸øUI½øĞĞ»Ø¸´
+//
 int data_process(char **buf)
 {
 	int ret = 0;
-	char *sendUiData = NULL;				//»ñÈ¡¶ÓÁĞÖĞµÄÊı¾İ	
-	uint8_t cmd = 0;						//Êı¾İ°üÃüÁî×Ö
+	char *sendUiData = NULL;				//
+	uint8_t cmd = 0;						//
 	
 	
-	//1.È¡³ö¶ÓÁĞÖĞÊı¾İ  ±¨Í·+ÏûÏ¢Ìå+Ğ£ÑéÂë
+	//
 	if((ret = pop_queue(g_queueRecv, &sendUiData)) < 0)		
 	{
 		myprint("Error: func pop_queue()");
  		assert(0);
 	}
 
-	//2.»ñÈ¡ÃüÁî×Ö
+	//
 	cmd = *((uint8_t *)sendUiData);
 
-	//3.½øĞĞÃüÁî×ÖµÄÑ¡Ôñ
+	//
 	switch (cmd){
 		case ERRORFLAGMY:
 			if((ret = data_un_packge(error_net_reply, sendUiData, buf)) < 0)
@@ -853,7 +853,7 @@ int data_process(char **buf)
 			assert(0);
 		}
 
-	//4. ÊÍ·ÅÄÚ´æ
+	//
 	if((mem_pool_free(g_memPool, sendUiData)) < 0)
 	{
 		myprint("Error : func mem_pool_free()");
@@ -883,15 +883,15 @@ int data_un_packge(call_back_un_pack func_data, char *news, char **outDataNews)
 }
 
 
-//ÊÍ·ÅÄÚ´æ
+//
 int free_memory_net(char *buf)
 {
 	int ret = 0;
 	
 	if(buf)
 	{
-		//sscanf(buf, "%[^~]", tmpBuf);
-		if(g_close_net != 1)		//ÊÍ·ÅÄÚ´æ»ØÄÚ´æ³Ø
+		//
+		if(g_close_net != 1)		//
 		{
 			if((ret = mem_pool_free(g_memPool, buf)) < 0)
 			{
@@ -901,7 +901,7 @@ int free_memory_net(char *buf)
 			}		
 		}
 	#if 0	
-		else			//Çå¿ÕÈ«¾Ö±äÁ¿ĞÅÏ¢
+		else			//
 		{
 			memset(g_request_reply_content, 0, REQUESTCONTENTLENTH);
 		}
@@ -916,7 +916,7 @@ int free_memory_net(char *buf)
 
 
 /*copy The news content in block buffer
-*@param : news cmd~content~;Â¢~
+*@param : news cmd~content~;å„~
 *@retval: OK block buffer addr; fail NULL
 */
 void *copy_the_ui_cmd_news(const char *news)
@@ -928,7 +928,7 @@ void *copy_the_ui_cmd_news(const char *news)
 	char bufAddr[20] = { 0 };
 
 
-	//1.find The flag in news
+	//
 	if((tmp = strchr(news, '~')) == NULL)
 	{
 		ret = -1;
@@ -938,7 +938,7 @@ void *copy_the_ui_cmd_news(const char *news)
 	memcpy(bufAddr, tmp + 1, strlen(tmp) - 2);
 
 	
-	//2.alloc The block in mempry pool
+	//
 	if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -947,7 +947,7 @@ void *copy_the_ui_cmd_news(const char *news)
 	}
 
 
-	//3.The buffer content conver 16 hex
+	//
 	apprLen = hex_conver_dec(bufAddr);
 	tmp = NULL + apprLen;	
 	memcpy(tmpPool, tmp, sizeof(UitoNetExFrame));
@@ -963,12 +963,12 @@ void *thid_hreat_beat_time(void *arg)
 	int ret = 0 ;
 	pthread_detach(pthread_self());
 
-	//½øĞĞĞÄÌøÊı¾İ°üµÄ·¢ËÍ
+	//
 	while(1)
 	{
 		timer_select(HEART_TIME);
 
-		if(!g_isSendPackCurrent)		//µ±ÎŞÊı¾İ°ü·¢ËÍÊ±, ½øĞĞÊı¾İ°üµÄ·¢ËÍ
+		if(!g_isSendPackCurrent)		//
 		{
 			if((ret = recv_ui_data("3~")) < 0)
 			{
@@ -986,12 +986,12 @@ void *thid_hreat_beat_time(void *arg)
 
 
 
-//´¦Àí UI ÃüÁîµÄÏß³Ì
+//
 void *thid_business(void *arg)
 {
 	int ret = 0, cmd = -1;
-	char tmpBuf[4] = { 0 };				//»ñÈ¡ÃüÁî
-	int numberCmd = 1;					//½ÓÊÕÃüÁî¼ÆÊıÆ÷
+	char tmpBuf[4] = { 0 };				//
+	int numberCmd = 1;					//
 	
 	pthread_detach(pthread_self());
 	
@@ -999,13 +999,13 @@ void *thid_business(void *arg)
 
 	while(1)
 	{
-		sem_wait(&g_sem_business);			//µÈ´ıĞÅºÅÁ¿Í¨Öª	
-		sem_wait(&g_sem_sequence);			//½øĞĞÃüÁî´¦Àí¿ØÖÆ,±ØĞëÒ»ÌõÃüÁî´¦ÀíÍê,·µ»Ø½á¹û¸øUIºó, ÔÙ´¦ÀíÏÂÒ»ÌõÃüÁî
+		sem_wait(&g_sem_business);			//
+		sem_wait(&g_sem_sequence);			//
 
-		char 	cmdBuffer[BUFSIZE] = { 0 };	//È¡³ö¶ÓÁĞÖĞµÄÃüÁî
+		char 	cmdBuffer[BUFSIZE] = { 0 };	//
 		int		num = 0;		
 				
-		//1.È¡³ö UI ÃüÁîĞÅÏ¢
+		//
 		memset(tmpBuf, 0, sizeof(tmpBuf));
 		ret = pop_buffer_queue(g_que_buf, cmdBuffer);
 		if(ret == -1)
@@ -1015,72 +1015,72 @@ void *thid_business(void *arg)
 		}
 		
 		printf("\n-------------- number cmd : %d, content : %s\n\n", numberCmd, cmdBuffer);
-		//socket_log(SocketLevel[2], ret, "\n---------- number cmd : %d, content : %s", numberCmd, cmdBuffer);
+		//
 		numberCmd += 1;
 		
-		//2.»ñÈ¡ÃüÁî
+		//
 		sscanf(cmdBuffer, "%[^~]", tmpBuf);
 		cmd = atoi(tmpBuf);		
 		
 		do 
 		{				
-			//3.½øĞĞÃüÁîÑ¡Ôñ
+			//
 			switch (cmd){
-				case 0x01:		//µÇÂ¼		
+				case 0x01:		//
 					if((ret = data_packge(login_func, cmdBuffer)) < 0)			
 						socket_log(SocketLevel[4], ret, "Error: data_packge() login_func"); 									
 					break;				
-				case 0x02:		//µÇ³ö
+				case 0x02:		//
 					if((ret = data_packge(exit_program, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() exit_program");					
 					break;
-				case 0x03:		//ĞÄÌø
+				case 0x03:		//
 					if((ret = data_packge(heart_beat_program, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() heart_beat_program");
 					break;					
-				case 0x04:		//´Ó·şÎñÆ÷ÏÂÔØÎÄ¼ş
+				case 0x04:		//
 					if((ret = data_packge(download_file_fromServer, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() download_template");
 					break;
-				case 0x05:		//»ñÈ¡ÎÄ¼ş×îĞÂID 
+				case 0x05:		//
 					if((ret = data_packge(get_FileNewestID, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() get_FileNewestID");
 					break;	
 				
-				case 0x06:		//ÉÏ´«Í¼Æ¬
+				case 0x06:		//
 					if((ret = data_packge(upload_picture, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() upload_picture");
 					break;
 #if 1					
-				case 0x07:		//ÏûÏ¢ÍÆËÍ
+				case 0x07:		//
 					if((ret = data_packge(push_info_from_server_reply, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() upload_picture");
 					break;
-				case 0x08:		//Ö÷¶¯¹Ø±ÕÍøÂç
+				case 0x08:		//
 					if((ret = data_packge(active_shutdown_net, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() active_shutdown_net");
 					break;
-				case 0x09:		//É¾³ıÍ¼Æ¬
+				case 0x09:		//
 					if((ret = data_packge(delete_spec_pic, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() delete_spec_pic");
 					break;
 #endif					
-				case 0x0A:		//Á´½Ó·şÎñÆ÷
+				case 0x0A:		//
 					if((ret = data_packge(connet_server, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() connet_server");
 					break;
 
-				case 0x0B:		//¶ÁÈ¡ÅäÖÃÎÄ¼ş
+				case 0x0B:		//
 					if((ret = data_packge(read_config_file, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() read_config_file");
 					break;
 					
-				case 0x0C:		//Ä£°åÉ¨ÃèÊı¾İÉÏ´«
+				case 0x0C:		//
 					if((ret = data_packge(template_extend_element, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() template_extend_element");
 					break;
 #if 0					
-				case 0x0E:		//¼ÓÃÜ´«Êä »òÕß È¡Ïû¼ÓÃÜ´«Êä
+				case 0x0E:		//
 					if((ret = data_packge(encryp_or_cancelEncrypt_transfer, cmdBuffer)) < 0)
 						socket_log(SocketLevel[4], ret, "Error: data_packge() encryp_or_cancelEncrypt_transfer");
 					break;
@@ -1092,11 +1092,11 @@ void *thid_business(void *arg)
 
 			if(ret < 0)		
 			{
-				sleep(1);		//µ±´¦Àí³ö´íºó, 
+				sleep(1);		//
 				num += 1;
 			}
 		}while( 0 );
-//		myprint("cmd : %d end...", cmd);	
+//
 		
 	}
 
@@ -1105,17 +1105,17 @@ void *thid_business(void *arg)
 	return	NULL;
 }
 
-//½øĞĞº¯Êı×¢²á
+//
 int  data_packge(call_back_package  func, const char *news)
 {
 	return func(news);
 }
 
 
-/*·¢ËÍÊı¾İ
- *@param: fd : Ö¸¶¨Ì×½Ó×Ö
- *@param: buf : Êı¾İÄÚÈİ
- *@param: lenth: Êı¾İ³¤¶È
+/*å‘é€æ•°æ®
+ *@param: fd : æŒ‡å®šå¥—æ¥å­—
+ *@param: buf : æ•°æ®å†…å®¹
+ *@param: lenth: æ•°æ®é•¿åº¦
  *@retval : -1: fail  >=0 : The sendLenth
 */
 ssize_t writen(int fd, const void *buf, ssize_t lenth)
@@ -1138,7 +1138,7 @@ ssize_t writen(int fd, const void *buf, ssize_t lenth)
             {
                 return -1;
             }
-            else	//·¢ËÍÊı¾İÒ»°ë³ö´í
+            else	//
             {
                 break;
             }
@@ -1159,12 +1159,12 @@ ssize_t writen(int fd, const void *buf, ssize_t lenth)
 int send_data(int sockfd, int *sendCmd)
 {
 	int 	ret = 0;
-	char 	*tmpSend = NULL;		//·¢ËÍÊı¾İµÄµØÖ·
-	int 	tmpSendLenth = 0;		//·¢ËÍÊı¾İ³¤¶È
-	int 	nSendLen = 0;			//·¢ËÍÁË³¤¶È
+	char 	*tmpSend = NULL;		//
+	int 	tmpSendLenth = 0;		//
+	int 	nSendLen = 0;			//
 
 	
-	//1.»ñÈ¡·¢ËÍµÄµØÖ·ºÍ³¤¶È
+	//
 	if(( ret = pop_queue_send_block(g_queue_sendDataBlock, &tmpSend, &tmpSendLenth, sendCmd)) < 0)
 	{
 		myprint( "Error: func get_queue_send_block()");
@@ -1172,19 +1172,19 @@ int send_data(int sockfd, int *sendCmd)
 	}
 	g_send_package_cmd = *sendCmd;
 
-	//2.ÅĞ¶Ï²ÉÈ¡ÄÄÖÖÍ¨µÀ·¢ËÍÊı¾İ
-	if(!g_encrypt)					//No encrypt
+	//
+	if(!g_encrypt)					//
 	{		
 		nSendLen = writen(g_sockfd, tmpSend, tmpSendLenth);		
 	}
-	else if(g_encrypt)				//encrypt 
+	else if(g_encrypt)				//
 	{		
-//		nSendLen = SSL_write(g_sslHandle, tmpSend, tmpSendLenth);
+//
 	}
 	do{
 		if(nSendLen == tmpSendLenth)	
 		{
-			//3.·¢ËÍ³É¹¦, »º´æµ±Ç°·¢ËÍµÄÊı¾İ°üĞÅÏ¢, (Ö÷Òª»º´æ×îºóÒ»°ü)
+			//
 			g_lateSendPackNews.cmd = *sendCmd;
 			g_lateSendPackNews.sendAddr = tmpSend;
 			g_lateSendPackNews.sendLenth = tmpSendLenth;
@@ -1193,7 +1193,7 @@ int send_data(int sockfd, int *sendCmd)
 			if(g_send_package_cmd == PUSHINFOREQ)
 			{
 				remove_senddataserver_addr();				
-				sem_post(&g_sem_send);	//·şÎñÆ÷ÍÆËÍÏûÏ¢³É¹¦Ó¦´ğºó,Í¨Öª½øĞĞÏÂÒ»°üÊı¾İµÄ·¢ËÍ 
+				sem_post(&g_sem_send);	//
 				goto End;
 			}
 		}
@@ -1221,7 +1221,7 @@ End:
 	return ret;
 }
 
-//É¾³ıÁ´±íÖĞËùÓĞµÄÔªËØ
+//
 void remove_senddataserver_addr()
 {
 	
@@ -1235,7 +1235,7 @@ void remove_senddataserver_addr()
 }
 
 
-//½ÓÊÕÊı¾İ; success 0;  fail -1;
+//
 int recv_data(int sockfd)
 {
 	int ret = 0, recvLenth = 0, number = 0;
@@ -1245,19 +1245,19 @@ int recv_data(int sockfd)
 	while(1)
 	{
 
-		//1.Ñ¡Ôñ½ÓÊÕÊı¾İµÄ·½Ê½
+		//
 		if(g_encrypt == false )
 		{
 			recvLenth = read(g_sockfd, buf, sizeof(buf));
 		}
 		else if(g_encrypt)
 		{
-//			recvLenth = SSL_read(g_sslHandle, buf, sizeof(buf));
+//
 		}
 		nRead += recvLenth;;
 		if(recvLenth < 0)		
 		{			
-			//2.½ÓÊÕÊı¾İÊ§°Ü
+			//
 			if(errno == EINTR || errno == EAGAIN  || errno == EWOULDBLOCK )
 			{			
 				continue;
@@ -1271,16 +1271,16 @@ int recv_data(int sockfd)
 		}
 		else if(recvLenth == 0)		
 		{
-			//3.·şÎñÆ÷ÒÑ¹Ø±Õ
+			//
 			ret = -1;
 			myprint("The server has closed !!!");			
 			goto End;
 		}
 		else if(recvLenth > 0)		
 		{
-			//4.½ÓÊÕÊı¾İ³É¹¦
+			//
 			do{
-				//5.½«Êı¾İ·ÅÈë¶ÓÁĞÖĞ
+				//
 				ret = push_fifo(g_fifo, buf, recvLenth);
 				if(ret == -1)
 				{
@@ -1302,7 +1302,7 @@ int recv_data(int sockfd)
 				goto End;
 			}
 
-			//6.ÊÍ·ÅĞÅºÅÁ¿, Í¨Öª½â°üÏß³Ì
+			//
 			sem_post(&g_sem_unpack);
 		
 			goto End;				
@@ -1316,53 +1316,53 @@ End:
 
 
 
-/*±È½ÏÊı¾İ°ü½ÓÊÕÊÇ·ñÕıÈ·
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*æ¯”è¾ƒæ•°æ®åŒ…æ¥æ”¶æ˜¯å¦æ­£ç¡®
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, repeat : -1, Noreapt : -2
 */
 int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	int checkCode = 0;					//±¾µØ¼ÆËãĞ£ÑéÂë
-	int *tmpCheckCode = NULL;			//»º´æ·şÎñÆ÷µÄĞ£ÑéÂë
-	uint8_t cmd = 0;					//½ÓÊÕÊı¾İ°üÃüÁî
-	resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	resSubPackHead_t  *subHead = NULL;	//ÏÂÔØ·şÎñÆ÷ÎÄ¼şµÄ±¨Í·
+	int checkCode = 0;					//
+	int *tmpCheckCode = NULL;			//
+	uint8_t cmd = 0;					//
+	resCommonHead_t  *comHead = NULL;	//
+	resSubPackHead_t  *subHead = NULL;	//
 
 
-	//1.»ñÈ¡½ÓÊÕÊı¾İ°üµÄÃüÁî×Ö
+	//
 	cmd = *((uint8_t *)tmpContent);
 
-	//2.½øĞĞÃüÁî×ÖµÄÑ¡Ôñ
+	//
 	if(cmd != DOWNFILEZRESPON)
 	{
-		//3. »ñÈ¡½ÓÊÕÊı¾İµÄ±¨Í·ĞÅÏ¢
+		//
 		comHead = (resCommonHead_t *)tmpContent;
 
-		//4. Êı¾İ°ü³¤¶È±È½Ï
+		//
 		if(comHead->contentLenth + sizeof(int) == tmpContentLenth)
 		{
 			if(cmd == LOGINCMDRESPON)	
 			{
-				g_recvSerial = comHead->seriaNumber;  //µÚÒ»´Î½ÓÊÕÊı¾İ, »ñÈ¡·şÎñÆ÷µÄÁ÷Ë®ºÅ´¢´æ
+				g_recvSerial = comHead->seriaNumber;  //
 			}	
 
-			//5.³¤¶ÈÕıÈ·, ½øĞĞÁ÷Ë®ºÅ±È½Ï, È¥³ıÖØ°ü			
+			//
 			if(comHead->seriaNumber >= g_recvSerial)
 			{				
-				//6.Á÷Ë®ºÅÕıÈ·,½øĞĞĞ£ÑéÂë±È½Ï
+				//
 				tmpCheckCode = (int *)(tmpContent + tmpContentLenth - sizeof(uint32_t));			
 				checkCode = crc326(tmpContent, tmpContentLenth - sizeof(uint32_t));
 				if(checkCode == *tmpCheckCode)
 				{
-					//7.Ğ£ÑéÂëÕıÈ·, Õû¸öÊı¾İ°üÕıÈ·
-					g_recvSerial = comHead->seriaNumber + 1;		//Á÷Ë®ºÅÍùÏÂÒÆ¶¯					
+					//
+					g_recvSerial = comHead->seriaNumber + 1;		//
 					ret = 0;				
 				}
 				else
 				{
-					//8.Ğ£ÑéÂë´íÎó, Êı¾İ°üĞèÒªÖØ·¢
+					//
 					myprint( "Error: cmd : %d, contentLenth : %d, package serial : %u checkCode : %u != *tmpCheckCode : %u",
 									cmd , comHead->contentLenth, comHead->seriaNumber, checkCode, *tmpCheckCode);
 					ret = -1;
@@ -1370,7 +1370,7 @@ int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 			}
 			else
 			{
-				//9.Á÷Ë®ºÅ³ö´í, ²»ĞèÒªÖØ·¢
+				//
 				socket_log(SocketLevel[3], ret, "Err : cmd : %d, package serial : %u, loacl ServerSerial : %u", 
 											cmd,  comHead->seriaNumber, g_recvSerial);
 				ret = -2;		
@@ -1378,35 +1378,35 @@ int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 		}
 		else
 		{
-			//10.Êı¾İ³¤¶È³ö´í, ²»ĞèÒªÖØ·¢
+			//
 			socket_log(SocketLevel[3], ret, "Err : cmd : %d, package Lenth : %d != recvLenth : %d, package serial : %u", 
 						cmd, comHead->contentLenth + sizeof(int), tmpContentLenth, comHead->seriaNumber);
 			ret = -2;			
 		}
 	}
-	else	//´Ó·şÎñÆ÷ÏÂÔØÎÄ¼ş
+	else	//
 	{
 		subHead = (resSubPackHead_t *)tmpContent;
 
-		//11.Êı¾İ°ü³¤¶È±È½Ï
+		//
 		if(subHead->contentLenth + sizeof(int) == tmpContentLenth)
 		{
-			//12.Êı¾İ°ü³¤¶ÈÕıÈ·, ±È½ÏÁ÷Ë®ºÅ, È¥³ıÖØ°ü
+			//
 			if(g_recvSerial <= subHead->seriaNumber)
 			{
 								
-				//14.Á÷Ë®ºÅÕıÈ·,½øĞĞĞ£ÑéÂë±È½Ï
+				//
 				tmpCheckCode = (int *)(tmpContent + tmpContentLenth - sizeof(uint32_t));
 				checkCode = crc326(tmpContent, tmpContentLenth - sizeof(uint32_t));
 				if(*tmpCheckCode == checkCode)
 				{
-					//15.Ğ£ÑéÂëÕıÈ·, Õâ¸öÊı¾İ°üÕıÈ·
-					g_recvSerial = subHead->seriaNumber + 1;		//Á÷Ë®ºÅÍùÏÂÒÆ¶¯					
+					//
+					g_recvSerial = subHead->seriaNumber + 1;		//
 					ret = 0;
 				}
 				else
 				{
-					//16.Ğ£ÑéÂë³ö´í, ĞèÒªÖØ·¢Êı¾İ°ü						
+					//
 					myprint( "Error: cmd : %d, package serial : %u checkCode : %u != *tmpCheckCode : %u",
 									cmd , subHead->seriaNumber, checkCode, *tmpCheckCode);
 					ret = -1;
@@ -1414,7 +1414,7 @@ int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 			}
 			else
 			{
-				//17.Á÷Ë®ºÅ³ö´í, ²»ĞèÒªÖØ·¢
+				//
 				socket_log(SocketLevel[3], ret, "Err : cmd : %d, package serial : %u, loacl ServerSerial : %u", 
 											cmd,  subHead->seriaNumber, g_seriaNumber);
 				ret = -2;	
@@ -1422,7 +1422,7 @@ int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 		}
 		else
 		{
-			//18.Êı¾İ³¤¶È³ö´í, ²»ĞèÒªÖØ·¢
+			//
 			socket_log(SocketLevel[3], ret, "Err : cmd : %d, package Lenth : %d != recvLenth : %d, package serial : %u", 
 						cmd, subHead->contentLenth + sizeof(int), tmpContentLenth, subHead->seriaNumber);
 			ret = -2;
@@ -1434,39 +1434,39 @@ int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
 }
 
 
-/*¶ÔÖØĞÂ·¢ËÍµÄÊı¾İ°üĞŞ¸ÄËüµÄÁ÷Ë®ºÅ
-*@param : sendAddr  	 ÍêÕûµÄÊı¾İ°üÔ­Ê¼µØÖ·
-*@param : sendLenth  	 Êı¾İ°ü³¤¶È
-*@param : cmd			 ·¢ËÍÊı¾İ°üµÄÃüÁî×Ö
+/*å¯¹é‡æ–°å‘é€çš„æ•°æ®åŒ…ä¿®æ”¹å®ƒçš„æµæ°´å·
+*@param : sendAddr  	 å®Œæ•´çš„æ•°æ®åŒ…åŸå§‹åœ°å€
+*@param : sendLenth  	 æ•°æ®åŒ…é•¿åº¦
+*@param : cmd			 å‘é€æ•°æ®åŒ…çš„å‘½ä»¤å­—
 */
 void modify_repeatPackSerialNews(char *sendAddr, int sendLenth, int *newSendLenth)
 {
 	char *tmp = NULL;
-	char tmpPackData[PACKMAXLENTH] = { 0 };		//»º´æÊı¾İ°üµÄÄÚÈİ
+	char tmpPackData[PACKMAXLENTH] = { 0 };		//
 	int outLenth = 0;
 	reqPackHead_t *tmpHead;
-	int  checkCode = 0;				//Ğ£ÑéÂë
+	int  checkCode = 0;				//
 	int	 outDataLenth = 0;
 
-	//1. ½â×ªÒåÊı¾İ°üÄÚÈİ
+	//
 	if((anti_escape(sendAddr + 1, sendLenth - 2, tmpPackData, &outLenth)) < 0)
 	{
 		myprint("Error : func anti_escape()");
 		assert(0);
 	} 
 	
-	//2.»ñÈ¡Êı¾İ°üµÄ±¨Í·ĞÅÏ¢, ĞŞ¸ÄÆäÖĞµÄÁ÷Ë®ºÅ
+	//
 	tmpHead = (reqPackHead_t*)tmpPackData;
 	pthread_mutex_lock(&g_mutex_serial);
 	tmpHead->seriaNumber = g_seriaNumber++;
 	pthread_mutex_unlock(&g_mutex_serial);
 
-	//3.ÖØĞÂ¼ÆËãĞ£ÑéÂë
+	//
 	checkCode = crc326((const char *)tmpPackData, tmpHead->contentLenth);
 	tmp = tmpPackData + tmpHead->contentLenth;
 	memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
 
-	//4.¶ÔÊı¾İ°ü×ªÒå
+	//
 	if((escape(PACKSIGN, tmpPackData, tmpHead->contentLenth + sizeof(uint32_t), sendAddr + 1, &outDataLenth)) < 0)
 	{
 		myprint("Error: func escape() ");		 
@@ -1474,35 +1474,35 @@ void modify_repeatPackSerialNews(char *sendAddr, int sendLenth, int *newSendLent
 	}
 	*(sendAddr + outDataLenth + 1) = PACKSIGN;
 
-	//5.½«×îĞÂµÄ³¤¶È·µ»Ø
+	//
 	*newSendLenth = outDataLenth + sizeof(char) * 2;	
 	
 }
 
 
-/*ÆÕÍ¨ÃüÁîµÄ Ó¦´ğ°ü´¦Àí,(´Ë´¦Ö¸: ¿Í»§¶ËµÄÒ»¸öÃüÁî Ö»¶ÔÓ¦ ·şÎñÆ÷µÄÒ»¸öÓ¦´ğ°ü)
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*æ™®é€šå‘½ä»¤çš„ åº”ç­”åŒ…å¤„ç†,(æ­¤å¤„æŒ‡: å®¢æˆ·ç«¯çš„ä¸€ä¸ªå‘½ä»¤ åªå¯¹åº” æœåŠ¡å™¨çš„ä¸€ä¸ªåº”ç­”åŒ…)
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	char *tmpPool = NULL;				//ÄÚ´æ¿é
+	resCommonHead_t  *comHead = NULL;	//
+	char *tmpPool = NULL;				//
 	
-	//1.»ñÈ¡Ó¦´ğµÄ±¨Í·ĞÅÏ¢
+	//
 	comHead = (resCommonHead_t*)tmpContent;
 
-	//2.ÅĞ¶ÏÊı¾İ°üÊÇ·ñ·¢ËÍ¹ı³ÌÖĞ, ĞÅÏ¢³ö´í
+	//
 	if(comHead->isFailPack == 1)
 	{
-		//3.·¢ËÍ¹ı³ÌÖĞ, ĞÅÏ¢³ö´í, Ö¸Ğ£ÑéÂëĞÅÏ¢, ÖØ·¢¸ÃÊı¾İ°ü, Ïàµ±ÓÚ×îºóÒ»°ü
+		//
 		repeat_latePack();		
 	}
 	else
 	{
-		//5.ÉêÇëÄÚ´æ
+		//
 		if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 		{
 			ret = -1;
@@ -1511,7 +1511,7 @@ int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
 		}
 		memcpy(tmpPool, tmpContent, tmpContentLenth);
 		
-		//6.½«ÄÚÈİ´¢´æ½ø ¶ÓÁĞ,Í¨Öª¸øUI»Ø¸´
+		//
 		if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
 		{
 			myprint( "Error: func push_queue() ");
@@ -1520,7 +1520,7 @@ int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
 		}
 		sem_post(&g_sem_cur_read);
 
-		//7.½«·¢ËÍÄÚÈİ´ÓÁ´±íÖĞÇå³ı(ÒòÎª±¾º¯ÊıÖĞ, ËùÓĞµÄ¿Í»§¶ËÃüÁî¶¼Ö»¶ÔÓ¦Ò»¸öÓ¦´ğ°ü, ËùÒÔÖ±½ÓÇå¿ÕÁ´±í¾Í¿ÉÒÔ)
+		//
 		trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 		if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 		{			
@@ -1528,10 +1528,10 @@ int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
 			assert(0);
 		}
 
-		//8.ĞŞ¸Ä±êÊ¶·û, ±êÊ¶½ÓÊÕµ½¸ÃÊı¾İ°üµÄÓ¦´ğ
+		//
 		g_isSendPackCurrent = false;
 		
-		//9.Í¨Öª×é°üÏß³Ì½øĞĞÏÂÒ»¸öÈÎÎñ
+		//
 		sem_post(&g_sem_send);
 	}
 
@@ -1542,10 +1542,10 @@ int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
 int pushInfo_func(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	//resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	char *tmpPool = NULL;				//ÄÚ´æ¿é
+	//
+	char *tmpPool = NULL;				//
 
-	//1.ÉêÇëÄÚ´æ
+	//
 	if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -1554,7 +1554,7 @@ int pushInfo_func(char *tmpContent, int tmpContentLenth)
 	}
 	memcpy(tmpPool, tmpContent, tmpContentLenth);
 	
-	//2.½«ÄÚÈİ´¢´æ½ø ¶ÓÁĞ,Í¨Öª¸øUI»Ø¸´
+	//
 	if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
 	{
 		myprint( "Error: func push_queue() ");
@@ -1569,12 +1569,12 @@ int pushInfo_func(char *tmpContent, int tmpContentLenth)
 
 void reset_template_respon(char *tmpPool, char *tmpContent, int tmpContentLenth)
 {
-	char *tmpResult = NULL;				//»ñÈ¡Êı¾İ°üµÄĞ­Òé·µ»Ø½á¹û	
-	resCommonHead_t  head;				//Ó¦´ğ±¨Í·
+	char *tmpResult = NULL;				//
+	resCommonHead_t  head;				//
 	int contentLenth = 0;	
 	char *tmp = tmpPool;
 	
-	//1. ²é¿´ÊÇ·ñÎª¶¨ÒåµÄĞ­Òé³ö´í(ÄÚ´æÂú, ÆäËûÔ­ÒòµÈ, ·ÇÊı¾İ°üÍøÂç´«Êä³ö´í)
+	//
 	tmpResult = tmpContent + sizeof(resCommonHead_t);
 	tmp += sizeof(resCommonHead_t);
 	if(*tmpResult == 0x01)
@@ -1589,75 +1589,75 @@ void reset_template_respon(char *tmpPool, char *tmpContent, int tmpContentLenth)
 		contentLenth =  sizeof(resCommonHead_t) + sizeof(char);
 	}
 
-	//2. ×é×°±¨Í·	
+	//
 	assign_resComPack_head(&head, TEMPLATECMDRESPON, contentLenth, 0, 1);
 	memcpy(tmpPool, &head, sizeof(resCommonHead_t));
 	
 	
 }
 
-/*¶àÕÅÉÏ´«Í¼Æ¬, ·şÎñÆ÷µÄÓ¦´ğ°ü´¦Àí
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*å¤šå¼ ä¸Šä¼ å›¾ç‰‡, æœåŠ¡å™¨çš„åº”ç­”åŒ…å¤„ç†
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int mutiUpload_respon_func(char *tmpContent,int tmpContentLenth)
 {
 	int ret = 0;
-	resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	node *repeatPackage = NULL;			//²éÕÒÖØ·¢Êı¾İ°üµÄĞÅÏ¢
-	char *tmpPool = NULL;				//ÄÚ´æ³ØÊı¾İ¿é	
-	int  newSendLenth = 0; 				//ĞŞ¸ÄÁ÷Ë®ºÅºó×îĞÂµÄÊı¾İ°ü³¤¶È
+	resCommonHead_t  *comHead = NULL;	//
+	node *repeatPackage = NULL;			//
+	char *tmpPool = NULL;				//
+	int  newSendLenth = 0; 				//
 
-	//1.»ñÈ¡Ó¦´ğµÄ±¨Í·ĞÅÏ¢
+	//
 	comHead = (resCommonHead_t*)tmpContent;
 
-	//2.ÅĞ¶ÏÊÇ·ñÎª×Ó°üÓ¦´ğ
+	//
 	if(comHead->isSubPack == 1)
 	{		
-		g_subResPonFlag = true;			//ĞŞ¸Ä±êÊ¶·û, ±êÊ¶±¾ÂÖÓĞÓ¦´ğ½ÓÊÕ 
-		//3.×Ó°üÓ¦´ğ, ÅĞ¶Ï×Ó°üÊÇ·ñÎª·şÎñÆ÷ÈÏ¶¨Ê§°Ü, ĞèÒªÖØ·¢µÄÊı¾İ°ü
+		g_subResPonFlag = true;			//
+		//
 		if(comHead->isFailPack == 1)
 		{
-			//4.Ê§°Ü,ĞèÒªÖØ·¢Ö¸¶¨µÄĞòºÅÊı¾İ°ü, È¥Á´±íÖĞÈ¡³ö¸ÃÖ¸¶¨Êı¾İ°ü
+			//
 			if((repeatPackage = FindNode_ByVal_listSendInfo(g_list_send_dataInfo, comHead->failPackIndex, my_compare_packIndex)) == NULL)
 			{
-				//5.Î´ÕÒµ½ĞèÒªÖØĞÂ·¢ËÍµÄÊı¾İ°üĞòºÅ				
+				//
 				socket_log(SocketLevel[4], ret, "Error: func FindNode_ByVal_listSendInfo() ");
-				ret = 0;		//²»ÖªµÀ´Ë´¦¸ÃÈçºÎ·µ»Ø, ²»ÒªÀíËû
+				ret = 0;		//
 			}
 			else
 			{
-				//6.ÕÒµ½ĞèÒªÖØĞÂ·¢ËÍÊı¾İ°üĞòºÅ, ÏÈĞŞ¸ÄÁ÷Ë®ºÅĞÅÏ¢				
+				//
 				modify_repeatPackSerialNews(repeatPackage->sendAddr, repeatPackage->sendLenth, &newSendLenth);
 				repeatPackage->sendLenth = newSendLenth;				
 				if((ret = push_queue_send_block(g_queue_sendDataBlock, repeatPackage->sendAddr, repeatPackage->sendLenth, UPLOADCMDREQ)) < 0)
 				{
-					//7.ĞÅÏ¢·ÅÈë¶ÓÁĞÊ§°Ü					
+					//
 					myprint("Error: func push_queue_send_block(), package News : cmd : %d, lenth : %d, sendAdd : %p ", 
 							UPLOADCMDREQ, repeatPackage->sendLenth, repeatPackage->sendAddr);
 					assert(0);
 				}
 				else
 				{
-					//8.³É¹¦·ÅÈë·¢ËÍ¶ÓÁĞ, ÊÍ·ÅĞÅºÅÁ¿, Í¨Öª·¢ËÍÏß³Ì½øĞĞ·¢ËÍ
+					//
 					sem_post(&g_sem_cur_write);
 				}
 			}
 		}
 		else
 		{				
-			//9.×Ó°ü½ÓÊÕ³É¹¦,ÅĞ¶ÏÊÇ·ñĞèÒª¸øUI»ØÓ¦, ÕâÖÖÇé¿öÊÇ: ÕıÈ·½ÓÊÕ,µ«ÊÇ³öÏÖÁËĞ­ÒéÖĞ¶¨ÒåµÄ(ÄÚ´æÒÑÂú»òÕßÆäËû´íÎó, ĞèÒª»ØÓ¦¸øUI ) 
+			//
 			if(comHead->isRespondClient == 1)
 			{
-				//10. ĞèÒª¸øUI»ØÓ¦, ÉêÇëÄÚ´æ,¿½±´ĞÅÏ¢, ½«ĞÅÏ¢·ÅÈë»ØÓ¦¶ÓÁĞ, ÊÍ·ÅĞÅºÅÁ¿ 
+				//
 				if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 				{
 					myprint("Err : func mem_pool_alloc() to resPond UI");					
 					assert(0);
 				}
 
-				//10.1 ÖØĞÂ×é×°Ó¦´ğ·µ»Ø¸øUI
+				//
 				reset_template_respon(tmpPool, tmpContent, tmpContentLenth);
 								
 				if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
@@ -1669,26 +1669,26 @@ int mutiUpload_respon_func(char *tmpContent,int tmpContentLenth)
 				{
 					sem_post(&g_sem_cur_read);
 				}
-				//11.ĞŞ¸Ä±êÊ¶·û, ±êÊ¶½ÓÊÕµ½¸ÃÊı¾İ°üµÄÓ¦´ğ
+				//
 				g_isSendPackCurrent = false;				
 			}
 							
-			//12.½«ËùÓĞ·¢ËÍÄÚÈİ´ÓÁ´±íÖĞÇå³ı,
+			//
 			trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 			if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 			{
 				myprint("Error : func clear_LinkListSendInfo()");
 				assert(0);
 			}
-			g_subResPonFlag = false;				//ĞŞ¸Ä±êÊ¶·ûÖÁ³õÊ¼»¯×´Ì¬, ¼´ÎŞÓ¦´ğ½ÓÊÕ, ÒòÎª´ËÊ±Á´±íÖĞÒÑÎŞ·¢ËÍÔªËØ
+			g_subResPonFlag = false;				//
 
-			//13. Í¨Öª×é°üÏß³ÌÈ¥½øĞĞÏÂÒ»ÂÖµÄÊı¾İ×é°ü»òÕß¸ÃÈÎÎñ½áÊø
+			//
 			sem_post(&g_sem_send);
 		}
 	}
 	else
 	{		
-		//10.×Ü°üÓ¦´ğ, ²»Òª½âÎöĞÅÏ¢, Ö±½ÓÍ¨Öª×é°üÏß³ÌÈ¥½øĞĞÏÂÒ»ÂÖµÄÊı¾İ×é°ü
+		//
 		trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 		if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 		{
@@ -1703,63 +1703,63 @@ int mutiUpload_respon_func(char *tmpContent,int tmpContentLenth)
 }
 
 
-/*ÉÏ´«Í¼Æ¬, ·şÎñÆ÷µÄÓ¦´ğ°ü´¦Àí
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*ä¸Šä¼ å›¾ç‰‡, æœåŠ¡å™¨çš„åº”ç­”åŒ…å¤„ç†
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int upload_respon_func(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	node *repeatPackage = NULL;			//²éÕÒÖØ·¢Êı¾İ°üµÄĞÅÏ¢
-	char *tmpPool = NULL;				//ÄÚ´æ³ØÊı¾İ¿é
-	char *tmpResult = NULL;				//»ñÈ¡Êı¾İ°üµÄĞ­Òé·µ»Ø½á¹û
-	int  newSendLenth = 0; 				//ĞŞ¸ÄÁ÷Ë®ºÅºó×îĞÂµÄÊı¾İ°ü³¤¶È
+	resCommonHead_t  *comHead = NULL;	//
+	node *repeatPackage = NULL;			//
+	char *tmpPool = NULL;				//
+	char *tmpResult = NULL;				//
+	int  newSendLenth = 0; 				//
 
 	
-	//1.»ñÈ¡Ó¦´ğµÄ±¨Í·ĞÅÏ¢
+	//
 	comHead = (resCommonHead_t*)tmpContent;
 
-	//2.ÅĞ¶ÏÊÇ·ñÎª×Ó°üÓ¦´ğ
+	//
 	if(comHead->isSubPack == 1)
 	{
-		g_subResPonFlag = true;			//ĞŞ¸Ä±êÊ¶·û, ±êÊ¶±¾ÂÖÓĞÓ¦´ğ½ÓÊÕ
-		//3.×Ó°üÓ¦´ğ, ÅĞ¶Ï×Ó°üÊÇ·ñÎª·şÎñÆ÷ÈÏ¶¨Ê§°Ü, ĞèÒªÖØ·¢µÄÊı¾İ°ü
+		g_subResPonFlag = true;			//
+		//
 		if(comHead->isFailPack == 1)
 		{
-			//4.Ê§°Ü,ĞèÒªÖØ·¢Ö¸¶¨µÄĞòºÅÊı¾İ°ü, È¥Á´±íÖĞÈ¡³ö¸ÃÖ¸¶¨Êı¾İ°ü
+			//
 			if((repeatPackage = FindNode_ByVal_listSendInfo(g_list_send_dataInfo, comHead->failPackIndex, my_compare_packIndex)) == NULL)
 			{
-				//5.Î´ÕÒµ½ĞèÒªÖØĞÂ·¢ËÍµÄÊı¾İ°üĞòºÅ				
+				//
 				socket_log(SocketLevel[4], ret, "Error: func FindNode_ByVal_listSendInfo() ");
-				ret = 0;		//²»ÖªµÀ´Ë´¦¸ÃÈçºÎ·µ»Ø, ²»ÒªÀíËû
+				ret = 0;		//
 			}
 			else
 			{
-				//6.ÕÒµ½ĞèÒªÖØĞÂ·¢ËÍÊı¾İ°üĞòºÅ, ÏÈĞŞ¸ÄÁ÷Ë®ºÅĞÅÏ¢			
+				//
 				modify_repeatPackSerialNews(repeatPackage->sendAddr, repeatPackage->sendLenth, &newSendLenth);
 				repeatPackage->sendLenth = newSendLenth;				
 				if((ret = push_queue_send_block(g_queue_sendDataBlock, repeatPackage->sendAddr, repeatPackage->sendLenth, UPLOADCMDREQ)) < 0)
 				{
-					//7.ĞÅÏ¢·ÅÈë¶ÓÁĞÊ§°Ü					
+					//
 					myprint("Error: func push_queue_send_block(), package News : cmd : %d, lenth : %d, sendAdd : %p ", 
 							UPLOADCMDREQ, repeatPackage->sendLenth, repeatPackage->sendAddr);
 					assert(0);
 				}
 				else
 				{
-					//8.³É¹¦·ÅÈë·¢ËÍ¶ÓÁĞ, ÊÍ·ÅĞÅºÅÁ¿, Í¨Öª·¢ËÍÏß³Ì½øĞĞ·¢ËÍ
+					//
 					sem_post(&g_sem_cur_write);
 				}
 			}
 		}
 		else
 		{				
-			//9.×Ó°ü½ÓÊÕ³É¹¦,ÅĞ¶ÏÊÇ·ñĞèÒª¸øUI»ØÓ¦, ÕâÖÖÇé¿öÊÇ: ÕıÈ·½ÓÊÕ,µ«ÊÇ³öÏÖÁËĞ­ÒéÖĞ¶¨ÒåµÄ(ÄÚ´æÒÑÂú»òÕßÆäËû´íÎó, ĞèÒª»ØÓ¦¸øUI ) 
+			//
 			if(comHead->isRespondClient == 1)
 			{
-				//10. ĞèÒª¸øUI»ØÓ¦, ÉêÇëÄÚ´æ,¿½±´ĞÅÏ¢, ½«ĞÅÏ¢·ÅÈë»ØÓ¦¶ÓÁĞ, ÊÍ·ÅĞÅºÅÁ¿ 
+				//
 				if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 				{
 					myprint("Err : func mem_pool_alloc() to resPond UI");		
@@ -1776,33 +1776,33 @@ int upload_respon_func(char *tmpContent, int tmpContentLenth)
 					sem_post(&g_sem_cur_read);
 				}
 
-				//11.²é¿´ÊÇ·ñÎª¶¨ÒåµÄĞ­Òé³ö´í(ÄÚ´æÂú, ÆäËûÔ­ÒòµÈ, ·ÇÊı¾İ°üÍøÂç´«Êä³ö´í)
+				//
 				tmpResult = tmpContent + sizeof(resCommonHead_t);
 				if(*tmpResult == 0x02)
 				{
 					g_residuePackNoNeedSend = true;
 				}
-				//11.ĞŞ¸Ä±êÊ¶·û, ±êÊ¶½ÓÊÕµ½¸ÃÊı¾İ°üµÄÓ¦´ğ
+				//
 				g_isSendPackCurrent = false;
 			
 			}
 
-			//12.½«ËùÓĞ·¢ËÍÄÚÈİ´ÓÁ´±íÖĞÇå³ı,
+			//
 			trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 			if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 			{
 				myprint("Error : func clear_LinkListSendInfo()");
 				assert(0);
 			}
-			g_subResPonFlag = false;				//ĞŞ¸Ä±êÊ¶·ûÖÁ³õÊ¼»¯×´Ì¬, ¼´ÎŞÓ¦´ğ½ÓÊÕ, ÒòÎª´ËÊ±Á´±íÖĞÒÑÎŞ·¢ËÍÔªËØ
+			g_subResPonFlag = false;				//
 
-			//13. Í¨Öª×é°üÏß³ÌÈ¥½øĞĞÏÂÒ»ÂÖµÄÊı¾İ×é°ü»òÕß¸ÃÈÎÎñ½áÊø
+			//
 			sem_post(&g_sem_send);
 		}
 	}
 	else
 	{
-		//10.×Ü°üÓ¦´ğ, ²»Òª½âÎöĞÅÏ¢, Ö±½ÓÍ¨Öª×é°üÏß³ÌÈ¥½øĞĞÏÂÒ»ÂÖµÄÊı¾İ×é°ü
+		//
 		trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 		if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 		{
@@ -1815,22 +1815,22 @@ int upload_respon_func(char *tmpContent, int tmpContentLenth)
 	return ret;
 }
 
-/*ÏÂÔØ·şÎñÆ÷ÎÄ¼ş, µÄÓ¦´ğ°ü´¦Àí
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*ä¸‹è½½æœåŠ¡å™¨æ–‡ä»¶, çš„åº”ç­”åŒ…å¤„ç†
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int downFile_respon_func(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	resSubPackHead_t  *comHead = NULL;	//ÏÂÔØ·şÎñÆ÷ÎÄ¼şµÄ±¨Í·	
-	char *tmpPool = NULL;				//ÄÚ´æ¿é
+	resSubPackHead_t  *comHead = NULL;	//
+	char *tmpPool = NULL;				//
 	
-	//0. »ñÈ¡½ÓÊÕÊı¾İ°üĞÅÏ¢
+	//
 	comHead = (resSubPackHead_t *)tmpContent;
 		
 
-	//1.ÉêÇëÄÚ´æ
+	//
 	if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -1839,7 +1839,7 @@ int downFile_respon_func(char *tmpContent, int tmpContentLenth)
 	}
 	memcpy(tmpPool, tmpContent, tmpContentLenth);
 	
-	//2.½«ÄÚÈİ´¢´æ½ø ¶ÓÁĞ,Í¨Öª¸øUI»Ø¸´
+	//
 	if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
 	{
 		myprint( "Error: func push_queue() ");
@@ -1848,44 +1848,44 @@ int downFile_respon_func(char *tmpContent, int tmpContentLenth)
 	}
 	sem_post(&g_sem_cur_read);
 
-	//3. ÅĞ¶ÏÊÇ·ñ³É¹¦½ÓÊÕµ½×îºóÒ»±¨ËÍÊı¾İ
+	//
 	if(comHead->currentIndex + 1 == comHead->totalPackage)
 	{	
-		//4.½«·¢ËÍÄÚÈİ´ÓÁ´±íÖĞÇå³ı(ÒòÎª±¾º¯ÊıÖĞ, ËùÓĞµÄ¿Í»§¶ËÃüÁî¶¼Ö»¶ÔÓ¦Ò»¸öÓ¦´ğ°ü, ËùÒÔÖ±½ÓÇå¿ÕÁ´±í¾Í¿ÉÒÔ)
+		//
 		trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 		if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 		{			
 			myprint("Error: func clear_LinkListSendInfo() ");
 			assert(0);
 		}
-		//5.Í¨Öª×é°üÏß³Ì½øĞĞÏÂÒ»¸öÈÎÎñ
+		//
 		sem_post(&g_sem_send);
 	}		
 
 	return ret;
 }
 
-/*ÉÏ´«Ä£°åÊı¾İ µÄÓ¦´ğ°ü´¦Àí
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*ä¸Šä¼ æ¨¡æ¿æ•°æ® çš„åº”ç­”åŒ…å¤„ç†
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int template_respon_func(char *tmpContent, int tmpContentLenth)
 {
 	int ret = 0;
-	resCommonHead_t  *comHead = NULL;	//ÆÕÍ¨Ó¦´ğ±¨Í·
-	char *tmpPool = NULL;				//ÄÚ´æ¿é
-	int  newSendLenth = 0;				//ĞŞ¸ÄÁ÷Ë®ºÅºó×îĞÂµÄÊı¾İ°ü³¤¶È
+	resCommonHead_t  *comHead = NULL;	//
+	char *tmpPool = NULL;				//
+	int  newSendLenth = 0;				//
 	char *tmp = NULL;
 	
-	//1.»ñÈ¡Ó¦´ğµÄ±¨Í·ĞÅÏ¢, ºÍÄ£°åÊı¾İÉÏ´«µÄ½á¹û
+	//
 	comHead = (resCommonHead_t*)tmpContent;
 	tmp = tmpContent + sizeof(resCommonHead_t);
 
-	//2.ÅĞ¶ÏÊı¾İ°üÊÇ·ñ·¢ËÍ¹ı³ÌÖĞ, ĞÅÏ¢³ö´í
+	//
 	if(comHead->isFailPack == 1)
 	{
-		//3.·¢ËÍ¹ı³ÌÖĞ, ĞÅÏ¢³ö´í, Ö¸Ğ£ÑéÂëĞÅÏ¢
+		//
 		modify_repeatPackSerialNews(g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, &newSendLenth);
 		g_lateSendPackNews.sendLenth = newSendLenth;
 		if((push_queue_send_block(g_queue_sendDataBlock, g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, g_lateSendPackNews.cmd)) < 0)
@@ -1893,18 +1893,18 @@ int template_respon_func(char *tmpContent, int tmpContentLenth)
 			myprint("Error : func push_queue_send_block()");
 			assert(0);
 		}
-		//4.ÊÍ·ÅĞÅºÅÁ¿,Í¨Öª·¢ËÍÊı¾İÏß³Ì¼ÌĞø·¢ËÍ
+		//
 		sem_post(&g_sem_cur_write);
 	}
 	else
 	{
 		if(*tmp == 0)
 		{
-			//Ä£°åÊı¾İÉÏ´«³É¹¦, ´ËÊ±²»ĞèÒª¸ø UI·µ»ØĞÅÏ¢, µÈ´ıÍ¼Æ¬ÉÏ´«Íê³Éºó, ÔÙÒ»Æğ·µ»Ø
+			//
 			sem_post(&g_sem_send);
 			return ret;
 		}
-		//5.ÉÏ´«³öÏÖĞ­ÒéĞÔ´íÎó, ĞèÒª¸øUI ·µ»Ø
+		//
 		if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 		{
 			myprint( "Error: func mem_pool_alloc() ");
@@ -1912,7 +1912,7 @@ int template_respon_func(char *tmpContent, int tmpContentLenth)
 		}
 		memcpy(tmpPool, tmpContent, tmpContentLenth);
 		
-		//6.½«ÄÚÈİ´¢´æ½ø ¶ÓÁĞ,Í¨Öª¸øUI»Ø¸´
+		//
 		if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
 		{
 			myprint( "Error: func push_queue() ");
@@ -1920,14 +1920,14 @@ int template_respon_func(char *tmpContent, int tmpContentLenth)
 		}
 		sem_post(&g_sem_cur_read);
 	
-		//7.½«·¢ËÍÄÚÈİ´ÓÁ´±íÖĞÇå³ı(ÒòÎª±¾º¯ÊıÖĞ, ËùÓĞµÄ¿Í»§¶ËÃüÁî¶¼Ö»¶ÔÓ¦Ò»¸öÓ¦´ğ°ü, ËùÒÔÖ±½ÓÇå¿ÕÁ´±í¾Í¿ÉÒÔ)
+		//
 		trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
 		if((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 		{			
 			myprint("Error: func clear_LinkListSendInfo() ");
 			assert(0);
 		}
-		//8.Í¨Öª×é°üÏß³ÌĞ­ÒéĞÔ´íÎó, ²»ÓÃÔÙ´«ÊäÍ¼Æ¬Êı¾İ, 
+		//
 		g_template_uploadErr = true;			
 		sem_post(&g_sem_send);
 
@@ -1936,21 +1936,21 @@ int template_respon_func(char *tmpContent, int tmpContentLenth)
 	return ret;
 }
 
-/*¶Ô·şÎñÆ÷µÄÓ¦´ğÊı¾İ°ü, ½øĞĞÑ¡Ôñ´¦Àí
-*@param : tmpContent		Êı¾İ°ü×ªÒåºóµÄÊı¾İ
-*@param : tmpContentLenth	×ªÒåºóÊı¾İµÄ³¤¶È, °üº¬: ±¨Í· + ĞÅÏ¢ + Ğ£ÑéÂë
+/*å¯¹æœåŠ¡å™¨çš„åº”ç­”æ•°æ®åŒ…, è¿›è¡Œé€‰æ‹©å¤„ç†
+*@param : tmpContent		æ•°æ®åŒ…è½¬ä¹‰åçš„æ•°æ®
+*@param : tmpContentLenth	è½¬ä¹‰åæ•°æ®çš„é•¿åº¦, åŒ…å«: æŠ¥å¤´ + ä¿¡æ¯ + æ ¡éªŒç 
 *@retval: success 0, 
 */
 int deal_with_pack(char *tmpContent, int tmpContentLenth )
 {
 	int ret = 0;
-	uint8_t cmd = 0;					//½ÓÊÕÊı¾İ°üÃüÁî
+	uint8_t cmd = 0;					//
 
 
-	//1.»ñÈ¡½ÓÊÕÊı¾İ°üµÄÃüÁî×Ö
+	//
 	cmd = *((uint8_t *)tmpContent);
 
-	//2.µ¥°ü»Ø¸´ÃüÁî
+	//
 	if(cmd == LOGINCMDRESPON || cmd == LOGOUTCMDRESPON || cmd == HEARTCMDRESPON || cmd == NEWESCMDRESPON
 			 || cmd == DELETECMDRESPON || cmd == ENCRYCMDRESPON )
 	{	
@@ -2010,14 +2010,14 @@ void modify_listNodeNews(node *listNode)
 }
 
 
-//function: find  the whole packet; retval maybe error
+//
 int	data_unpack_process(int recvLenth)
 {
 	int ret = 0, tmpContentLenth = 0;
-	static int flag = 0, lenth = 0; 	//flag ±êÊ¶ÕÒµ½±êÊ¶·ûµÄÊıÁ¿;  lenth : Êı¾İµÄ³¤¶È
+	static int flag = 0, lenth = 0; 	//
 	char buffer[2] = { 0 };
 	static char content[2800] = { 0 };	//
-	char tmpContent[1400] = { 0 }; 		//tmpBufFlag[15] = { 0 };		
+	char tmpContent[1400] = { 0 }; 		//
 	char *tmp = NULL;
 	
 	tmp = content + lenth;
@@ -2026,26 +2026,26 @@ int	data_unpack_process(int recvLenth)
 		while(1)
 		{
 
-			//1. jurge current fifo is empty
+			//
 			if(get_fifo_element_count(g_fifo) == 0)
 			{
 				goto End;
 			}
-			//2. get The fifo element
+			//
 			if((ret = pop_fifo(g_fifo, (char *)buffer, 1)) < 0)
 			{
 				myprint( "Error: func pop_fifo() ");
 				assert(0);
 			}
-			//3.flag : have find The whole package head 
+			//
 			if(*buffer == 0x7e && flag == 0)
 			{
 				flag = 1;
 				continue;
 			}
-			else if(*buffer == 0x7e && flag == 1)	//4. flag : have find The whole package 
+			else if(*buffer == 0x7e && flag == 1)	//
 			{
-				//4. anti escape recv data
+				//
 				if((ret = anti_escape(content, lenth, tmpContent, &tmpContentLenth)) < 0)
 				{
 					myprint( "Error: func anti_escape() no have data");
@@ -2054,8 +2054,8 @@ int	data_unpack_process(int recvLenth)
 										
 				if((ret = compare_recvData_Correct( tmpContent, tmpContentLenth)) == 0)				
 				{
-					//5. Êı¾İ°üÕıÈ·,´¦ÀíÊı¾İ°ü
-					//socket_log(SocketLevel[2], ret, "------ func compare_recvData_Correct() OK ------");
+					//
+					//
 
 					if((deal_with_pack(tmpContent, tmpContentLenth )) < 0)
 					{
@@ -2063,7 +2063,7 @@ int	data_unpack_process(int recvLenth)
 						assert(0);
 					}
 
-					//6.Çå¿ÕÁÙÊ±±äÁ¿
+					//
 					memset(content, 0, sizeof(content));
 					memset(tmpContent, 0, sizeof(tmpContent));					
 					recvLenth -= (lenth + 2);
@@ -2074,9 +2074,9 @@ int	data_unpack_process(int recvLenth)
 				}
 				else if(ret == -1)
 				{
-					//½ÓÊÕµÄÊı¾İ°üĞ£ÑéÂë³ö´í, ĞèÒª·şÎñÆ÷ÖØĞÂ·¢ËÍÊı¾İ
+					//
 					myprint("Error: func compare_recvData_Correct()");					
-					//7. clear the variable
+					//
 					memset(content, 0, sizeof(content));
 					memset(tmpContent, 0, sizeof(tmpContent));					
 					recvLenth -= (lenth + 2);
@@ -2084,16 +2084,16 @@ int	data_unpack_process(int recvLenth)
 					flag = 0;
 					tmp = content + lenth;
 
-					//8.±éÀúÕû¸öÁ´±í, ĞŞ¸ÄÁ÷Ë®ºÅ, ÖØĞÂËùÓĞ·¢ËÍÊı¾İ				
+					//
 					trave_LinkListSendInfo(g_list_send_dataInfo, modify_listNodeNews);						
-  					ret = 0;			//´Ë´¦±»ĞŞ¸Ä, Ôö¼Ó, ºÜÖØÒª  2017.04.21
+  					ret = 0;			//
 					break;
 				}
 				else if(ret == -2)
 				{
-					//socket_log(SocketLevel[2], ret, "compare_recvData_Correct() ret : %d", ret);
-					//9.½ÓÊÕµÄÊı¾İ°ü ³¤¶ÈºÍÁ÷Ë®ºÅ²»ÕıÈ·, ²»ĞèÒªÖØĞÂ·¢ËÍÊı¾İ
-					//clear the variable
+					//
+					//
+					//
 					memset(content, 0, sizeof(content));
 					memset(tmpContent, 0, sizeof(tmpContent));					
 					recvLenth -= (lenth + 2);
@@ -2105,7 +2105,7 @@ int	data_unpack_process(int recvLenth)
 			}
 			else if(*buffer != 0x7e && flag == 1)
 			{
-				//10. training in rotation
+				//
 				*tmp++ = *buffer;
 				lenth += 1;
 				continue;
@@ -2126,7 +2126,7 @@ End:
 
 }
 
-//select() ¶¨Ê±Æ÷ 
+//
 void timer_select(int seconds)
 {
 	struct timeval temp;
@@ -2140,43 +2140,43 @@ void timer_select(int seconds)
 }
 
 
-//³¬Ê±Ïß³Ì
+//
 void *thid_server_func_time(void *arg)
 {
-	time_t  nowTime = 0, timeDiffer = 0;		//Ê±¼ä
-	int waitNumber = 0;							//³¬Ê±ºó, ÏàÍ¬Êı¾İ°üÖØ·¢´ÎÊı
+	time_t  nowTime = 0, timeDiffer = 0;		//
+	int waitNumber = 0;							//
 
-	//1.·ÖÀë×ÓÏß³Ì
+	//
 	pthread_detach(pthread_self());
 
-	//2.½øĞĞÂÖÑµ¼ì²â
+	//
 	while(1)
 	{		
-		//3.¶¨Ê±¼ì²â
+		//
 		timer_select(OUTTIMEPACK + 3);
-		//4.Èç¹û¿Í»§¶Ë³ö´í, ¼ÌĞøÂÖÑ¯
+		//
 		if(g_err_flag)
 		{
 			waitNumber = 0;
 			continue;	
 		}
-		//5.¶Ô·¢ËÍÁ´±íµÄÔªËØÊıÁ¿½øĞĞÅĞ¶Ï
+		//
 		if((Size_LinkListSendInfo(g_list_send_dataInfo)) == 0)
 		{
 			waitNumber = 0;
-			//·¢ËÍÁ´±íÖĞÎŞÔªËØ, ¼ÌĞøÂÖÑ¯,
+			//
 			continue;	
 		}
 		else if((Size_LinkListSendInfo(g_list_send_dataInfo)) > 1)
 		{	
-			//·¢ËÍÁ´±íº¬¶à°üÔªËØ			
+			//
 			time(&nowTime);
 			timeDiffer = nowTime - g_lateSendPackNews.sendTime;
 
-			//6.²é¿´ÊÇ·ñ³¬Ê±
+			//
 			if(timeDiffer < OUTTIMEPACK)
 			{
-				//Î´³¬Ê±
+				//
 				continue;
 			}
 			else
@@ -2184,15 +2184,15 @@ void *thid_server_func_time(void *arg)
 				if(waitNumber < 2)
 				{
 					myprint("respond timeOut : %d > time : %d, repeatNumber : %d", timeDiffer, OUTTIMEPACK, waitNumber);
-					//³¬Ê±, ÅĞ¶Ï±¾ÂÖÊı¾İ°üÊÇ·ñÓĞÆäËûÓ¦´ğ
+					//
 					if(g_subResPonFlag)
 					{	
-						//ÓĞÆäËûÓ¦´ğ, Ö»ÖØ·¢×îºóÒ»°üÊı¾İ
+						//
 						repeat_latePack();
 					}	
 					else
 					{
-						//Ã»ÓĞÈÎºÎÓ¦´ğ, ±¾ÂÖËùÓĞµÄÊı¾İ°üÈ«²¿ÖØ·¢
+						//
 						trave_LinkListSendInfo(g_list_send_dataInfo, modify_listNodeNews);						
 					}
 					waitNumber++;
@@ -2206,14 +2206,14 @@ void *thid_server_func_time(void *arg)
 		}
 		else if((Size_LinkListSendInfo(g_list_send_dataInfo)) == 1)
 		{
-			//·¢ËÍÁ´±íº¬µ¥°üÔªËØ
+			//
 			time(&nowTime);
 			timeDiffer = nowTime - g_lateSendPackNews.sendTime;
 
-			//7.²é¿´ÊÇ·ñ³¬Ê±
+			//
 			if(timeDiffer < OUTTIMEPACK)
 			{
-				//Î´³¬Ê±
+				//
 				continue;
 			}
 			else
@@ -2221,7 +2221,7 @@ void *thid_server_func_time(void *arg)
 				if(waitNumber < 2)
 				{
 					myprint("respond timeOut : %d > time : %d, repeatNumber : %d", timeDiffer, OUTTIMEPACK, waitNumber);
-					//³¬Ê±
+					//
 					repeat_latePack();
 					waitNumber++;
 				}
@@ -2242,10 +2242,10 @@ void repeat_latePack()
 {
 	int newSendLenth = 0;
 
-	//1.ĞèÒªÖØ·¢×îºóÒ»°üÊı¾İ, ĞŞ¸ÄËüµÄÁ÷Ë®ºÅ
+	//
 	modify_repeatPackSerialNews(g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, &newSendLenth);
 
-	//2.ÖØĞÂ¸³ÖµÊı¾İ°ü³¤¶È, ²¢¼ÓÈë¶ÓÁĞ
+	//
 	g_lateSendPackNews.sendLenth = newSendLenth;
 	if((push_queue_send_block(g_queue_sendDataBlock, g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, g_lateSendPackNews.cmd)) < 0)
 	{
@@ -2253,7 +2253,7 @@ void repeat_latePack()
 		assert(0);
 	}
 	
-	//3.ÊÍ·ÅĞÅºÅÁ¿,Í¨Öª·¢ËÍÊı¾İÏß³Ì¼ÌĞø·¢ËÍ
+	//
 	sem_post(&g_sem_cur_write);
 
 }
@@ -2267,10 +2267,10 @@ void *thid_unpack_thread(void *arg)
 
 	while(1)
 	{
-		//1. wait The semaphore
+		//
 		sem_wait(&g_sem_unpack);
 
-		//2. unpack The Queue Data
+		//
 		if((ret = data_unpack_process(get_fifo_element_count(g_fifo))) < 0)
 		{							
 			myprint( "Error: func data_unpack_process()");							
@@ -2292,14 +2292,14 @@ void assign_resComPack_head(resCommonHead_t *head, int cmd, int contentLenth, in
 }
 
 
-//·¢ËÍĞÅÏ¢¹ı³ÌÖĞ, ³öÏÖÍøÂç´íÎó
+//
 int send_error_netPack(int sendCmd)
 {
 	int ret = 0;
-	int cmd = 0, err = 0, errNum = 0;	//ÉèÖÃÊı¾İ°üµÄÃüÁî×Ö, ´íÎó±êÊ¶·û, ´íÎóÔ­Òò±êÊ¶·û
+	int cmd = 0, err = 0, errNum = 0;	//
 
 
-	//socket_log(SocketLevel[3], ret, "*****begin: send_error_netPack() sendCmd : %d", sendCmd);		
+	//
 
 
 	switch (sendCmd)
@@ -2361,7 +2361,7 @@ int send_error_netPack(int sendCmd)
 			assert(0);
 			
 	}
-	//2.·¢ËÍÊı¾İ°üµÄÖ¸¶¨´íÎóĞÅÏ¢ÖÁ UI
+	//
 	if((ret = copy_news_to_mem(cmd, err, errNum)) < 0)
 	{		
 		myprint("Error: func copy_news_to_mem()");
@@ -2369,17 +2369,17 @@ int send_error_netPack(int sendCmd)
 	}
 
 
-	//socket_log(SocketLevel[3], ret, "*****end: send_error_netPack() sendCmd : %d", sendCmd);
+	//
 
 	return ret;
 }
 
 
 
-/*·¢ËÍÊı¾İ°üµÄÖ¸¶¨´íÎóĞÅÏ¢ÖÁ UI
- *@param: cmd : Êı¾İ°üÃüÁî
- *@param: err: ´íÎó±êÊ¶
- *@param: errNum: ´íÎóÔ­Òò±êÊ¶
+/*å‘é€æ•°æ®åŒ…çš„æŒ‡å®šé”™è¯¯ä¿¡æ¯è‡³ UI
+ *@param: cmd : æ•°æ®åŒ…å‘½ä»¤
+ *@param: err: é”™è¯¯æ ‡è¯†
+ *@param: errNum: é”™è¯¯åŸå› æ ‡è¯†
 */
 int copy_news_to_mem(int cmd, int err, int errNum)
 {
@@ -2387,7 +2387,7 @@ int copy_news_to_mem(int cmd, int err, int errNum)
 	resCommonHead_t head;
 	char *tmp = NULL, *tmpPool = NULL;
 
-	//1.ÉêÇëÄÚ´æ
+	//
 	if((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -2395,7 +2395,7 @@ int copy_news_to_mem(int cmd, int err, int errNum)
 		assert(0);
 	}
 
-	//2.¿½±´ÄÚÈİ
+	//
 	tmp = tmpPool;
 	memset(&head, 0, sizeof(resCommonHead_t));
 	head.cmd = cmd;
@@ -2406,7 +2406,7 @@ int copy_news_to_mem(int cmd, int err, int errNum)
 	*tmp++ = errNum;
 	
 
-	//3.½«×é°üµÄÊı¾İ·ÅÈë¶ÓÁĞ, Í¨ÖªÖ÷Ïß³Ì½øĞĞ´¦Àí, ·¢ËÍ¸øUI
+	//
 	if((ret = push_queue(g_queueRecv, tmpPool)) < 0)
 	{
 		mem_pool_free(g_memPool, tmpPool);
@@ -2422,10 +2422,10 @@ int copy_news_to_mem(int cmd, int err, int errNum)
 
 
 
-/*Çå¿Õ¶ÓÁĞ, ĞÅºÅÁ¿ÖĞµÄÊı¾İ; ¸Ãº¯ÊıÖ»ÓĞÔÚ·¢ÉúÍøÂç´íÎó ºÍ ³¬Ê±Ïß³Ì¼ì²âµ½´ïÉÏÏŞÊ±²Åµ÷ÓÃ
- *@param: flag : 0 ·¢ËÍÏß³ÌÇå³ıÊı¾İ; 1 ½ÓÊÕÏß³ÌÇå³ıÊı¾İ; TIMEOUTRETURNFLAG : ³¬Ê±Ïß³ÌÇå³ıÊı¾İ
- *@param: 20170531  ÈÏÎª¸Ãº¯Êı ·¢ËÍÏß³Ì²»ĞèÒª½øĞĞµ÷ÓÃ, ÒòÎªÖ»ÒªÍøÂç´íÎó, ½ÓÊÕÏß³ÌÒ»¶¨¿ÉÒÔ½ÓÊÕ
- *@param:			µ½´íÎó, ËùÒÔÖ»ĞèÒªµ÷ÓÃÒ»´Î¼´¿É;
+/*æ¸…ç©ºé˜Ÿåˆ—, ä¿¡å·é‡ä¸­çš„æ•°æ®; è¯¥å‡½æ•°åªæœ‰åœ¨å‘ç”Ÿç½‘ç»œé”™è¯¯ å’Œ è¶…æ—¶çº¿ç¨‹æ£€æµ‹åˆ°è¾¾ä¸Šé™æ—¶æ‰è°ƒç”¨
+ *@param: flag : 0 å‘é€çº¿ç¨‹æ¸…é™¤æ•°æ®; 1 æ¥æ”¶çº¿ç¨‹æ¸…é™¤æ•°æ®; TIMEOUTRETURNFLAG : è¶…æ—¶çº¿ç¨‹æ¸…é™¤æ•°æ®
+ *@param: 20170531  è®¤ä¸ºè¯¥å‡½æ•° å‘é€çº¿ç¨‹ä¸éœ€è¦è¿›è¡Œè°ƒç”¨, å› ä¸ºåªè¦ç½‘ç»œé”™è¯¯, æ¥æ”¶çº¿ç¨‹ä¸€å®šå¯ä»¥æ¥æ”¶
+ *@param:			åˆ°é”™è¯¯, æ‰€ä»¥åªéœ€è¦è°ƒç”¨ä¸€æ¬¡å³å¯;
 */
 void clear_global(int flag)
 {
@@ -2433,30 +2433,30 @@ void clear_global(int flag)
 	int size = 0, i = 0;
 	node rmNode;
 	
-	//socket_log(SocketLevel[3], ret, "func clear_global() begin flag : %d ", flag);
+	//
 
-	//1.ĞŞ¸ÄÈ«¾Ö±êÖ¾, ±êÊ¶³ö´í
+	//
 	g_err_flag = true;
 
 
-	//2.Çå¿Õ ½ÓÊÕ·şÎñÆ÷µÄÊı¾İ¶ÓÁĞ
+	//
 	if((ret = clear_fifo(g_fifo)) < 0)								
 	{
 		myprint("Error: func clear_fifo()");		
 		assert(0);
 	}
 
-	//3.Çå¿Õ ·¢ËÍÊı¾İÖÁ·şÎñÆ÷µÄ¶ÓÁĞ
-	while (get_element_count_send_block(g_queue_sendDataBlock)) 	//5. ·¢ËÍ¶ÓÁĞ: ·¢ËÍµØÖ·ºÍ³¤¶È
+	//
+	while (get_element_count_send_block(g_queue_sendDataBlock)) 	//
 	{
-		if((ret = pop_queue_send_block(g_queue_sendDataBlock, NULL, NULL, NULL)) < 0) //6. Çå¿Õ¶ÓÁĞ
+		if((ret = pop_queue_send_block(g_queue_sendDataBlock, NULL, NULL, NULL)) < 0) //
 		{
 			myprint("Error: func pop_queue_send_block()");
 			assert(0);
 		}
 	}
 
-	//4.Çå¿Õ ±£´æ·¢ËÍĞÅÏ¢µÄÁ´±í
+	//
 	if((size = Size_LinkListSendInfo(g_list_send_dataInfo)) < 0)
 	{
 		myprint("Error: func Size_LinkListSendInfo()");		
@@ -2478,24 +2478,24 @@ void clear_global(int flag)
 	}
 
 
-	//5.Ñ¡ÔñÊÇÄÄ¸ö¹¦ÄÜµ÷ÓÃµÄ¸Ãº¯Êı, ½øĞĞĞÅºÅÁ¿µÄ´¦Àí
-	if(flag == 1)				//½ÓÊÕÏß³Ìµ÷ÓÃ¸Ãº¯Êı
+	//
+	if(flag == 1)				//
 	{
-		sem_init(&g_sem_read_open, 0, 0);		//½ÓÊÕÏß³ÌĞÅºÅÁ¿, ¿ªÊ¼½ÓÊÕÊı¾İ
+		sem_init(&g_sem_read_open, 0, 0);		//
 	}
 #if 0	
-	if(flag == 1)								//½ÓÊÕÏß³Ìµ÷ÓÃ¸Ãº¯Êı
+	if(flag == 1)								//
 	{		
-		sem_post(&g_sem_send);					//Ä¿µÄ: ½ÓÊÕ³ö´íºó,Í¨ÖªÈÎÎñ×é°üÏß³Ì²»Òª×èÈûÁË. 	
-		sem_init(&g_sem_read_open, 0, 0);		//½ÓÊÕÏß³ÌĞÅºÅÁ¿, ¿ªÊ¼½ÓÊÕÊı¾İ
-		//sem_init(&g_sem_send, 0, 0);			//·ÀÖ¹ÎŞÏûÏ¢ÊÕ·¢Ê±, ÍøÂç¶Ï¿ª, ¸ÃĞÅºÅÁ¿Æ¾¿ÕÔö1; ´Ë´¦Ó¦×¢ÊÍ, ÒòÎªÏß³ÌÔËĞĞÊ±¼äÊÇ¾ºÕùÄ£Ê½, »áµ¼ÖÂÁíÒ»¸öÏß³Ì»¹Ã»ÓĞ½ÓÊÕµ½¸ÃĞÅºÅÁ¿, ÓÖ±»Õâ¸öÏß³Ì³õÊ¼»¯ÁË
+		sem_post(&g_sem_send);					//
+		sem_init(&g_sem_read_open, 0, 0);		//
+		//
 	}
-	else										//³¬Ê±Ïß³Ì
+	else										//
 	{
-		sem_post(&g_sem_send);					//Ä¿µÄ: ½ÓÊÕ³ö´íºó,Í¨ÖªÈÎÎñ×é°üÏß³Ì²»Òª×èÈûÁË. 	
+		sem_post(&g_sem_send);					//
 	}
 #endif		
-	//socket_log(SocketLevel[3], ret, "func clear_global() end flag : %d ", flag);
+	//
 
 	
 	return ;
@@ -2503,8 +2503,8 @@ void clear_global(int flag)
 
 
 
-/*net ½ÓÊÕÊı¾İÖĞ, ÍøÂç³ö´í, ·¢´í0ºÅÊı¾İ°ü
- *@param : flag  1 ½ÓÊÕÏß³Ì³ö´í
+/*net æ¥æ”¶æ•°æ®ä¸­, ç½‘ç»œå‡ºé”™, å‘é”™0å·æ•°æ®åŒ…
+ *@param : flag  1 æ¥æ”¶çº¿ç¨‹å‡ºé”™
 */
 int error_net(int flag)
 {
@@ -2512,28 +2512,28 @@ int error_net(int flag)
 	char *sendData = NULL;
 	resCommonHead_t  head;
 	
-	//socket_log(SocketLevel[2], ret, "debug: func error_net()  begin");
+	//
 
-	//1.·¢ËÍÖ¸¶¨Êı¾İ°ü´íÎó, g_isSendPackCurrent = true, ±êÊ¶µ±Ç°ÕıÔÚµÈ´ı·¢ËÍÊı¾İ°üµÄÓ¦´ğ,´ËÊ±³ö´í,Ó¦¸Ã·µ»Ø¸ÃÊı¾İ°üµÄ´íÎóºÍ0ºÅÊı¾İ°ü
+	//
 	if(g_isSendPackCurrent)
 	{
 		send_error_netPack(g_send_package_cmd);
-		sem_post(&g_sem_send);					//Ä¿µÄ: ½ÓÊÕ³ö´íºó,Í¨ÖªÈÎÎñ×é°üÏß³Ì²»Òª×èÈûÁË. 	
+		sem_post(&g_sem_send);					//
 		g_isSendPackCurrent = false;
 	}
-	//2.Çå¿Õ¶ÓÁĞ, Á´±í
+	//
 	clear_global(flag);
 
-	//3.Êı¾İ°ü·¢ËÍ¶à´Îºó, Î´ÊÕµ½»Ø¸´, ³¬Ê±
+	//
 	if(flag == TIMEOUTRETURNFLAG)
 	{
 		return ret;
 	}
 	
-	//4.×éÊı¾İ°üÍ·
+	//
 	assign_resComPack_head(&head, ERRORFLAGMY, sizeof(resCommonHead_t), 1, 1 );
 	
-	//5.ÉêÇëÄÚ´æ, ½«Êı¾İ¿½±´½øÄÚ´æ
+	//
 	if((sendData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error : func mem_pool_alloc()");
@@ -2541,7 +2541,7 @@ int error_net(int flag)
 	}
 	memcpy(sendData, &head, sizeof(resCommonHead_t));
 
-	//6.Ïò¶ÓÁĞÖĞ·ÅÈëÊı¾İ
+	//
 	if((ret = push_queue(g_queueRecv, sendData)) < 0)
 	{
 		myprint("Error : func push_queue()");
@@ -2549,43 +2549,43 @@ int error_net(int flag)
 		assert(0);
 	}		
 
-	//7.ÖØÖÃ½ÓÊÕ·şÎñÆ÷Êı¾İ°üÁ÷Ë®ºÅ, ²¢·¢ËÍĞÅºÅÍ¨Öª·¢ËÍÏß³Ì
+	//
 	g_recvSerial = 0;
 	sem_post(&g_sem_cur_read);
 	
 	
-	//socket_log(SocketLevel[2], ret, "debug: func error_net()  end");
+	//
 	return ret;
 }
 
 
-//½ÓÊÕÊı¾İÏß³Ì
+//
 void *thid_server_func_read(void *arg)
 {
 	int ret = 0;
 	int num = 0;
 	
-	//1.·ÖÀëÏß³Ì
+	//
 	pthread_detach(pthread_self());
 
 	while(1)
 	{
-		//2.µÈ´ıĞÅºÅÁ¿Í¨Öª, ÒÑÁ´½ÓÉÏ·şÎñÆ÷, ¿ÉÒÔ½øĞĞÊı¾İ½ÓÊÕ
+		//
 		sem_wait(&g_sem_read_open);			
 
 		while(1)
 		{
-			//3.½ÓÊÕÊı¾İ
+			//
 			if((ret = recv_data(g_sockfd)) < 0)			
 			{		
-				//4.½ÓÊÕÊı¾İ³ö´í
+				//
 				if(g_sockfd > 0)
 				{
 					close(g_sockfd);
 					g_sockfd = 0;
 				}
 
-				//5.Ö÷¶¯¹Ø±Õ»òÏú»ÙÍøÂç, ²»ĞèÒª½øĞĞ³ö´í»Ø¸´
+				//
 				if(g_close_net == 1 || g_close_net == 2)	
 				{
 					clear_global(1);
@@ -2595,15 +2595,15 @@ void *thid_server_func_read(void *arg)
 				else if(g_close_net == 0)		
 				{	
 					
-					//6.½øĞĞ³ö´í»Ø¸´				
+					//
 					do{
-						if((ret = error_net(1)) < 0)		//ÍøÂç³ö´íºó, ¸øUI ¶Ë»Ø¸´
+						if((ret = error_net(1)) < 0)		//
 						{
 							myprint(  "Error: func error_net()");
 							sleep(1);	
-							num++;			//¼ÌĞø½øĞĞ·¢ËÍ
+							num++;			//
 						}
-						else				//·¢ËÍ³É¹¦,
+						else				//
 						{		
 							num = 0;
 							break;
@@ -2620,31 +2620,31 @@ void *thid_server_func_read(void *arg)
 }
 
 
-//·¢ËÍÏß³Ì·¢ËÍÊı¾İ
+//
 void *thid_server_func_write(void *arg)
 {
 	int ret = 0;
-	int sendCmd = -1;		//·¢ËÍÊı¾İ°üµÄÃüÁî×Ö
+	int sendCmd = -1;		//
 	
-	//socket_log( SocketLevel[3], ret, "func thid_server_func_write() begin");
+	//
 
-	//1.·ÖÀëÏß³Ì
+	//
 	pthread_detach(pthread_self());
 
-	//2.½øÈë²Ù×÷Á÷³Ì
+	//
 	while(1)
 	{
-		//3.µÈ´ıĞÅºÅÁ¿Í¨Öª, ½øĞĞÊı¾İ·¢ËÍ
+		//
 		sem_wait(&g_sem_cur_write);		
-		//pthread_mutex_lock(&g_mutex_client);
+		//
 
-		//4.½øĞĞÊı¾İ·¢ËÍ
+		//
 		if((ret = send_data(g_sockfd, &sendCmd)) < 0)		
 		{
-			//·¢ËÍÊ§°Ü
-			//socket_log( SocketLevel[3], ret, "---------- func send_data() err -------");
+			//
+			//
 							
-			//Ì×½Ó×ÖĞèÒª¹Ø±Õ, ÊÍ·Å»¥³âËø
+			//
 			if(g_sockfd > 0)
 			{
 				close(g_sockfd );
@@ -2658,7 +2658,7 @@ void *thid_server_func_write(void *arg)
 
 	}
 
-	pthread_exit(NULL);		//Ïß³ÌÍË³ö
+	pthread_exit(NULL);		//
 	socket_log( SocketLevel[3], ret, "func thid_server_func_write() end");
 
 	return NULL;
@@ -2681,7 +2681,7 @@ void assign_reqPack_head(reqPackHead_t *head, uint8_t cmd, int contentLenth, int
 	pthread_mutex_unlock(&g_mutex_serial);
 }
 
-//µÇÂ¼Êı¾İ°ü  1~123213123~qgdyuwgqu455~;   
+//
 int  login_func(const char* news)
 {	
 	int ret = 0;
@@ -2694,9 +2694,9 @@ int  login_func(const char* news)
 	int  checkCode = 0, contenLenth = 0;
 	int outDataLenth = 0;
 
-	//socket_log(SocketLevel[2], ret, "func login_func() begin: [%s]", news);
+	//
 
-	//1.²éÕÒ·Ö¸î·û
+	//
 	if((tmp = strchr(news, DIVISIONSIGN)) == NULL)
 	{		
 		myprint("Error: func strstr() No find");
@@ -2710,10 +2710,10 @@ int  login_func(const char* news)
 		myprint( "Error: func strstr() No find");
 		assert(0);
 	}
-	memcpy(passWd, tmp + 1, strlen(tmp)-2);				//»ñÈ¡ÃÜÂë
+	memcpy(passWd, tmp + 1, strlen(tmp)-2);				//
 	passWdSize = strlen(passWd);
 
-	//2.ÉêÇëÄÚ´æ
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func mem_pool_alloc()");
@@ -2725,11 +2725,11 @@ int  login_func(const char* news)
 		assert(0);
 	}
 
-	//3.¼ÆËãÊı¾İ°ü×Ü³¤¶È, ²¢×é×°±¨Í·
+	//
 	contenLenth = sizeof(reqPackHead_t) + ACCOUTLENTH + sizeof(char) + passWdSize;
 	assign_reqPack_head(&head, LOGINCMDREQ, contenLenth, NOSUBPACK, 0, 1, 1);
 
-	//4.×é×°Êı¾İ°üĞÅÏ¢
+	//
 	tmp = tmpSendPackDataOne;
 	memcpy(tmp, (char *)&head, sizeof(reqPackHead_t));
 	tmp += sizeof(reqPackHead_t);
@@ -2738,12 +2738,12 @@ int  login_func(const char* news)
 	*tmp++ = passWdSize;
 	memcpy(tmp, passWd, passWdSize);
 
-	//5.¼ÆËãĞ£ÑéÂë
+	//
 	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
 	tmp += passWdSize;
 	memcpy(tmp, &checkCode, sizeof(int));
 
-	//6.×ªÒåÊı¾İ°üÄÚÈİ
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData + 1, &outDataLenth)) < 0)
 	{
@@ -2752,7 +2752,7 @@ int  login_func(const char* news)
 	}
 	*(sendPackData + outDataLenth + sizeof(char)) = PACKSIGN;
 
-	//7.ÊÍ·ÅÄÚ´æÖÁÄÚ´æ³Ø
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -2769,16 +2769,16 @@ int  login_func(const char* news)
 		assert(0);
 	}
 
-	sem_post(&g_sem_cur_write);	//·¢ËÍĞÅºÅÁ¿, Í¨Öª·¢ËÍÏß³Ì
+	sem_post(&g_sem_cur_write);	//
 	sem_wait(&g_sem_send);
 
-	//socket_log(SocketLevel[2], ret, "func login_func() end: [%s] %p", news, sendPackData);
+	//
 
 	
 	return ret;
 }
 
-//µÇ³ö
+//
 int  exit_program(const char* news)
 {
 	int ret = 0;
@@ -2787,10 +2787,10 @@ int  exit_program(const char* news)
 	int  checkCode = 0;
 	int outDataLenth = 0;
 
-	//1.×é±¨Í·
+	//
 	assign_reqPack_head(&head, LOGOUTCMDREQ, sizeof(reqPackHead_t), NOSUBPACK, 0, 1, 1);
 
-	//2.ÉêÇëÄÚ´æ
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error: func mem_pool_alloc()");
@@ -2802,12 +2802,12 @@ int  exit_program(const char* news)
 		assert(0);
 	}
 
-	//3.¼ÆËãĞ£ÑéÂë
+	//
 	memcpy(tmpSendPackDataOne, (char *)&head, sizeof(reqPackHead_t));
 	checkCode = crc326((const  char*)tmpSendPackDataOne, head.contentLenth);
 	memcpy(tmpSendPackDataOne + sizeof(reqPackHead_t), (char *)&checkCode, sizeof(uint32_t));
 
-	//4.×ªÒåÊı¾İÄÚÈİ
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -2816,7 +2816,7 @@ int  exit_program(const char* news)
 	}
 	*(sendPackData+outDataLenth+1) = PACKSIGN;
 
-	//5.ÊÍ·ÅÁÙÊ±ÄÚ´æ, ²¢½«·¢ËÍµØÖ·ºÍÊı¾İ³¤¶È·ÅÈë¶ÓÁĞ
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint("Error: func mem_pool_free()");
@@ -2833,7 +2833,7 @@ int  exit_program(const char* news)
 		assert(0);
 	}
 
-	sem_post(&g_sem_cur_write);	//·¢ËÍĞÅºÅÁ¿, Í¨Öª·¢ËÍÏß³Ì
+	sem_post(&g_sem_cur_write);	//
 	sem_wait(&g_sem_send);
 
 
@@ -2841,7 +2841,7 @@ int  exit_program(const char* news)
 }
 
 
-//ĞÄÌø
+//
 int  heart_beat_program(const char* news)
 {
 	int ret = 0;
@@ -2851,10 +2851,10 @@ int  heart_beat_program(const char* news)
 	int outDataLenth = 0;
 
 
-	//1.package The Head news
+	//
 	assign_reqPack_head(&head, HEARTCMDREQ, sizeof(reqPackHead_t), NOSUBPACK, 0, 1, 1);
 
-	//2.alloc The memory block
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func mem_pool_alloc()");
@@ -2866,12 +2866,12 @@ int  heart_beat_program(const char* news)
 		assert(0);
 	}
 
-	//3.¼ÆËãĞ£ÑéÂë
+	//
 	memcpy(tmpSendPackDataOne, (char *)&head, sizeof(reqPackHead_t));
 	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
 	memcpy(tmpSendPackDataOne + head.contentLenth, (char *)&checkCode, sizeof(uint32_t));
 	
-	//4.×ªÒåÊı¾İÄÚÈİ	
+	//
 	*sendPackData = PACKSIGN; 
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -2880,7 +2880,7 @@ int  heart_beat_program(const char* news)
 	}
 	*(sendPackData+outDataLenth+1) = PACKSIGN;
 
-	//5.ÊÍ·ÅÁÙÊ±ÄÚ´æ, ²¢½«·¢ËÍµØÖ·ºÍÊı¾İ³¤¶È·ÅÈë¶ÓÁĞ
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -2904,7 +2904,7 @@ int  heart_beat_program(const char* news)
 	return ret;
 }
 
-//ÏÂÔØÄ£°åÎÄ¼ş, cmd~type~ID~
+//
 int download_file_fromServer(const char *news)
 {
 	int ret = 0;
@@ -2916,7 +2916,7 @@ int download_file_fromServer(const char *news)
 	char IdBuf[65] = { 0 };
 	long long int fileid = 0;
 
-	//1.find The selected content
+	//
 	if((tmp = strchr(news, DIVISIONSIGN)) == NULL)
 	{		
 		myprint( "Error: func strstr() No find");
@@ -2924,7 +2924,7 @@ int download_file_fromServer(const char *news)
 	}
 	tmp++;
 
-	//2.alloc The memory block
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error: func mem_pool_alloc()");
@@ -2936,7 +2936,7 @@ int download_file_fromServer(const char *news)
 		assert(0);
 	}
 
-	//3.get The downLoad FileType And FileID
+	//
 	tmpOut = tmpSendPackDataOne + sizeof(reqPackHead_t);
 	if(*tmp == '0') 			*tmpOut++ = 0;
 	else if(*tmp == '1')		*tmpOut++ = 1;
@@ -2947,17 +2947,17 @@ int download_file_fromServer(const char *news)
 	memcpy(tmpOut, &fileid, sizeof(long long int)); 	
 	contentLenth = sizeof(reqPackHead_t) + sizeof(char) * 65;
 
-	//5. package The head news
+	//
 	assign_reqPack_head(&head, DOWNFILEREQ, contentLenth, NOSUBPACK, 0, 1, 1);
 	memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
 
-	//6. calculation The checkCode
+	//
 	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
 	tmp = tmpSendPackDataOne + head.contentLenth;
 	memcpy(tmp, (char *)&checkCode, sizeof(int));
 
 
-	//7. escape The origin Data
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -2966,7 +2966,7 @@ int download_file_fromServer(const char *news)
 	}
 	*(sendPackData+outDataLenth+1) = PACKSIGN;
 
-	//8.free The tmp mempool block And push The sendData Addr and lenth in queue
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -2991,7 +2991,7 @@ int download_file_fromServer(const char *news)
 
 
 
-//Get The specify File type NewEst ID, cmd~type~
+//
 int  get_FileNewestID(const char* news)
 {
 	int ret = 0;
@@ -3001,7 +3001,7 @@ int  get_FileNewestID(const char* news)
 	int outDataLenth = 0, contentLenth = 0;
 	char *tmp = NULL, *tmpOut = NULL ;
 	
-	//1.find The selected content
+	//
 	if((tmp = strchr(news, DIVISIONSIGN)) == NULL)
 	{
 		myprint( "Error: func strstr() No find");
@@ -3009,7 +3009,7 @@ int  get_FileNewestID(const char* news)
 	}
 	tmp++;
 	
-	//2.alloc The memory block
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error: func mem_pool_alloc()");
@@ -3021,24 +3021,24 @@ int  get_FileNewestID(const char* news)
 		assert(0);
 	}
 
-	//3.get The downLoad FileType
+	//
 	tmpOut = tmpSendPackDataOne + sizeof(reqPackHead_t);
 	if(*tmp == '0') 			*tmpOut++ = 0;
 	else if(*tmp == '1')		*tmpOut++ = 1;
 	else						assert(0);
 	contentLenth = sizeof(reqPackHead_t) + sizeof(char) * 1;
 			
-	//4. package The head news
+	//
 	assign_reqPack_head(&head, NEWESCMDREQ, contentLenth, NOSUBPACK, 0, 1, 1);
 	memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
 
-	//6. calculation The checkCode
+	//
 	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
 	tmp = tmpSendPackDataOne + head.contentLenth;
 	memcpy(tmp, (char *)&checkCode, sizeof(int));
 	
 	
-	//7. escape The origin Data
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -3047,7 +3047,7 @@ int  get_FileNewestID(const char* news)
 	}
 	*(sendPackData+outDataLenth+1) = PACKSIGN;
 
-	//8.free The tmp mempool block And push The sendData Addr and lenth in queue
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -3071,49 +3071,49 @@ int  get_FileNewestID(const char* news)
 	return ret;
 }
 
-//Ã¿ÂÖÊı¾İ¿ªÊ¼·¢ËÍÖ®Ç° µÄ×Ü°ü(²»Ğ¯´ø¾ßÌåÊı¾İ)
+//
 int send_perRounc_begin(int cmd, int totalPacka,int sendPackNumber)
 {
-	 reqPackHead_t  head;								//ÇëÇóĞÅÏ¢µÄ±¨Í·
-	 char *sendPackData = NULL;							//·¢ËÍÊı¾İ°üµØÖ·
-	 char tmpSendPackDataOne[PACKMAXLENTH] = { 0 };		//ÁÙÊ±Êı¾İ°üµØÖ·³¤¶È
-	 int checkCode = 0;									//Ğ£ÑéÂë
+	 reqPackHead_t  head;								//
+	 char *sendPackData = NULL;							//
+	 char tmpSendPackDataOne[PACKMAXLENTH] = { 0 };		//
+	 int checkCode = 0;									//
 	 char *tmp = NULL;
 	 int ret = 0, outDataLenth = 0;
 	 
-	 //1.×é×°±¨Í·
+	 //
 	 assign_reqPack_head(&head, cmd, sizeof(reqPackHead_t), NOSUBPACK, 0, totalPacka, sendPackNumber);
 			
-	 //2. ÉêÇëÄÚ´æ, ´¢´æ·¢ËÍÊı¾İ°ü
+	 //
 	 if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	 {			 
 	 	 myprint("Error : func mem_pool_alloc()");
 		 assert(0);
  	 }
 
-	 //3.¼ÆËãÊı¾İĞ£ÑéÂë,
+	 //
 	 memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
 	 checkCode = crc326((const char *)tmpSendPackDataOne, head.contentLenth);
 	 tmp = tmpSendPackDataOne + head.contentLenth;
 	 memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
 
-	 //4. ×ªÒåÊı¾İ°üÄÚÈİ
-	 *sendPackData = PACKSIGN;							 //flag 
+	 //
+	 *sendPackData = PACKSIGN;							 //
 	 if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 	 {
 		 myprint("Error : func escape()");
 		 assert(0);
 	 }
-	 *(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //flag 
+	 *(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //
 
-	 //5. ½«·¢ËÍÊı¾İ°ü·ÅÈë¶ÓÁĞ, Í¨Öª·¢ËÍÏß³Ì
+	 //
 	 if((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, cmd)) < 0)
 	 {
 		 myprint("Error : func push_queue_send_block()");
 		 assert(0);
 	 }
 
-	 //6. ½«·¢ËÍÊı¾İ·ÅÈëÁ´±í			 
+	 //
 	 if((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, 0, sendPackData, outDataLenth + sizeof(char) * 2, cmd )) < 0)
 	 {
 		  myprint( "Error: func Pushback_node_index_listSendInfo()");
@@ -3128,32 +3128,32 @@ int send_perRounc_begin(int cmd, int totalPacka,int sendPackNumber)
 }
 
 
-//upload file content  6~liunx.c~	   The package cmd : 6
+//
 int  upload_picture(const char* news)
 {
-	int ret = 0, index = 0, i = 0;			//index : µ±Ç°ÎÄ¼ş°üµÄĞòºÅ
-	uint16_t  tmpTotalPack = 0, totalPacka = 0;				//·¢ËÍÎÄ¼şËùĞèÒªµÄ×Ü°üÊı
+	int ret = 0, index = 0, i = 0;			//
+	uint16_t  tmpTotalPack = 0, totalPacka = 0;				//
 	char *tmp = NULL;
-	char filepath[250] = { 0 };				//·¢ËÍÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
-	char fileName[100] = { 0 };				//·¢ËÍµÄÎÄ¼şÃû
-	int  checkCode = 0;						//Ğ£ÑéÂë	
-	int doucumentLenth = 0 ;				//Ã¿¸ö°ü´¢´æÎÄ¼şÊı¾İÄÚÈİµÄ×î´ó×Ö½ÚÊı
-	int lenth = 0, packContenLenth = 0;		//lenth : ¶ÁÈ¡ÎÄ¼şÄÚÈİµÄ³¤¶È, packContenLenth : Êı¾İ°üµÄÔ­Ê¼³¤¶È
-	char *sendPackData = NULL;				//·¢ËÍÊı¾İ°üµÄµØÖ·
-	char *tmpSendPackDataOne = NULL;		//ÁÙÊ±»º³åÇøµÄµØÖ·
-	int outDataLenth = 0;					//Ã¿¸öÊı¾İ°üµÄ·¢ËÍ³¤¶È
-	FILE *fp = NULL;						//´ò¿ªµÄÎÄ¼ş¾ä±ú
-	reqPackHead_t  head;					//ÇëÇóĞÅÏ¢µÄ±¨Í·
-	int   sendPackNumber = 0;				//Ã¿ÂÖ·¢ËÍÊı¾İµÄ°üÊı
-	int   nRead = 0;						//ÒÑ¾­¿½±´µÄÊı¾İ×Ü³¤¶È
-	int   copyLenth = 0;					//Ã¿´Î¿½±´µÄÊı¾İ³¤¶È
+	char filepath[250] = { 0 };				//
+	char fileName[100] = { 0 };				//
+	int  checkCode = 0;						//
+	int doucumentLenth = 0 ;				//
+	int lenth = 0, packContenLenth = 0;		//
+	char *sendPackData = NULL;				//
+	char *tmpSendPackDataOne = NULL;		//
+	int outDataLenth = 0;					//
+	FILE *fp = NULL;						//
+	reqPackHead_t  head;					//
+	int   sendPackNumber = 0;				//
+	int   nRead = 0;						//
+	int   copyLenth = 0;					//
 	int  tmpLenth = 0;
 
 	
-	//1. calculate The package store fileContent Max Lenth;  1369 - 46 = 1323
+	//
 	doucumentLenth = COMREQDATABODYLENTH - FILENAMELENTH;
 	
-	//2.check The news style and find '~' position, copy The filePath
+	//
 	if((tmp = strchr(news, '~')) == NULL)
 	{
 		myprint("Error : The content style is err : %s", news);
@@ -3161,7 +3161,7 @@ int  upload_picture(const char* news)
 	}
 	memcpy(filepath, tmp + 1, strlen(tmp) - 2);
 
-	//3.get The filepath totalPacka by doucumentLenth of part of the filecontent	
+	//
 	if((ret = get_file_size(filepath, (int *)&totalPacka, doucumentLenth, NULL)) < 0)
 	{
 		myprint( "Error: func get_file_size()");
@@ -3169,7 +3169,7 @@ int  upload_picture(const char* news)
 	}
 	tmpTotalPack = totalPacka;
 
-	//4.find The fileName and open The file
+	//
 	if((ret = find_file_name(fileName, sizeof(fileName), filepath)) < 0)
 	{
 		myprint( "Error: func find_file_name()");
@@ -3181,7 +3181,7 @@ int  upload_picture(const char* news)
 		assert(0);
 	}
 
-	//5.allock The block buffer in memory Pool
+	//
 	if((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;		
@@ -3189,14 +3189,14 @@ int  upload_picture(const char* news)
 		assert(0);
 	}
 
-	//6. operation The file content and package
+	//
 	while(!feof(fp))
 	{
-		//7.¼ÆËãÃ¿ÂÖ·¢ËÍµÄ×Ü°üÊı
+		//
 		if(tmpTotalPack > PERROUNDNUMBER)			sendPackNumber = PERROUNDNUMBER;
 		else										sendPackNumber = tmpTotalPack;
 	
-		//8.¶ÁÈ¡Ã¿ÂÖ·¢ËÍÎÄ¼şµÄËùÓĞÄÚÈİ
+		//
 		memset(g_sendFileContent, 0, PERROUNDNUMBER * COMREQDATABODYLENTH);
 		while(lenth < sendPackNumber * doucumentLenth && !feof(fp) )
 		{
@@ -3220,47 +3220,47 @@ int  upload_picture(const char* news)
 			goto End;
 		}
 
-		//9.¶Ô±¾ÂÖµÄÊı¾İ½øĞĞ×é°ü
+		//
 		for(i = 0; i < sendPackNumber; i++)
 		{
-			//10.¿½±´ÎÄ¼şÃû³Æ
+			//
 			 tmp = tmpSendPackDataOne + sizeof(reqPackHead_t);
 			 memcpy(tmp, fileName, FILENAMELENTH);
 			 tmp += FILENAMELENTH;
 			 
-			 //11.¿½ÎÄ¼şÊı¾İ
+			 //
 			 copyLenth = MY_MIN(lenth, doucumentLenth);		
 			 memcpy(tmp, g_sendFileContent + nRead , copyLenth);
 			 nRead += copyLenth;
 			 lenth -= copyLenth;
 			
-			 //12. ¼ÆËãÊı¾İ°üÔ­Ê¼³¤¶È, ²¢³õÊ¼»¯±¨Í·
+			 //
 			 packContenLenth = sizeof(reqPackHead_t) + FILENAMELENTH + copyLenth;
 			 assign_reqPack_head(&head, UPLOADCMDREQ, packContenLenth, SUBPACK, index, totalPacka, sendPackNumber);
 			 
-			 //13. ÉêÇëÄÚ´æ, ´¢´æ·¢ËÍÊı¾İ°ü
+			 //
 			 if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 			 {			 
 				 myprint("Error : func mem_pool_alloc()");
 				 assert(0);
 		 	 }
 
-			 //14.¼ÆËãÊı¾İĞ£ÑéÂë,
+			 //
 			 memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
 			 checkCode = crc326((const char *)tmpSendPackDataOne, head.contentLenth);
 			 tmp = tmpSendPackDataOne + head.contentLenth;
 			 memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
 
-			 //15. ×ªÒåÊı¾İ°üÄÚÈİ
-			 *sendPackData = PACKSIGN;							 //flag 
+			 //
+			 *sendPackData = PACKSIGN;							 //
 			 if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 			 {
 				 myprint("Error : func escape()");
 				 assert(0);
 			 }
-			 *(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //flag 
+			 *(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //
 
-			 //16. ½«·¢ËÍÊı¾İ°ü·ÅÈë¶ÓÁĞ, Í¨Öª·¢ËÍÏß³Ì
+			 //
 			 if((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, UPLOADCMDREQ)) < 0)
 			 {
 				 myprint("Error : func push_queue_send_block()");
@@ -3277,12 +3277,12 @@ int  upload_picture(const char* news)
 			 sem_post(&g_sem_cur_write);
 		}
 
-		//17.Ò»ÂÖÊı¾İ·¢ËÍÍê±Ï, ½øĞĞÈ«¾ÖÊı¾İµÄ¼ÆËã
+		//
 		nRead = 0;
 		tmpTotalPack -= sendPackNumber;
 		lenth = 0;
 
-		//18.µÈ´ıĞÅºÅÍ¨Öª, ²¢¼ì²éÊÇ·ñ»¹ĞèÒªÏÂÒ»ÂÖµÄ×é°ü
+		//
 		sem_wait(&g_sem_send);	
 		if(g_residuePackNoNeedSend)			
 		{
@@ -3298,7 +3298,7 @@ int  upload_picture(const char* news)
 
 End:
 
-	//19. Çé¿ö×ÊÔ´, ÊÍ·ÅÁÙÊ±ÄÚ´æºÍÎÄ¼şÃèÊö·û
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint("Error : func mem_pool_free()");
@@ -3311,7 +3311,7 @@ End:
 }
 
 
-//push information from server reply
+//
 int  push_info_from_server_reply(const char* news)
 {
 	int ret = 0;
@@ -3320,10 +3320,10 @@ int  push_info_from_server_reply(const char* news)
 	int  checkCode = 0;
 	int outDataLenth = 0;
 
-	//1.package The Head news
+	//
 	assign_reqPack_head(&head, PUSHINFOREQ, sizeof(reqPackHead_t), NOSUBPACK, 0, 1, 1);
 
-	//2.alloc The memory block
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func mem_pool_alloc()");
@@ -3335,13 +3335,13 @@ int  push_info_from_server_reply(const char* news)
 		assert(0);
 	}
 
-	//3.
+	//
 	memcpy(tmpSendPackDataOne, (char *)&head, sizeof(reqPackHead_t));
 	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
 	memcpy(tmpSendPackDataOne + head.contentLenth, (char *)&checkCode, sizeof(int));
 
 
-	//4.
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -3350,7 +3350,7 @@ int  push_info_from_server_reply(const char* news)
 	}
 	*(sendPackData+outDataLenth+1) = PACKSIGN;
 
-	//5.
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -3375,32 +3375,32 @@ int  push_info_from_server_reply(const char* news)
 
 
 
-//Ö÷¶¯¹Ø±ÕÍøÂç·şÎñ, ±¾µØÊı¾İ°ü			
+//
 int  active_shutdown_net()
 {
 	int  ret = 0;
-	resCommonHead_t head;				//Ó¦´ğ±¨Í·ĞÅÏ¢
+	resCommonHead_t head;				//
 	char *sendData = NULL;
 
-	sem_init(&g_sem_read_open, 0, 0);			//³õÊ¼»¯½ÓÊÕĞÅºÅÁ¿
-	g_close_net = 2;							//ĞŞ¸Ä±êÊ¶·û, Ö÷¶¯¹Ø±Õ
-	g_err_flag = true;							//ĞŞ¸Ä±êÊ¶·û, ³ö´í
+	sem_init(&g_sem_read_open, 0, 0);			//
+	g_close_net = 2;							//
+	g_err_flag = true;							//
 
-	//1.¹Ø±ÕÌ×½Ó×Ö
+	//
 	if(g_sockfd > 0)
 	{
 		shutdown(g_sockfd, SHUT_RDWR); 
 		g_sockfd = -1;
 	}
 
-	//2.alloc The memory block And package  News
+	//
 	if((sendData = mem_pool_alloc(g_memPool)) == NULL)
 	{		
 		myprint( "Error: func mem_pool_alloc() ");
 		assert(0);
 	}
 		
-	//3.package The head News And body news
+	//
 	if(ret == -1)
 	{
 		*(sendData + sizeof(reqPackHead_t)) = 1;
@@ -3413,7 +3413,7 @@ int  active_shutdown_net()
 	assign_resComPack_head(&head, ACTCLOSERESPON, sizeof(reqPackHead_t) + 1, 0, 0);	
 	memcpy(sendData, &head, sizeof(reqPackHead_t));
 
-	//4. push The sendData addr in queue
+	//
 	if((ret = push_queue(g_queueRecv, sendData)) < 0)
 	{
 		myprint( "Error: func push_queue() " );								
@@ -3421,7 +3421,7 @@ int  active_shutdown_net()
 	}		
 	sem_post(&g_sem_cur_read);			
 
-	//5. have recv The cmd 11 to modify the config file And need set IP 
+	//
 	if(g_modify_config_file)
 	{
 		if((ret = chose_setip_method()) < 0)
@@ -3430,7 +3430,7 @@ int  active_shutdown_net()
 			assert(0);
 		}
 		
-		sleep(2);		// sleep' reason : set IP need response Time 
+		sleep(2);		//
 		g_modify_config_file = false;
 	}
 	
@@ -3438,7 +3438,7 @@ int  active_shutdown_net()
 }
 
 
-//É¾³ıÍ¼Æ¬  cmd~Í¼Æ¬Â·¾¶~
+//
 int delete_spec_pic(const char *news)
 {
 	int ret = 0;
@@ -3448,17 +3448,17 @@ int delete_spec_pic(const char *news)
 	int  checkCode = 0;
 	int outDataLenth = 0;		
 
-	//1.find The filePath And fileName
+	//
 	if((tmp = strchr(news, DIVISIONSIGN)) == NULL)
 	{
 		myprint( "Error: func strstr() No find");
 		assert(0);
 	}
-	//myprint("delete News : %s", news);
+	//
 	
 	memcpy(fileName, tmp + 1, strlen(tmp) - 2);			
 
-	//2.alloc The memory block And package The Body news
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{	
 		myprint( "Error: func mem_pool_alloc()");
@@ -3470,18 +3470,18 @@ int delete_spec_pic(const char *news)
 		assert(0);
 	}
 	memcpy(tmpSendPackDataOne + sizeof(reqPackHead_t), fileName, strlen(fileName));
-	//myprint("rm fileName : %s", fileName);
-	//3.package The head news
+	//
+	//
 	assign_reqPack_head(&head, DELETECMDREQ, sizeof(reqPackHead_t) + FILENAMELENTH, NOSUBPACK, 0, 1, 1);
 
-	//4.¼ÆËãĞ£ÑéÂë
+	//
 	memcpy(tmpSendPackDataOne, (char *)&head, sizeof(reqPackHead_t));
 	checkCode = crc326((const  char*)tmpSendPackDataOne, head.contentLenth);
 	memcpy(tmpSendPackDataOne+head.contentLenth, (char *)&checkCode, sizeof(uint32_t));
-	//myprint("delete pic contentLenth : %d", head.contentLenth);
+	//
 
 	
-	//5.×ªÒå
+	//
 	*sendPackData = PACKSIGN;  
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 	{
@@ -3490,7 +3490,7 @@ int delete_spec_pic(const char *news)
 	}
 	*(sendPackData + outDataLenth + sizeof(char)) = PACKSIGN;
 	
-	//6.ÊÍ·ÅÁÙÊ±ÄÚÈİÖÁÄÚ´æ³Ø, ²¢½«Êı¾İ°ü·ÅÈë·¢ËÍ¶ÓÁĞºÍÁ´±í
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -3516,32 +3516,32 @@ int delete_spec_pic(const char *news)
 
 
 
-// Á´½Ó·şÎñÆ÷, ±¾µØÊı¾İ°ü			
+//
 int  connet_server(const char *news)
 {	
-	int  ret = 0, contentLenth = 0;		//·¢ËÍÊı¾İ³¤¶È
-	char *sendData = NULL;				//·¢ËÍµØÖ·
-	resCommonHead_t head;				//Ó¦´ğ±¨Í·ĞÅÏ¢
+	int  ret = 0, contentLenth = 0;		//
+	char *sendData = NULL;				//
+	resCommonHead_t head;				//
 	int keepalive = 1;
 	int keepidle = 2;
 	int keepinterval = 1;
 	int keepcount = 1;
 
-	//1. Á´½Ó·şÎñÆ÷
+	//
 	if(g_sockfd <= 0)
 	{		
 		if((ret = client_con_server(&g_sockfd, WAIT_SECONDS)) < 0)			
 		{
-			//2. Á´½Ó·şÎñÆ÷Ê§°Ü
+			//
 			g_sockfd = -1;
 			myprint("Error: func client_con_server()");
 		}
 		else if(ret == 0)			
 		{		
-			//4. ³õÊ¼»¯È«¾Ö±äÁ¿
-			sem_post(&g_sem_read_open); 	//Í¨Öª½ÓÊÕÊı¾İÏß³Ì
-			g_err_flag = false; 			//³ö´íµÄÈ«¾Ö±äÁ¿ĞŞ¸Ä
-			g_close_net = 0;				//³õÊ¼»¯
+			//
+			sem_post(&g_sem_read_open); 	//
+			g_err_flag = false; 			//
+			g_close_net = 0;				//
 			setsockopt(g_sockfd, SOL_SOCKET, SO_KEEPALIVE, (void *)&keepalive , sizeof(keepalive ));
 			setsockopt(g_sockfd, SOL_TCP, TCP_KEEPIDLE, (void*)&keepidle , sizeof(keepidle ));
 			setsockopt(g_sockfd, SOL_TCP, TCP_KEEPINTVL, (void *)&keepinterval , sizeof(keepinterval ));
@@ -3551,23 +3551,23 @@ int  connet_server(const char *news)
 		
 	}
 
-	//5. ÉêÇëÄÚ´æ
+	//
 	if((sendData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func mem_pool_alloc() ");
 		assert(0);
 	}
 
-	//6. ×é×°Êı¾İ°üĞÅÏ¢ºÍ±¨Í·³¤¶È
+	//
 	if(ret == 0)		*(sendData + sizeof(resCommonHead_t)) = ret;
 	else				*(sendData + sizeof(resCommonHead_t)) = 1;
 	contentLenth = sizeof(resCommonHead_t) + 1;	
 
-	//7.×é°ü±¨Í·ĞÅÏ¢, ²¢¿½±´
+	//
 	assign_resComPack_head(&head, CONNECTCMDRESPON, contentLenth, 0, 0);
 	memcpy(sendData, &head, sizeof(resCommonHead_t));
 
-	//8. ½«ÏûÏ¢·ÅÈë¶ÓÁĞ
+	//
 	if((ret = push_queue(g_queueRecv, sendData)) < 0)
 	{
 		myprint("Error: func push_queue() no have data");
@@ -3575,26 +3575,26 @@ int  connet_server(const char *news)
 		assert(0);
 	}
 
-	//9.ÊÍ·ÅĞÅºÅÁ¿, Í¨Öª·¢ËÍ¸øUIÊı¾İµÄÏß³Ì
+	//
 	sem_post(&g_sem_cur_read);				
 
 	return ret;
 }
 
 
-//¶ÁÈ¡ÅäÖÃÎÄ¼ş, ±¾µØÊı¾İ°ü																
+//
 int read_config_file(const char *news)
 {
 	
 	int  ret = 0;
-	resCommonHead_t head;				//Ó¦´ğ±¨Í·ĞÅÏ¢
+	resCommonHead_t head;				//
 	int contenLenth = 0;
 	char *sendData = NULL, *tmp = NULL;
 
-	//1.read config file And manual set The ip or operation The DHCP
+	//
 	ret = get_config_file_para();
 
-	//2.alloc The memory block And package Body news
+	//
 	if((sendData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func mem_pool_alloc() ");
@@ -3605,20 +3605,20 @@ int read_config_file(const char *news)
 	else			*tmp = ret;
 	contenLenth = sizeof(reqPackHead_t) + sizeof(char);
 
-	//3.package Head
+	//
 	assign_resComPack_head(&head, MODIFYCMDRESPON, contenLenth, 0, 0);
 
-	//4.copy The head news in memory block
+	//
 	memcpy(sendData, &head, sizeof(resCommonHead_t));
 
-	//5.push The memory block Addr in queue
+	//
 	if((ret = push_queue(g_queueRecv, sendData)) < 0)
 	{
 		myprint( "Error: func push_queue() no have data");
 		assert(0);
 	}
 
-	//6.notice The shutwon function set IP. And post The semphore
+	//
 	g_modify_config_file = true;		
 	sem_post(&g_sem_cur_read);
 
@@ -3627,7 +3627,7 @@ int read_config_file(const char *news)
 
 
 
-/*Ä£°åÊı¾İ°üÍØÕ¹
+/*æ¨¡æ¿æ•°æ®åŒ…æ‹“å±•
 *@param : news   cmd~data~;
 *@retval: success 0; fail -1.
 */
@@ -3635,17 +3635,17 @@ int template_extend_element(const char *news)
 {
 	int ret = 0, i = 0;
 	char *tmp = NULL;
-	reqPackHead_t head;							//±¨Í·
-	char *tmpSendPackDataOne = NULL;				//ÁÙÊ±»º³åÇø
-	char *sendPackData = NULL;						//·¢ËÍµØÖ·
-	int  checkCode = 0, contentLenth = 0;			//Ğ£ÑéÂëºÍÊı¾İ³¤¶È
-	int outDataLenth = 0;							//·¢ËÍµØÖ·³¤¶È						
-	char bufAddr[20] = { 0 };						//Ä£°åÊı¾İ¿éµØÖ·				
+	reqPackHead_t head;							//
+	char *tmpSendPackDataOne = NULL;				//
+	char *sendPackData = NULL;						//
+	int  checkCode = 0, contentLenth = 0;			//
+	int outDataLenth = 0;							//
+	char bufAddr[20] = { 0 };						//
 	unsigned int apprLen = 0; 							
 	UitoNetExFrame *tmpExFrame = NULL;					
 						
 
-	//1.È¥³ı·Ö¸î·û, »ñÈ¡Êı¾İµØÖ·
+	//
 	if((tmp = strchr(news, DIVISIONSIGN)) == NULL)
 	{
 		myprint( "Error: func strstr() No find");
@@ -3656,11 +3656,11 @@ int template_extend_element(const char *news)
 	tmp = NULL + apprLen;
 	tmpExFrame = (UitoNetExFrame*)tmp;
 
-	//2.×é×°±¨Í·
+	//
 	contentLenth = sizeof(reqPackHead_t) + sizeof(unsigned char) * 4 + strlen(tmpExFrame->sendData.identifyID) + strlen(tmpExFrame->sendData.objectAnswer) + tmpExFrame->sendData.subMapCoordNum * sizeof(Coords) + tmpExFrame->sendData.totalNumberPaper * sizeof(tmpExFrame->sendData.toalPaperName[0]);
 	assign_reqPack_head(&head, TEMPLATECMDREQ, contentLenth, NOSUBPACK, 0, 1, 1);
 
-	//3.ÉêÇëÄÚ´æ¿é
+	//
 	if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error: func mem_pool_alloc()");
@@ -3672,8 +3672,8 @@ int template_extend_element(const char *news)
 		assert(0);
 	}
 	
-	//5.×é°ü±¨ÎÄ
-	//ID
+	//
+	//
 	apprLen = strlen(tmpExFrame->sendData.identifyID);		
 	tmp = tmpSendPackDataOne;
 	memcpy(tmp, (char *)&head, sizeof(reqPackHead_t));			
@@ -3681,30 +3681,30 @@ int template_extend_element(const char *news)
 	*tmp = apprLen;
 	tmp += 1;
 	memcpy(tmp, tmpExFrame->sendData.identifyID, apprLen);
-	//object
+	//
 	tmp += apprLen;
 	apprLen = strlen(tmpExFrame->sendData.objectAnswer);
 	*tmp = apprLen;
 	tmp += 1;
 	memcpy(tmp, tmpExFrame->sendData.objectAnswer, apprLen);
-	//fileName
+	//
 	tmp += apprLen;	
 	*tmp = tmpExFrame->sendData.totalNumberPaper;
 	tmp += 1;
 	apprLen = tmpExFrame->sendData.totalNumberPaper;
 	memcpy(tmp, tmpExFrame->sendData.toalPaperName, sizeof(tmpExFrame->sendData.toalPaperName[1]) * apprLen );
 	tmp += sizeof(tmpExFrame->sendData.toalPaperName[1]) * apprLen;
-	//subcoord
+	//
 	*tmp = tmpExFrame->sendData.subMapCoordNum;
 	tmp += 1;
 	memcpy(tmp, tmpExFrame->sendData.coordsDataToUi, tmpExFrame->sendData.subMapCoordNum * sizeof(Coords));
 
-	//checkCode
-	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);	//¼ÆËãĞ£ÑéÂë
+	//
+	checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);	//
 	tmp = tmpSendPackDataOne + head.contentLenth;
 	memcpy(tmp, &checkCode, sizeof(uint32_t));	
 
-	//6.×ªÒåÊı¾İ
+	//
 	*sendPackData = PACKSIGN; 
 	if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData + 1, &outDataLenth)) < 0)
 	{
@@ -3713,7 +3713,7 @@ int template_extend_element(const char *news)
 	}
 	*(sendPackData + outDataLenth + sizeof(char)) = PACKSIGN;
 
-	//7.ÊÍ·ÅÁÙÊ±ÄÚ´æ
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -3731,7 +3731,7 @@ int template_extend_element(const char *news)
 		assert(0);
 	}
 
-	//8. »º´æÉ¨ÃèÊı¾İ¿éÍ¼Æ¬ĞÅÏ¢
+	//
 	memset(g_upload_set, 0, sizeof(g_upload_set));
 	for(i = 0; i < tmpExFrame->sendData.totalNumberPaper; i++)
 	{
@@ -3739,7 +3739,7 @@ int template_extend_element(const char *news)
 		g_upload_set[i].totalNumber = tmpExFrame->sendData.totalNumberPaper;
 		g_upload_set[i].indexNumber = i;
 	}
-	sem_post(&g_sem_cur_write);	//Í¨ÖªÏß³Ì½øĞĞ·¢ËÍ
+	sem_post(&g_sem_cur_write);	//
 	sem_wait(&g_sem_send);
 	
 	if(g_template_uploadErr)
@@ -3748,7 +3748,7 @@ int template_extend_element(const char *news)
 		goto End;
 	}
 
-	//9. ·¢ËÍ¶àÕÅÍ¼Æ¬
+	//
 	if((ret = upload_template_set(g_upload_set)) < 0)
 	{
 		myprint("Error: upload_template_set()");
@@ -3767,8 +3767,8 @@ End:
 
 
 
-/*ÉÏ´«¶àÕÅÍ¼Æ¬
-*@param : uploadSet  Í¼Æ¬Êı¾İ¼¯ºÏ
+/*ä¸Šä¼ å¤šå¼ å›¾ç‰‡
+*@param : uploadSet  å›¾ç‰‡æ•°æ®é›†åˆ
 *@retval: success 0; fail -1;
 */
 int upload_template_set(uploadWholeSet *uploadSet)
@@ -3780,7 +3780,7 @@ int upload_template_set(uploadWholeSet *uploadSet)
 	
 	for(i = 0; i < uploadSet->totalNumber; i++)
 	{
-		//¶ÔÍ¼Æ¬Êı¾İ×é°ü,
+		//
 		if((ret = image_data_package(uploadSet[i].filePath, contentLenth, i, uploadSet->totalNumber)) < 0)
 		{
 			if(ret == -1)
@@ -3802,33 +3802,33 @@ End:
 }
 
 
-/*Í¼Æ¬Êı¾İ×é°ü,½øĞĞÉÏ´«
-*@param : filePath  Í¼Æ¬Â·¾¶
-*@param : readLen   Êı¾İ°üĞÅÏ¢µÄ³¤¶È(³öÈ¥±¨Í·, Ğ£ÑéÂë, ±êÊ¶·û)
-*@retval: success 0; fail -1; -2 ½ÓÊÕµ½ÍøÂç´íÎóĞÅºÅ,½ÓÏÂÀ´µÄÍ¼Æ¬²»»á×éÊı¾İ°ü
+/*å›¾ç‰‡æ•°æ®ç»„åŒ…,è¿›è¡Œä¸Šä¼ 
+*@param : filePath  å›¾ç‰‡è·¯å¾„
+*@param : readLen   æ•°æ®åŒ…ä¿¡æ¯çš„é•¿åº¦(å‡ºå»æŠ¥å¤´, æ ¡éªŒç , æ ‡è¯†ç¬¦)
+*@retval: success 0; fail -1; -2 æ¥æ”¶åˆ°ç½‘ç»œé”™è¯¯ä¿¡å·,æ¥ä¸‹æ¥çš„å›¾ç‰‡ä¸ä¼šç»„æ•°æ®åŒ…
 */
 int image_data_package(const char *filePath, int readLen, int fileNumber, int totalFileNumber)
 {
-	int ret = 0, index = 0, i = 0;			//index : µ±Ç°ÎÄ¼ş°üµÄĞòºÅ
-	int  tmpTotalPack = 0, totalPacka = 0;	//·¢ËÍÎÄ¼şËùĞèÒªµÄ×Ü°üÊı
+	int ret = 0, index = 0, i = 0;			//
+	int  tmpTotalPack = 0, totalPacka = 0;	//
 	char *tmp = NULL;
-	char filepath[250] = { 0 };				//·¢ËÍÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
-	char fileName[100] = { 0 };				//·¢ËÍµÄÎÄ¼şÃû
-	int  checkCode = 0;						//Ğ£ÑéÂë	
-	int doucumentLenth = 0 ;				//Ã¿¸ö°ü´¢´æÎÄ¼şÊı¾İÄÚÈİµÄ×î´ó×Ö½ÚÊı
-	int lenth = 0, packContenLenth = 0;		//lenth : ¶ÁÈ¡ÎÄ¼şÄÚÈİµÄ³¤¶È, packContenLenth : Êı¾İ°üµÄÔ­Ê¼³¤¶È
-	char *sendPackData = NULL;				//·¢ËÍÊı¾İ°üµÄµØÖ·
-	char *tmpSendPackDataOne = NULL;		//ÁÙÊ±»º³åÇøµÄµØÖ·
-	int outDataLenth = 0;					//Ã¿¸öÊı¾İ°üµÄ·¢ËÍ³¤¶È
-	FILE *fp = NULL;						//´ò¿ªµÄÎÄ¼ş¾ä±ú
-	reqPackHead_t  head;					//ÇëÇóĞÅÏ¢µÄ±¨Í·
-	int   sendPackNumber = 0;				//Ã¿ÂÖ·¢ËÍÊı¾İµÄ°üÊı
-	int   nRead = 0;						//ÒÑ¾­¿½±´µÄÊı¾İ×Ü³¤¶È
-	int   copyLenth = 0;					//Ã¿´Î¿½±´µÄÊı¾İ³¤¶È
+	char filepath[250] = { 0 };				//
+	char fileName[100] = { 0 };				//
+	int  checkCode = 0;						//
+	int doucumentLenth = 0 ;				//
+	int lenth = 0, packContenLenth = 0;		//
+	char *sendPackData = NULL;				//
+	char *tmpSendPackDataOne = NULL;		//
+	int outDataLenth = 0;					//
+	FILE *fp = NULL;						//
+	reqPackHead_t  head;					//
+	int   sendPackNumber = 0;				//
+	int   nRead = 0;						//
+	int   copyLenth = 0;					//
 	int  tmpLenth = 0;
 
 
-	//1.»ñÈ¡ÎÄ¼ş×é°üÊı
+	//
 	if((ret = get_file_size(filePath, &totalPacka, readLen, NULL)) < 0)
 	{
 		myprint("Error: func get_file_size() filePath : %s", filePath);
@@ -3837,35 +3837,35 @@ int image_data_package(const char *filePath, int readLen, int fileNumber, int to
 	doucumentLenth = readLen;
 	tmpTotalPack = totalPacka;
 	
-	//2.²éÕÒÎÄ¼şÃû×Ö
+	//
 	if((ret = find_file_name(fileName, sizeof(fileName), filePath)) < 0)
 	{
 		myprint( "Error: func find_file_name()");
 		assert(0);
 	}
 
-	//3.´ò¿ªÎÄ¼ş
+	//
 	if((fp = fopen(filePath, "rb")) == NULL)
 	{
 		myprint("Error: func fopen(), %s", strerror(errno));
 		assert(0);
 	}
 
-	//4.ÉêÇëÄÚ´æ
+	//
 	if((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint("Error: func mem_pool_alloc()");
 		assert(0);
 	}
 
-	//6. operation The file content and package
+	//
 	while(!feof(fp))
 	{
-		//7.¼ÆËãÃ¿ÂÖ·¢ËÍµÄ×Ü°üÊı
+		//
 		if(tmpTotalPack > PERROUNDNUMBER)			sendPackNumber = PERROUNDNUMBER;
 		else										sendPackNumber = tmpTotalPack;
 	
-		//8.¶ÁÈ¡Ã¿ÂÖ·¢ËÍÎÄ¼şµÄËùÓĞÄÚÈİ
+		//
 		memset(g_sendFileContent, 0, PERROUNDNUMBER * COMREQDATABODYLENTH);
 		while(lenth < sendPackNumber * doucumentLenth && !feof(fp) )
 		{
@@ -3890,49 +3890,49 @@ int image_data_package(const char *filePath, int readLen, int fileNumber, int to
 			ret = -2;
 			goto End;
 		}
-		//9.¶Ô±¾ÂÖµÄÊı¾İ½øĞĞ×é°ü
+		//
 		for(i = 0; i < sendPackNumber; i++)
 		{
-			 //10.¿½±´ÎÄ¼şÃû³Æ
+			 //
 			 tmp = tmpSendPackDataOne + sizeof(reqPackHead_t);
 			 *tmp++ = fileNumber;
 			 *tmp++ = totalFileNumber;
 			 memcpy(tmp, fileName, FILENAMELENTH);
 			 tmp += FILENAMELENTH;
 			 
-			 //11.¿½ÎÄ¼şÊı¾İ
+			 //
 			 copyLenth = MY_MIN(lenth, doucumentLenth); 	
 			 memcpy(tmp, g_sendFileContent + nRead , copyLenth);
 			 nRead += copyLenth;
 			 lenth -= copyLenth;
 
-			 //12. ¼ÆËãÊı¾İ°üÔ­Ê¼³¤¶È, ²¢³õÊ¼»¯±¨Í·
+			 //
 			 packContenLenth = sizeof(reqPackHead_t) + FILENAMELENTH + copyLenth + sizeof(char) * 2;
 			 assign_reqPack_head(&head, MUTIUPLOADCMDREQ, packContenLenth, SUBPACK, index, totalPacka, sendPackNumber);
 			 
-			 //13. ÉêÇëÄÚ´æ, ´¢´æ·¢ËÍÊı¾İ°ü
+			 //
 			 if((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
 			 {			 
 				 myprint("Error : func mem_pool_alloc()");
 				 assert(0);
 			 }
 
-			 //14.¼ÆËãÊı¾İĞ£ÑéÂë,
+			 //
 			memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
 			checkCode = crc326((const char *)tmpSendPackDataOne, head.contentLenth);
 			tmp = tmpSendPackDataOne + head.contentLenth;
 			memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
 
-			//15. ×ªÒåÊı¾İ°üÄÚÈİ
-			*sendPackData = PACKSIGN;							//flag 
+			//
+			*sendPackData = PACKSIGN;							//
 			if((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData+1, &outDataLenth)) < 0)
 			{
 				myprint("Error : func escape()");
 				assert(0);
 			}
-			*(sendPackData + outDataLenth + 1) = PACKSIGN;		//flag 
+			*(sendPackData + outDataLenth + 1) = PACKSIGN;		//
 		
-			//16. ½«·¢ËÍÊı¾İ°ü·ÅÈë¶ÓÁĞ, Í¨Öª·¢ËÍÏß³Ì
+			//
 			if((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, MUTIUPLOADCMDREQ)) < 0)
 			{
 				myprint("Error : func push_queue_send_block()");
@@ -3950,12 +3950,12 @@ int image_data_package(const char *filePath, int readLen, int fileNumber, int to
 			
 		}
 			
-		//17.Ò»ÂÖÊı¾İ·¢ËÍÍê±Ï, ½øĞĞÈ«¾ÖÊı¾İµÄ¼ÆËã
+		//
 		nRead = 0;
 		tmpTotalPack -= sendPackNumber;
 		lenth = 0;
 
-		//18.µÈ´ıĞÅºÅÍ¨Öª, ²¢¼ì²éÊÇ·ñ»¹ĞèÒªÏÂÒ»ÂÖµÄ×é°ü
+		//
 		sem_wait(&g_sem_send);	
 		if(g_residuePackNoNeedSend)			
 		{
@@ -3972,7 +3972,7 @@ int image_data_package(const char *filePath, int readLen, int fileNumber, int to
 	}
 
 End:	
-	//6.ÊÍ·ÅÁÙÊ±ÄÚ´æ
+	//
 	if((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 	{
 		myprint( "Error: func mem_pool_free()");
@@ -3986,7 +3986,7 @@ End:
 
 
 
-//find The file name in The Absolute filepath
+//
 int find_file_name(char *fileName, int desLenth, const char *filePath)
 {
  	int ret = 0;
@@ -4005,14 +4005,14 @@ int find_file_name(char *fileName, int desLenth, const char *filePath)
 
 
 
-//³ö´íÊı¾İ»Ø¸´  0ºÅÊı¾İ°ü
+//
 int error_net_reply(char *news, char **outDataToUi)
 {
 	int ret = 0;
 	char *outDataNews = NULL;
 
 
-	//1.ÉêÇëÄÚ´æ, ´¢´æÊı¾İ, ·µ»Ø¸øUI
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -4020,7 +4020,7 @@ int error_net_reply(char *news, char **outDataToUi)
 		assert(0);
 	}
 
-	//2.½«Êı¾İ¿½±´½øÄÚ´æ 
+	//
 	sprintf(outDataNews, "%d~", 0 );
 	*outDataToUi = outDataNews;
 
@@ -4028,16 +4028,16 @@ int error_net_reply(char *news, char **outDataToUi)
 }
 
 
-/*µÇÂ¼ĞÅÏ¢»Ø¸´
+/*ç™»å½•ä¿¡æ¯å›å¤
 */
 int login_reply_func(char *news, char **outDataToUi)
 {
 	int ret = 0;
-	char *tmp = NULL, *tmpOut = NULL;		//ÁÙÊ±Ö¸Õë
-	resCommonHead_t *head = NULL;			//Êı¾İ±¨Í·
-	char *outDataNews = NULL;				//ÄÚ´æ¿é
+	char *tmp = NULL, *tmpOut = NULL;		//
+	resCommonHead_t *head = NULL;			//
+	char *outDataNews = NULL;				//
 
-	//1.ÉêÇëÄÚ´æ, ´¢´æÊı¾İ, ·µ»Ø¸øUI
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -4045,26 +4045,26 @@ int login_reply_func(char *news, char **outDataToUi)
 		assert(0);
 	}
 
-	//2.½øĞĞÊı¾İ¿½±´
+	//
 	head = (resCommonHead_t *)news;
 	sprintf(outDataNews, "%d~", LOGINCMDRESPON);
 
-	//3.ÒÆ¶¯Ö¸Õë, Ö¸ÏòÊı¾İ¿é, »ñÈ¡Êı¾İ¿é³¤¶È
+	//
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	tmpOut = outDataNews + strlen(outDataNews);
 	if(*tmp == 0x01)
 	{			
-		//µÇÂ¼³É¹¦
+		//
 		sprintf(tmpOut, "%d~", *tmp);			
-		tmp += 2;						//Ãû³Æ³¤¶È
-		tmpOut += 2;					//Ö¸ÕëÏòÏÂÒÆ¶¯
-		memcpy(tmpOut, tmp + 1, *tmp);	//¿½±´Ãû³Æ
+		tmp += 2;						//
+		tmpOut += 2;					//
+		memcpy(tmpOut, tmp + 1, *tmp);	//
 		tmpOut += *tmp;
 		*tmpOut = '~';
 	}
 	else
 	{
-		//µÇÂ¼Ê§°Ü
+		//
 		sprintf(tmpOut, "%d~", *tmp);
 		tmp += 1;
 		tmpOut += 2;
@@ -4079,7 +4079,7 @@ int login_reply_func(char *news, char **outDataToUi)
 		}
 	}
 
-	//6.½øĞĞ¸³Öµ
+	//
 	*outDataToUi = outDataNews;
 
 	return ret;
@@ -4087,7 +4087,7 @@ int login_reply_func(char *news, char **outDataToUi)
 
 
 
-//µÇ³öĞÅÏ¢»Ø¸´
+//
 int exit_reply_program( char *news, char **outDataToUi)
 {
 	int ret = 0;
@@ -4119,7 +4119,7 @@ int exit_reply_program( char *news, char **outDataToUi)
 
 
 
-//ĞÄÌøÊı¾İ»Ø¸´
+//
 int heart_beat_reply_program( char *news, char **outDataNews)
 {
 
@@ -4140,23 +4140,23 @@ int download_reply_template( char *news, char **outDataToUi)
 	char *fileName;
 	char *outDataNews = NULL;
 	static FILE *fp = NULL;
-	resSubPackHead_t *tmpHead = NULL;				//Ó¦´ğ±¨Í·
-	static bool openFlag = false;					//true : open The file; false : no open The file
+	resSubPackHead_t *tmpHead = NULL;				//
+	static bool openFlag = false;					//
 	int  nWrite = 0, fileLenth = 0, tmpLenth = 0;
 
-	//1. »ñÈ¡±¨Í·ĞÅÏ¢, ²¢ÒÆ¶¯Ö¸Õë
+	//
 	tmpHead = (resSubPackHead_t *)news;
 	tmp = news + sizeof(resSubPackHead_t);
 
-	//2. ÅĞ¶ÏÏÂÔØÄ£°åÊÇ·ñ³É¹¦
+	//
 	if(*tmp == 0)		
 	{		
-		//3.ÏÂÔØ³É¹¦, Ğ´ÎÄ¼ş, open The file;  64 fileName lenth
+		//
 		if(!openFlag)
 		{
 			tmp = news + sizeof(resSubPackHead_t) + sizeof(char) * 2;
 
-			//4.¸ù¾İÀàĞÍÑ¡Ôñ½«Òª´æ´¢ÎÄ¼şµÄÃû³Æ
+			//
 			if(*tmp == 0)
 			{
 				fileName = g_downLoadTemplateName;
@@ -4171,7 +4171,7 @@ int download_reply_template( char *news, char **outDataToUi)
 				assert(0);
 			}
 
-			//5.´ò¿ªÎÄ¼ş
+			//
 			if((fp = fopen(fileName, "wb" )) == NULL)
 			{
 				myprint( "Error: func fopen(), The fileName %s, %s", fileName, strerror(errno));
@@ -4179,7 +4179,7 @@ int download_reply_template( char *news, char **outDataToUi)
 			}
 			openFlag = true;
 		}
-		//6. write And create The file
+		//
 		tmp = news + sizeof(resSubPackHead_t) + sizeof(char) * 3;
 		fileLenth = tmpHead->contentLenth - sizeof(resSubPackHead_t) - sizeof(char) * 3;
 		do{ 		
@@ -4194,17 +4194,17 @@ int download_reply_template( char *news, char **outDataToUi)
 			}
 		}while(nWrite < fileLenth);
 	
-		//7. jump whether reply UI message
+		//
 		if(tmpHead->currentIndex + 1 < tmpHead->totalPackage)
 		{
-			//8. ²»ĞèÒª¶Ô UI ½øĞĞ»Ø¸´
-			//myprint("func download_reply_template() continue index : %d, ret : %d,	indexPackge + 1 : %d, totalPackge : %d", 
-			//	index++, ret, tmpHead->packgeNews.indexPackge + 1, tmpHead->packgeNews.totalPackge);
+			//
+			//
+			//
 			ret = 1;
 		}
 		else
 		{
-			//9. ±¾Ä£°å×îºóÒ»°üÊı¾İ³É¹¦½ÓÊÕ, ĞèÒªÏò UI ½øĞĞ»Ø¸´
+			//
 			if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 			{
 				myprint("Error: func  mem_pool_alloc() ");
@@ -4227,15 +4227,15 @@ int download_reply_template( char *news, char **outDataToUi)
 			openFlag = false;
 			ret = 0;
 
-			//9.ĞŞ¸Ä±êÊ¶·û, ±êÊ¶½ÓÊÕµ½¸ÃÊı¾İ°üµÄÓ¦´ğ
+			//
 			g_isSendPackCurrent = false;
 			
-			//socket_log(SocketLevel[2], ret, "func download_reply_template() end fclose() index : %d, ret : %d", index++, ret);
+			//
 		}
 	}
 	else
 	{
-		//10.ÏÂÔØÎÄ¼şÊ§°Ü	
+		//
 		if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 		{
 			myprint( "Error: func  mem_pool_alloc() ");
@@ -4248,9 +4248,9 @@ int download_reply_template( char *news, char **outDataToUi)
 		openFlag = false;
 		ret = 0;
 
-		//11.ĞŞ¸Ä±êÊ¶·û, ±êÊ¶½ÓÊÕµ½¸ÃÊı¾İ°üµÄÓ¦´ğ
+		//
 		g_isSendPackCurrent = false;
-		//socket_log(SocketLevel[2], ret, "func download_reply_template() end  index : %d, ret : %d", index++, ret);
+		//
 	}
 	
 
@@ -4272,18 +4272,18 @@ int get_FileNewestID_reply( char *news, char **outDataToUi)
 	char *outDataNews = NULL;
 	long long int fileID =  0;
 
-	//1. alloc The memory block
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func  mem_pool_alloc() ");
 		assert(0);
 	}
 	
-	//2. get The fileType from server And fileID	
+	//
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	memcpy(&fileID, tmp + 1, sizeof(long long int));
-	if(*tmp == 0)					sprintf(outDataNews, "%d~%d~%lld~", NEWESCMDRESPON, 0, fileID);				//1.ç»„å‘½ä»¤å­—
-	else if(*tmp == 1)				sprintf(outDataNews, "%d~%d~%lld~", NEWESCMDRESPON, 1, fileID );				//1.ç»„å‘½ä»¤å­—
+	if(*tmp == 0)					sprintf(outDataNews, "%d~%d~%lld~", NEWESCMDRESPON, 0, fileID);				//
+	else if(*tmp == 1)				sprintf(outDataNews, "%d~%d~%lld~", NEWESCMDRESPON, 1, fileID );				//
 	else 							assert(0);
 	
 	*outDataToUi = outDataNews;
@@ -4301,10 +4301,10 @@ int upload_picture_reply_request( char *news,  char **outDataToUi)
 {
 
 	int ret = 0;
-	char *tmp = NULL, *tmpOut = NULL;		//ÁÙÊ±Ö¸Õë
-	char *outDataNews = NULL;				//ÄÚ´æ¿é
+	char *tmp = NULL, *tmpOut = NULL;		//
+	char *outDataNews = NULL;				//
 
-	//1.ÉêÇëÄÚ´æ, ´¢´æÊı¾İ, ·µ»Ø¸øUI
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -4312,13 +4312,13 @@ int upload_picture_reply_request( char *news,  char **outDataToUi)
 		assert(0);
 	}
 	
-	//2.½øĞĞÊı¾İ¿½±´
+	//
 	sprintf(outDataNews, "%d~", UPLOADCMDRESPON);				
 	tmpOut = outDataNews + strlen(outDataNews);			
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	sprintf(tmpOut, "%d~", *tmp );
 
-	//3.ÅĞ¶ÏÊÇ·ñ³ö´í
+	//
 	if(*tmp == 0x02)		
 	{
 		tmpOut = outDataNews + strlen(outDataNews);			
@@ -4341,21 +4341,21 @@ int push_info_from_server( char *news, char **outDataToUi)
 	char *outDataNews = NULL;
 	long long int fileID =	0;
 
-	//1. alloc The memory block
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		myprint( "Error: func  mem_pool_alloc() ");
 		assert(0);
 	}
 	
-	//2. get The fileType from server And fileID	
+	//
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	memcpy(&fileID, tmp + 1, sizeof(long long int));
-	if(*tmp == 0)					sprintf(outDataNews, "%d~%d~%lld~", PUSHINFORESPON, 0, fileID);				//1.ç»„å‘½ä»¤å­—
-	else if(*tmp == 1)				sprintf(outDataNews, "%d~%d~%lld~", PUSHINFORESPON, 1, fileID );				//1.ç»„å‘½ä»¤å­—
+	if(*tmp == 0)					sprintf(outDataNews, "%d~%d~%lld~", PUSHINFORESPON, 0, fileID);				//
+	else if(*tmp == 1)				sprintf(outDataNews, "%d~%d~%lld~", PUSHINFORESPON, 1, fileID );				//
 	else 							assert(0);
 
-	//3. send response To server
+	//
 	recv_ui_data("7~");
 	
 	*outDataToUi = outDataNews;
@@ -4382,8 +4382,8 @@ int active_shutdown_net_reply( char *news, char **outDataToUi)
 		assert(0);
 	}
 
-	sprintf(outDataNews, "%d~", ACTCLOSERESPON);						//1.ÃüÁî×Ö»º´æ
-	tmpOut = outDataNews + strlen(outDataNews);				//2.´¦Àí½á¹û
+	sprintf(outDataNews, "%d~", ACTCLOSERESPON);						//
+	tmpOut = outDataNews + strlen(outDataNews);				//
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	sprintf(tmpOut, "%d~", *tmp );
 
@@ -4442,7 +4442,7 @@ int connet_server_reply( char *news, char **outDataToUi)
 	char *tmp = NULL, *tmpOut = NULL;
 	char *outDataNews = NULL;
 
-	//1.ÉêÇëÄÚ´æ
+	//
 	if((outDataNews = mem_pool_alloc(g_memPool)) == NULL)
 	{
 		ret = -1;
@@ -4450,7 +4450,7 @@ int connet_server_reply( char *news, char **outDataToUi)
 		assert(0);
 	}
 
-	//2. ×é×°»Ø¸´ĞÅÏ¢
+	//
 	sprintf(outDataNews, "%d~", 0x8A);				
 	tmpOut = outDataNews + strlen(outDataNews);				
 	tmp = (char *)news + sizeof(resCommonHead_t);
@@ -4512,15 +4512,15 @@ int template_extend_element_reply( char *news, char **outDataToUi)
 		assert(0);
 	}
 
-	sprintf(outDataNews, "%d~", TEMPLATECMDRESPON);				//1.´¢´æÊı¾İÃüÁî°ü
+	sprintf(outDataNews, "%d~", TEMPLATECMDRESPON);				//
 	
-	tmpOut = outDataNews + strlen(outDataNews); 				//2.´¢´æ´¦Àí½á¹û
+	tmpOut = outDataNews + strlen(outDataNews); 				//
 	tmp = (char *)news + sizeof(resCommonHead_t);
 	sprintf(tmpOut, "%d~", *tmp );
 
 	if(*tmp == 1)
 	{
-		tmpOut = outDataNews + strlen(outDataNews);				//3.´¢´æÊ§°ÜÔ­Òò
+		tmpOut = outDataNews + strlen(outDataNews);				//
 		tmp += 1;
 		sprintf(tmpOut, "%d~", *tmp );
 	}
