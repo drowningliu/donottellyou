@@ -426,7 +426,7 @@ namespace DROWNINGLIU
 		}reqTemplateErrHead_t;
 
 #define 	NUMBER		15											//同一时间可以接收的客户端数
-#define     SCAN_TIME 	15											//扫描间隔时间 15s
+#define     SCAN_TIME 	5											//扫描间隔时间 15s
 
 	}
 }

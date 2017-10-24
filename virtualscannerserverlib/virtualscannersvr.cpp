@@ -2066,8 +2066,6 @@ namespace DROWNINGLIU
 
 		void VirtualScannerSvr::find_directory_file()
 		{
-			char *direct = NULL;
-			struct dirent *entry = NULL;
 			static bool flag = false;
 			int roundNum = 0, conIndex = 0, filyType = 0;
 			char tableName[256] = { 0 };
@@ -2088,8 +2086,7 @@ namespace DROWNINGLIU
 				//myprint("Err : func getenv() key = SERverSourceDir");
 				//assert(0);
 			}
-			direct = "d:\\serversource";
-			g_downLoadDir = direct;
+			g_downLoadDir = "d:\\serversource";
 #endif
 			auto getFiles = [](const std::string &path, std::vector<_finddata_t> &files)
 			{
@@ -2170,7 +2167,7 @@ namespace DROWNINGLIU
 						}
 						else
 						{
-							assert(0);
+							goto End;
 						}
 
 						{
@@ -2306,7 +2303,7 @@ namespace DROWNINGLIU
 					vctThreads.push_back(std::thread(handle_thread));
 
 				//创建子线程， 去执行扫描目录业务, 进行信息推送
-				//vctThreads.push_back(std::thread(child_scan_func, &server));
+				vctThreads.push_back(std::thread(child_scan_func, &server));
 
 				std::for_each(std::begin(vctThreads), std::end(vctThreads), [](auto &t) {t.join(); });
 
