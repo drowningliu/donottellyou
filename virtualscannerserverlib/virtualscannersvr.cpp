@@ -1260,99 +1260,113 @@ namespace DROWNINGLIU
 			tmp++;
 			//myprint("downLoadFileName : %s", fileName);
 
-			//3. open The template file
-			if ((fp = fopen(fileName, "rb+")) == NULL)
+			auto sendFile = [&]()
 			{
-				//myprint("Err : func fopen() : %s", fileName);
-				goto End;
-			}
 
-			//4. get The file Total Package Number 
-			doucumentLenth = RESTEMSUBBODYLENTH - sizeof(char) * 3;
-			if ((ret = get_file_size(fileName, &totalPacka, doucumentLenth, NULL)) < 0)
-			{
-				//myprint("Err : func get_file_size()");
-				goto End;
-			}
-
-			//5. read The file content	
-			while (!feof(fp))
-			{
-				type_data_t	data;
-
-				sendBufStr = data.data();
-
-				//6. get The part of The file conTent	And package The body News
-				memset(tmpSendBuf, 0, sizeof(tmpSendBuf));
-				tmp = tmpSendBuf + sizeof(resSubPackHead_t);
-				*tmp++ = 0;
-				*tmp++ = 2;
-				*tmp++ = fileType;
-
-				while (nRead < doucumentLenth && !feof(fp))
+				//3. open The template file
+				if ((fp = fopen(fileName, "rb+")) == NULL)
 				{
-					if ((tmpLenth = fread(tmp + nRead, 1, doucumentLenth - nRead, fp)) < 0)
+					//myprint("Err : func fopen() : %s", fileName);
+					goto End;
+				}
+
+				//4. get The file Total Package Number 
+				doucumentLenth = RESTEMSUBBODYLENTH - sizeof(char) * 3;
+				if ((ret = get_file_size(fileName, &totalPacka, doucumentLenth, NULL)) < 0)
+				{
+					//myprint("Err : func get_file_size()");
+					goto End;
+				}
+
+				//5. read The file content	
+				while (!feof(fp))
+				{
+					type_data_t	data;
+
+					sendBufStr = data.data();
+
+					//6. get The part of The file conTent	And package The body News
+					memset(tmpSendBuf, 0, sizeof(tmpSendBuf));
+					tmp = tmpSendBuf + sizeof(resSubPackHead_t);
+					*tmp++ = 0;
+					*tmp++ = 2;
+					*tmp++ = fileType;
+
+					while (nRead < doucumentLenth && !feof(fp))
 					{
-						//myprint("Error: func fread() : %s ", fileName);
+						if ((tmpLenth = fread(tmp + nRead, 1, doucumentLenth - nRead, fp)) < 0)
+						{
+							//myprint("Error: func fread() : %s ", fileName);
+							goto End;
+						}
+						nRead += tmpLenth;
+					}
+
+					//7. The head  of The package
+					contentLenth = sizeof(resSubPackHead_t) + nRead + 3 * sizeof(char);
+					assign_serverSubPack_head(&head, DOWNFILEZRESPON, contentLenth, indexNumber, totalPacka);
+					indexNumber += 1;
+					memcpy(tmpSendBuf, &head, sizeof(resSubPackHead_t));
+
+					//8. calculate checkCode
+					checkNum = crc326(tmpSendBuf, contentLenth);
+					memcpy(tmpSendBuf + contentLenth, &checkNum, sizeof(int));
+
+					//5.4 allock The block buffer in memory pool
+					/*if ((sendBufStr = mem_pool_alloc(g_memoryPool)) == NULL)
+					{
+						ret = -1;
+						myprint("Error: func mem_pool_alloc()");
+						goto End;
+					}*/
+
+					//5.6 escape the buffer
+					*sendBufStr = PACKSIGN;							 //flag 
+					if ((ret = escape(PACKSIGN, tmpSendBuf, head.contentLenth + sizeof(int), sendBufStr + 1, &outDataLenth)) < 0)
+					{
+						//myprint("Error: func escape()");
 						goto End;
 					}
-					nRead += tmpLenth;
+
+					*(sendBufStr + outDataLenth + 1) = PACKSIGN; 	 //flag 
+
+					//nLen2Write_ = outDataLenth + sizeof(char) * 2;
+
+					{
+						std::lock_guard<std::mutex> lock(_mtxData);
+
+						//_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
+						_deqData.push_back(std::make_tuple(DOWNFILEREQ, outDataLenth + sizeof(char) * 2, std::move(data)));
+					}
+
+					//5.7 push The sendData addr and sendLenth in queuebuf
+					/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + sizeof(char) * 2, DOWNFILEZRESPON)) < 0)
+					{
+						myprint("Error: func push_queue_send_block()");
+						fclose(fp);
+						mem_pool_free(g_memoryPool, sendBufStr);
+						return ret;
+					}*/
+
+					nRead = 0;
+					//sem_post(&(g_thid_sockfd_block[index].sem_send));
 				}
 
-				//7. The head  of The package
-				contentLenth = sizeof(resSubPackHead_t) + nRead + 3 * sizeof(char);
-				assign_serverSubPack_head(&head, DOWNFILEZRESPON, contentLenth, indexNumber, totalPacka);
-				indexNumber += 1;
-				memcpy(tmpSendBuf, &head, sizeof(resSubPackHead_t));
-
-				//8. calculate checkCode
-				checkNum = crc326(tmpSendBuf, contentLenth);
-				memcpy(tmpSendBuf + contentLenth, &checkNum, sizeof(int));
-
-				//5.4 allock The block buffer in memory pool
-				/*if ((sendBufStr = mem_pool_alloc(g_memoryPool)) == NULL)
-				{
-					ret = -1;
-					myprint("Error: func mem_pool_alloc()");
-					goto End;
-				}*/
-
-				//5.6 escape the buffer
-				*sendBufStr = PACKSIGN;							 //flag 
-				if ((ret = escape(PACKSIGN, tmpSendBuf, head.contentLenth + sizeof(int), sendBufStr + 1, &outDataLenth)) < 0)
-				{
-					//myprint("Error: func escape()");
-					goto End;
-				}
-
-				*(sendBufStr + outDataLenth + 1) = PACKSIGN; 	 //flag 
-
-				//nLen2Write_ = outDataLenth + sizeof(char) * 2;
-
-				{
-					std::lock_guard<std::mutex> lock(_mtxData);
-					
-					//_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
-					_deqData.push_back(std::make_tuple(DOWNFILEREQ, outDataLenth + sizeof(char) * 2, std::move(data)));
-				}
-
-				//5.7 push The sendData addr and sendLenth in queuebuf
-				/*if ((ret = push_queue_send_block(g_sendData_addrAndLenth_queue, sendBufStr, outDataLenth + sizeof(char) * 2, DOWNFILEZRESPON)) < 0)
-				{
-					myprint("Error: func push_queue_send_block()");
+				ret = 0;
+			End:
+				if (fp)
 					fclose(fp);
-					mem_pool_free(g_memoryPool, sendBufStr);
-					return ret;
-				}*/
+			};
 
-				nRead = 0;
-				//sem_post(&(g_thid_sockfd_block[index].sem_send));
+			sendFile();
+			if (fileType == 0)
+			{
+				sprintf(fileName, "%s\\%s", g_downLoadDir, "1.jpg");		//ÏÂÔØÍ¼Æ¬
+				sendFile();
+
+				//sprintf(fileName, "%s\\%s", g_downLoadDir, "2.jpg");		//ÏÂÔØÍ¼Æ¬
+				//sendFile();
 			}
-
-			ret = 0;
-		End:
-			if (fp)		
-				fclose(fp);
 
 			return ret;
 		}
