@@ -148,7 +148,7 @@ namespace DROWNINGLIU
 					char *tmp = NULL;
 					char accout[11] = { 0 };
 					char passWd[20] = "qgdyuwgqu455";
-					uint8_t passWdSize = strlen(passWd);
+					uint8_t passWdSize = (uint8_t)strlen(passWd);
 					reqPackHead_t head;
 					char *tmpSendPackDataOne = szBuf, *sendPackData = szBuf2;
 					int  checkCode = 0, contenLenth = 0;

@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <deque>
 #include <mutex>
+#include <io.h>
 
 namespace DROWNINGLIU
 {
@@ -28,6 +29,11 @@ namespace DROWNINGLIU
 			Write_MSG = 2
 		};
 
+		enum class FILE_TYPE
+		{
+			FILE_TEMPLATE = 0,
+			FILE_TABLE = 1
+		};
 
 #define SERVER_IP		"127.0.0.1"	//服务器IP
 #define SERVER_PORT		8009			//服务器端�?
@@ -37,6 +43,108 @@ namespace DROWNINGLIU
 #define UPLOADDIRPATH	"d:\\uploadTest"		//上传文件加目�?
 #define RMFILEPATH 		"d:\\home\\lsh\\share\\NH_1200\\Common_image"	
 #define FILEFORMAT 		".jpg"			//指定格式
+
+#pragma pack(push)
+#pragma pack(1)
+
+		//扫描仪请求数据包报头
+		typedef struct _reqPackHead_t {
+			uint8_t         cmd;                //命令字
+			uint16_t        contentLenth;       //长度； 包含：报头和消息体长度
+			uint8_t         isSubPack;          //判断是否为子包, 0 不是, 1 是;
+			uint8_t         machineCode[12];    //机器码
+			uint32_t        seriaNumber;        //流水号
+			uint16_t        currentIndex;       //当前包序号
+			uint16_t        totalPackage;       //总包数
+			uint8_t         perRoundNumber;     //本轮传输的数据包个数
+		}reqPackHead_t;
+		//1 + 2 + 1 + 12 + 4 + 2 + 2 + 1 = 25;
+
+		//服务器的普通应答
+		typedef struct _resCommonHead_t {
+			uint8_t     cmd;                //命令字
+			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
+			uint8_t     isSubPack;          //判断是否为子包, 			0 不是, 1 是;
+			uint32_t    seriaNumber;        //流水号
+			uint8_t     isFailPack;     	//是否失败					0成功, 1 失败
+			uint16_t    failPackIndex;      //失败数据包的序列号
+			uint8_t		isRespondClient;	//是否需要客户端作出界面响应,  0 不需要, 1 需要作出界面响应	
+		}resCommonHead_t;
+		//1 + 2 + 1 + 4 + 1 + 2 + 1 = 12
+
+		//从服务器下载文件应答
+		typedef struct _resSubPackHead_t {
+			uint8_t     cmd;                //命令字
+			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
+			uint32_t    seriaNumber;        //流水号
+			uint16_t    currentIndex;       //当前包序号
+			uint16_t    totalPackage;       //总包数
+		}resSubPackHead_t;
+		//1 + 2 + 4 + 2 + 2 = 11;
+
+#pragma pack(pop)
+
+#define PACKMAXLENTH  	1400		 //报文的最大长度;		报文结构：标识 1， 头 26，体， 校验 4， 标识 1
+#define COMREQDATABODYLENTH 	PACKMAXLENTH - sizeof(reqPackHead_t) - sizeof(char) * 2 - sizeof(int)         //报体长度最大: 1400-25-2-4 = 1369;  当传输图片时, 图片名在消息体中占46个字节
+#define REQTEMPERRBODYLENTH		PACKMAXLENTH - sizeof(reqTemplateErrHead_t) - sizeof(char) * 2 - sizeof(int)
+#define COMRESBODYLENTH			PACKMAXLENTH - sizeof(resCommonHead_t) - sizeof(char) * 2 - sizeof(int)
+#define RESTEMSUBBODYLENTH		PACKMAXLENTH - sizeof(resSubPackHead_t) - sizeof(char) * 2 - sizeof(int)
+#define FILENAMELENTH 	46			//文件名称
+#define PACKSIGN      	0x7e		//标识符
+#define PERROUNDNUMBER	50			//每轮发送的数据包最大数目
+#define OUTTIMEPACK 	5			//客户端接收应答的超时时间
+
+		enum Cmd {
+			ERRORFLAGMY = 0x00,		//出错
+			LOGINCMDREQ = 0x01,		//登录
+			LOGINCMDRESPON = 0x81,
+			LOGOUTCMDREQ = 0x02,		//登出
+			LOGOUTCMDRESPON = 0x82,
+			HEARTCMDREQ = 0x03,		//心跳
+			HEARTCMDRESPON = 0x83,
+			DOWNFILEREQ = 0x04,		//下载模板
+			DOWNFILEZRESPON = 0x84,
+			NEWESCMDREQ = 0x05,		//获取模板最新编号
+			NEWESCMDRESPON = 0x85,
+			UPLOADCMDREQ = 0x06,		//上传图片
+			UPLOADCMDRESPON = 0x86,
+			PUSHINFOREQ = 0x07, 	//消息推送
+			PUSHINFORESPON = 0x87,
+			ACTCLOSEREQ = 0x08, 	//主动关闭
+			ACTCLOSERESPON = 0x88,
+			DELETECMDREQ = 0x09, 	//删除图片
+			DELETECMDRESPON = 0x89,
+			CONNECTCMDREQ = 0x0A, 	//链接服务器
+			CONNECTCMDRESPON = 0x8A,
+			MODIFYCMDREQ = 0x0B, 	//修改配置文件
+			MODIFYCMDRESPON = 0x8B,
+			TEMPLATECMDREQ = 0x0C, 	//模板数据包
+			TEMPLATECMDRESPON = 0x8C,
+			MUTIUPLOADCMDREQ = 0x0D, 	//多张图片传输
+			MUTIUPLOADCMDRESPON = 0x8D,
+			ENCRYCMDREQ = 0x0E, 	//加密传输
+			ENCRYCMDRESPON = 0x8E
+		};
+
+		enum HeadNews {
+			NOSUBPACK = 0,		//非子包
+			SUBPACK = 1			//子包
+		};
+#define PACKSIGN      	0x7e		//标识符
+
+		typedef struct _reqTemplateErrHead_t {
+			uint8_t     cmd;                //命令字
+			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
+			uint8_t     isSubPack;          //判断是否为子包, 0 不是, 1 是;
+			uint8_t     machineCode[12];    //机器码
+			uint32_t    seriaNumber;        //流水号
+			uint8_t     failPackNumber;     //是否失败
+			uint16_t    failPackIndex;      //失败数据包的序列号
+		}reqTemplateErrHead_t;
+
+#define 	NUMBER		15											//同一时间可以接收的客户端数
+#define     SCAN_TIME 	15											//扫描间隔时间 15s
+
 
 		// Class to manage the memory to be used for handler-based custom allocation.
 		// It contains a single block of memory which may be returned for allocation
@@ -217,7 +325,24 @@ namespace DROWNINGLIU
 			}
 
 			std::deque<std::shared_ptr<T>>	_deqSessions;
-			mutable std::mutex	_mtxSessions;	//consider using rwlock
+			mutable std::mutex				_mtxSessions;	//consider using rwlock
+
+			mutable std::mutex			_mtxFiles;
+			std::vector<_finddata_t>	_vctfiles;
+
+			
+			//服务器资源文件ID 
+			__int64	_fileTemplateID = 562;
+			__int64	_fileTableID = 365;
+			//上传文件路径
+			std::string	_DirPath = UPLOADDIRPATH;
+			//服务器资源路径
+			std::string	_downLoadDir = "d:\\serversource";
+			//数据库表名称
+			std::string	_fileNameTable = "database.db";
+			//模板名称
+			std::string	_fileNameTemplate = "template.tmpl";
+
 		private:
 			void do_accept()
 			{
@@ -231,7 +356,7 @@ namespace DROWNINGLIU
 						std::cout << "on_accept\r\n";
 
 						//std::make_shared<session>(std::move(socket_))->start();
-						auto session = std::make_shared<T>(std::move(socket_));
+						auto session = std::make_shared<T>(std::move(socket_), *this);
 						int count = session.use_count();
 						session->start();
 
@@ -270,7 +395,8 @@ namespace DROWNINGLIU
 		class VirtualScannerSession : public session
 		{
 		public:
-			VirtualScannerSession(tcp::socket socket) : session(std::move(socket))
+			VirtualScannerSession(tcp::socket socket, server<VirtualScannerSession> &svr)
+				: session(std::move(socket)), _svr(svr)
 			{
 
 			}
@@ -278,6 +404,13 @@ namespace DROWNINGLIU
 			{
 				do_read();
 			}
+
+			//服务器 接收的 数据包流水号
+			unsigned int	_recvSerial = 0;
+			//服务器 发送的 数据包流水号
+			unsigned int 	_sendSerial = 0;
+
+			server<VirtualScannerSession> &_svr;
 
 			virtual void do_read() override;
 			virtual void do_write(std::size_t length) override;
@@ -312,7 +445,14 @@ namespace DROWNINGLIU
 			int upload_template_set_reply(char *recvBuf, int recvLen, int index);
 
 			int heart_beat_func_reply(char *recvBuf, int recvLen, int index);
-			int push_info_toUi(int index, int fileType);
+			int push_info_toUi(int index, enum class FILE_TYPE fileType);
+
+			int save_multiPicture_func(char *recvBuf, int recvLen);
+			int save_picture_func(char *recvBuf, int recvLen);
+			int compare_recvData_correct_server(char *tmpContent, int tmpContentLenth);
+			void assign_serverSubPack_head(resSubPackHead_t *head, uint8_t cmd, int contentLenth, int currentIndex, int totalNumber);
+			void assign_comPack_head(resCommonHead_t *head, int cmd, int contentLenth, int isSubPack, int isFailPack, int failPackIndex, int isRespond);
+
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>
@@ -324,109 +464,11 @@ namespace DROWNINGLIU
 
 			}
 
+			bool _bStop = false;
+
 			int init();
 			void find_directory_file();
 		};
-#pragma pack(push)
-#pragma pack(1)
-
-		//扫描仪请求数据包报头
-		typedef struct _reqPackHead_t {
-			uint8_t         cmd;                //命令字
-			uint16_t        contentLenth;       //长度； 包含：报头和消息体长度
-			uint8_t         isSubPack;          //判断是否为子包, 0 不是, 1 是;
-			uint8_t         machineCode[12];    //机器码
-			uint32_t        seriaNumber;        //流水号
-			uint16_t        currentIndex;       //当前包序号
-			uint16_t        totalPackage;       //总包数
-			uint8_t         perRoundNumber;     //本轮传输的数据包个数
-		}reqPackHead_t;
-		//1 + 2 + 1 + 12 + 4 + 2 + 2 + 1 = 25;
-
-		//服务器的普通应答
-		typedef struct _resCommonHead_t {
-			uint8_t     cmd;                //命令字
-			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
-			uint8_t     isSubPack;          //判断是否为子包, 			0 不是, 1 是;
-			uint32_t    seriaNumber;        //流水号
-			uint8_t     isFailPack;     	//是否失败					0成功, 1 失败
-			uint16_t    failPackIndex;      //失败数据包的序列号
-			uint8_t		isRespondClient;	//是否需要客户端作出界面响应,  0 不需要, 1 需要作出界面响应	
-		}resCommonHead_t;
-		//1 + 2 + 1 + 4 + 1 + 2 + 1 = 12
-
-		//从服务器下载文件应答
-		typedef struct _resSubPackHead_t {
-			uint8_t     cmd;                //命令字
-			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
-			uint32_t    seriaNumber;        //流水号
-			uint16_t    currentIndex;       //当前包序号
-			uint16_t    totalPackage;       //总包数
-		}resSubPackHead_t;
-		//1 + 2 + 4 + 2 + 2 = 11;
-
-#pragma pack(pop)
-
-#define PACKMAXLENTH  	1400		 //报文的最大长度;		报文结构：标识 1， 头 26，体， 校验 4， 标识 1
-#define COMREQDATABODYLENTH 	PACKMAXLENTH - sizeof(reqPackHead_t) - sizeof(char) * 2 - sizeof(int)         //报体长度最大: 1400-25-2-4 = 1369;  当传输图片时, 图片名在消息体中占46个字节
-#define REQTEMPERRBODYLENTH		PACKMAXLENTH - sizeof(reqTemplateErrHead_t) - sizeof(char) * 2 - sizeof(int)
-#define COMRESBODYLENTH			PACKMAXLENTH - sizeof(resCommonHead_t) - sizeof(char) * 2 - sizeof(int)
-#define RESTEMSUBBODYLENTH		PACKMAXLENTH - sizeof(resSubPackHead_t) - sizeof(char) * 2 - sizeof(int)
-#define FILENAMELENTH 	46			//文件名称
-#define PACKSIGN      	0x7e		//标识符
-#define PERROUNDNUMBER	50			//每轮发送的数据包最大数目
-#define OUTTIMEPACK 	5			//客户端接收应答的超时时间
-
-		enum Cmd {
-			ERRORFLAGMY = 0x00,		//出错
-			LOGINCMDREQ = 0x01,		//登录
-			LOGINCMDRESPON = 0x81,
-			LOGOUTCMDREQ = 0x02,		//登出
-			LOGOUTCMDRESPON = 0x82,
-			HEARTCMDREQ = 0x03,		//心跳
-			HEARTCMDRESPON = 0x83,
-			DOWNFILEREQ = 0x04,		//下载模板
-			DOWNFILEZRESPON = 0x84,
-			NEWESCMDREQ = 0x05,		//获取模板最新编号
-			NEWESCMDRESPON = 0x85,
-			UPLOADCMDREQ = 0x06,		//上传图片
-			UPLOADCMDRESPON = 0x86,
-			PUSHINFOREQ = 0x07, 	//消息推送
-			PUSHINFORESPON = 0x87,
-			ACTCLOSEREQ = 0x08, 	//主动关闭
-			ACTCLOSERESPON = 0x88,
-			DELETECMDREQ = 0x09, 	//删除图片
-			DELETECMDRESPON = 0x89,
-			CONNECTCMDREQ = 0x0A, 	//链接服务器
-			CONNECTCMDRESPON = 0x8A,
-			MODIFYCMDREQ = 0x0B, 	//修改配置文件
-			MODIFYCMDRESPON = 0x8B,
-			TEMPLATECMDREQ = 0x0C, 	//模板数据包
-			TEMPLATECMDRESPON = 0x8C,
-			MUTIUPLOADCMDREQ = 0x0D, 	//多张图片传输
-			MUTIUPLOADCMDRESPON = 0x8D,
-			ENCRYCMDREQ = 0x0E, 	//加密传输
-			ENCRYCMDRESPON = 0x8E
-		};
-
-		enum HeadNews {
-			NOSUBPACK = 0,		//非子包
-			SUBPACK = 1			//子包
-		};
-#define PACKSIGN      	0x7e		//标识符
-
-		typedef struct _reqTemplateErrHead_t {
-			uint8_t     cmd;                //命令字
-			uint16_t    contentLenth;       //长度； 包含：报头和消息体长度
-			uint8_t     isSubPack;          //判断是否为子包, 0 不是, 1 是;
-			uint8_t     machineCode[12];    //机器码
-			uint32_t    seriaNumber;        //流水号
-			uint8_t     failPackNumber;     //是否失败
-			uint16_t    failPackIndex;      //失败数据包的序列号
-		}reqTemplateErrHead_t;
-
-#define 	NUMBER		15											//同一时间可以接收的客户端数
-#define     SCAN_TIME 	5											//扫描间隔时间 15s
 
 	}
 }
