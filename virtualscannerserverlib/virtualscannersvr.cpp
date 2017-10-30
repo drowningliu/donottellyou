@@ -5,12 +5,12 @@
 #include <direct.h>
 #include <io.h>
 #include "virtualscannersvrmain.h"
-
+#include "Ga7Exception.h"
 namespace DROWNINGLIU
 {
-
 	namespace VSCANNERSVRLIB
 	{
+		using GAFIS7::GA7BASE::Ga7Exception;
 		//全局变量
 		//	RecvAndSendthid_Sockfd		_thid_sockfd_block[NUMBER];	//客户端信息
 		//char 			*_sendFileContent = NULL;					//读取每轮下载模板的数据
@@ -90,7 +90,7 @@ namespace DROWNINGLIU
 		*/
 		int crc326(const  char *buf, uint32_t size)
 		{
-			uint32_t i, crc;
+			int i, crc;
 			crc = 0xFFFFFFFF;
 			for (i = 0; i < size; i++)
 				crc = crc32tab[(crc ^ buf[i]) & 0xff] ^ (crc >> 8);
@@ -130,92 +130,98 @@ namespace DROWNINGLIU
 			tmp = recvBuf + sizeof(reqPackHead_t) + FILENAMELENTH + sizeof(char) * 2;
 			//myprint("picDataLenth : %d, currentIndex : %d, totalNumber : %d, recvLen : %d ...", lenth, tmpHead->currentIndex, tmpHead->totalPackage, recvLen);
 
-			if (tmpHead->currentIndex != 0 && tmpHead->currentIndex + 1 < tmpHead->totalPackage)
+			try
 			{
-				if (fp == NULL)
+				if (tmpHead->currentIndex != 0 && tmpHead->currentIndex + 1 < tmpHead->totalPackage)
 				{
-					ret = -1;
-					goto End;
-				}
-
-				//1.本图片的中间数据包, 将 指针指向 图片内容的部分, 将数据写入文件
-				while (nWrite < lenth)
-				{
-					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					if (fp == NULL)
 					{
-						//myprint("Err : func fopen() : fileName : %s !!!", fileName);
-						goto End;
-					}
-					nWrite += perWrite;
-				}
-			}
-			else if (tmpHead->currentIndex == 0)
-			{
-				//2.本图片的第一包数据, 获取文件名称
-				memcpy(TmpfileName, recvBuf + sizeof(reqPackHead_t) + sizeof(char) * 2, 46);
-				fileName = _svr._DirPath + "\\" +TmpfileName;
-
-				//3.查看文件是否存在, 存在即删除	
-				if (if_file_exist(fileName.c_str()))
-				{
-					if(!DeleteFileA(fileName.c_str()))
-					{
-						//myprint("Err : func pox_system()");
 						ret = -1;
-						goto End;
+						throw Ga7Exception(__FILE__, __LINE__);
 					}
-				}
 
-				//4.创建文件, 向文件中写入内容
-				if ((fp = fopen(fileName.c_str(), "ab")) == NULL)
-				{
-					//myprint("Err : func fopen() : fileName : %s !!!", fileName);
-					ret = -1;
-					goto End;
-				}
-
-				//5.将 指针指向 图片内容的部分, 将数据写入文件
-				while (nWrite < lenth)
-				{
-					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					//1.本图片的中间数据包, 将 指针指向 图片内容的部分, 将数据写入文件
+					while (nWrite < lenth)
 					{
-						//("Err : func fopen() : fileName : %s !!!", fileName);
-						goto End;
+						if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+						{
+							//myprint("Err : func fopen() : fileName : %s !!!", fileName);
+							throw Ga7Exception(__FILE__, __LINE__);
+						}
+						nWrite += perWrite;
 					}
-					nWrite += perWrite;
 				}
-			}
-			else if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
-			{
-				if (fp == NULL)
+				else if (tmpHead->currentIndex == 0)
 				{
-					ret = -1;
-					goto End;
-				}
+					//2.本图片的第一包数据, 获取文件名称
+					memcpy(TmpfileName, recvBuf + sizeof(reqPackHead_t) + sizeof(char) * 2, 46);
+					fileName = _svr._DirPath + "\\" + TmpfileName;
 
-				//6.本图片的最后一包数据		
-				while (nWrite < lenth)
-				{
-					if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+					//3.查看文件是否存在, 存在即删除	
+					if (if_file_exist(fileName.c_str()))
+					{
+						if (!DeleteFileA(fileName.c_str()))
+						{
+							//myprint("Err : func pox_system()");
+							ret = -1;
+							throw Ga7Exception(__FILE__, __LINE__);
+						}
+					}
+
+					//4.创建文件, 向文件中写入内容
+					if ((fp = fopen(fileName.c_str(), "ab")) == NULL)
 					{
 						//myprint("Err : func fopen() : fileName : %s !!!", fileName);
-						goto End;
+						ret = -1;
+						throw Ga7Exception(__FILE__, __LINE__);
 					}
-					nWrite += perWrite;
+
+					//5.将 指针指向 图片内容的部分, 将数据写入文件
+					while (nWrite < lenth)
+					{
+						if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+						{
+							//("Err : func fopen() : fileName : %s !!!", fileName);
+							throw Ga7Exception(__FILE__, __LINE__);
+						}
+						nWrite += perWrite;
+					}
 				}
+				else if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
+				{
+					if (fp == NULL)
+					{
+						ret = -1;
+						throw Ga7Exception(__FILE__, __LINE__);
+					}
 
-				fflush(fp);
-				fclose(fp);
-				fp = NULL;
+					//6.本图片的最后一包数据		
+					while (nWrite < lenth)
+					{
+						if ((perWrite = fwrite(tmp + nWrite, 1, lenth - nWrite, fp)) < 0)
+						{
+							//myprint("Err : func fopen() : fileName : %s !!!", fileName);
+							throw Ga7Exception(__FILE__, __LINE__);
+						}
+						nWrite += perWrite;
+					}
+
+					fflush(fp);
+					fclose(fp);
+					fp = NULL;
+				}
+				else
+				{
+					//myprint("Error : The package index is : %d, totalPackage : %d, !!! ",tmpHead->currentIndex, tmpHead->totalPackage);
+					ret = -1;
+					throw Ga7Exception(__FILE__, __LINE__);
+				}
 			}
-			else
+			catch (const Ga7Exception&e)
 			{
-				//myprint("Error : The package index is : %d, totalPackage : %d, !!! ",tmpHead->currentIndex, tmpHead->totalPackage);
-				ret = -1;
-				goto End;
+				e.print();
 			}
-
-		End:
+			
 			if (ret < 0 && fp)
 			{
 				fclose(fp);
@@ -853,7 +859,7 @@ namespace DROWNINGLIU
 			int		checkNum = 48848748;						//校验码
 			char	tmpSendBuf[1500] = { 0 };					//临时缓冲区
 			char	*tmp = NULL, *sendBufStr = NULL;			//发送数据包地址
-			std::string	fileName;						//文件名称
+			std::string		fileName;							//文件名称
 			resCommonHead_t	head = { 0 };						//应答数据报头
 
 			type_data_t	data;
@@ -864,7 +870,7 @@ namespace DROWNINGLIU
 
 			//3. 获取文件信息, 并删除
 			fileName.assign(recvBuf + sizeof(reqPackHead_t), recvLen - sizeof(reqPackHead_t) - sizeof(int));
-			std::string rmFile = _svr._DirPath + "\\" + fileName;
+			std::string	rmFile = _svr._DirPath + "\\" + fileName;
 			BOOL bSuccess = DeleteFileA(rmFile.c_str());
 
 			//4. 组装数据包信息
@@ -1116,7 +1122,7 @@ namespace DROWNINGLIU
 
 			//下载的文件类型
 			enum class FILE_TYPE	fileType;		
-			std::string	fileName;
+			std::string				fileName;
 			
 			auto sendFile = [this, &fileName, &ret](int nType)
 			{
@@ -1193,7 +1199,6 @@ namespace DROWNINGLIU
 					{
 						std::lock_guard<std::mutex> lock(_mtxData);
 
-						//_deqData.push_back(std::make_pair(outDataLenth + sizeof(char) * 2, std::move(data)));
 						_deqData.push_back(std::make_tuple(DOWNFILEREQ, outDataLenth + sizeof(char) * 2, std::move(data)));
 					}
 
@@ -1225,8 +1230,11 @@ namespace DROWNINGLIU
 				sendFile(1);
 			}
 			else
+			{
 				return -1;
+			}
 			
+			//return 0;
 			if (fileType == FILE_TYPE::FILE_TEMPLATE)
 			{
 				std::vector<std::string> jpgs;
@@ -1250,6 +1258,8 @@ namespace DROWNINGLIU
 					fileName = _svr._downLoadDir + "\\" + j;
 
 					char mark = j.at(0);
+					mark -= '0';
+					std::cout << fileName;
 					//1.jpg -> 2, 2.jpg -> 3
 					sendFile(mark + 1);
 				}
@@ -1427,12 +1437,12 @@ namespace DROWNINGLIU
 					return -1;//myprint("Error: func delete_func_reply() ");
 				break;
 			case TEMPLATECMDREQ:		//上传模板
-				std::cout << "template_extend_element_reply\r\n";
+				//std::cout << "template_extend_element_reply\r\n";
 				if ((ret = template_extend_element_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func template_extend_element() ");
 				break;
 			case MUTIUPLOADCMDREQ:		//上传图片集
-				std::cout << "upload_template_set_reply\r\n";
+				//std::cout << "upload_template_set_reply\r\n";
 				if ((ret = upload_template_set_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func upload_template_set ");
 				break;
@@ -1456,7 +1466,7 @@ namespace DROWNINGLIU
 			int		ret = -1, i = 0;
 			int		tmpContentLenth = 0;			//转义后的数据长度
 			char	tmpContent[2800] = { 0 }; 		//转义后的数据
-			
+	
 			//recvLenth可以大于1400，tmpContentLenth不行
 			if (recvBuf[0] != 0x7e || recvBuf[recvLenth - 1] != 0x7e)
 				return -1;
@@ -1477,64 +1487,32 @@ namespace DROWNINGLIU
 				//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
 				goto End;
 			}
-#if 0
-			//int flag = 0;				//flag 标识找到标识符的数量;
-			//int length = 0; 				//lenth : 缓存的数据包内容长度
-			//char content[2800] = { 0 };	//缓存完整包数据内容, 		
-			//char *tmp = NULL;
 
-			tmp = content + length;
-			for (i = 0; i < recvLenth; i++)
-			{
-				//1. 查找数据报头
-				if (recvBuf[i] == 0x7e && flag == 0)
-				{
-					flag = 1;
-					continue;
-				}
-				else if (recvBuf[i] == 0x7e && flag == 1)
-				{
-					//return 1;
-					
-					//2. 查找数据报尾, 获取到完整数据包, 将数据包进行反转义 
-					if ((ret = anti_escape(content, length, tmpContent, &tmpContentLenth)) < 0 || tmpContentLenth > 1400)
-					{
-						//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
-						goto End;
-					}
-
-					reqPackHead_t	&req = *(reqPackHead_t *)tmpContent;
-
-					//3.将转义后的数据包进行处理
-					if ((ret = read_data_proce(tmpContent, tmpContentLenth, index, nCmd)) < 0)
-					{
-						//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
-						goto End;
-					}
-					else
-					{
-						//4. 数据包处理成功, 清空临时变量
-						memset(content, 0, sizeof(content));
-						memset(tmpContent, 0, sizeof(tmpContent));
-						length = 0;
-						flag = 0;
-						tmp = content + length;
-					}
-				}
-				else
-				{
-					//5.取出数据包内容, 去除起始标识符
-					*tmp++ = recvBuf[i];
-					length += 1;
-					continue;
-				}
-			}
-#endif
 		End:
 			return ret;
 		}
 
-		size_t read_complete(const boost::asio::const_buffer &buffer, const boost::system::error_code & ec, size_t bytes)
+		int	VirtualScannerSession::find_whole_package2(const char *recvBuf, int recvLenth, int index, int &nCmd)
+		{
+			int		ret = -1;
+			//recvLenth可以大于1400，tmpContentLenth不行
+			if (recvBuf[recvLenth - 1] != 0x7e)
+				return -1;
+
+			reqPackHead_t	&req = *(reqPackHead_t *)recvBuf;
+
+			//3.将转义后的数据包进行处理
+			if ((ret = read_data_proce(const_cast<char *>(recvBuf), recvLenth - 1, index, nCmd)) < 0)
+			{
+				//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
+				goto End;
+			}
+
+		End:
+			return ret;
+		}
+
+		size_t VirtualScannerSession::read_complete(const boost::asio::const_buffer &buffer, const boost::system::error_code & ec, size_t bytes)
 		{
 			if (ec) 
 				return 0;
@@ -1545,30 +1523,30 @@ namespace DROWNINGLIU
 
 			const char *pBuf = static_cast<const char *>(boost::asio::detail::buffer_cast_helper(buffer));
 
-			int  tmpContentLenth = 0;			//转义后的数据长度
-			//比1400长一倍，以防溢出
-			char tmpContent[2800] = { 0 }; 		//转义后的数据
-
 			if (*pBuf != 0x7e)
 				return 0;
 
+			int  tempContentLenth = 0;	
+			char *tempContent = _Content;
+
 			//2. 跳过第一个标志位， 将数据包进行反转义 
 			int ret = 0;
-			if ((ret = anti_escape(pBuf + 1, bytes - 1, tmpContent, &tmpContentLenth)) < 0)
+			if ((ret = anti_escape(pBuf + 1, bytes - 1, tempContent, &tempContentLenth)) < 0)
 			{
 				//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
 				return 0;
 			}
 
-			if (tmpContentLenth > 1400)
+			_ContentLenth = tempContentLenth;
+			if (_ContentLenth > 1400)
 				return 0;
 
 			//包头可能包含转移字符，因此实际长度会大于sizeof(reqPackHead_t)
-			if (tmpContentLenth < sizeof(reqPackHead_t))
-				return sizeof(reqPackHead_t) - tmpContentLenth;
+			if (_ContentLenth < sizeof(reqPackHead_t))
+				return sizeof(reqPackHead_t) - _ContentLenth;
 
 			//继续收满包内容、校验和（int）、结束标志
-			const reqPackHead_t &req = *(reqPackHead_t *)(tmpContent);
+			const reqPackHead_t &req = *(reqPackHead_t *)(_Content);
 			int contLen = req.contentLenth;
 			if (contLen == 0 || contLen > 1400)
 				return 0;
@@ -1578,8 +1556,8 @@ namespace DROWNINGLIU
 				return 0;
 
 			//包体中包含转移字符，因此实际长度会大于all
-			if (tmpContentLenth + 1 < all)
-				return all - tmpContentLenth - 1;
+			if (_ContentLenth + 1 < all)
+				return all - _ContentLenth - 1;
 			else
 				return 0;
 		}
@@ -1593,7 +1571,7 @@ namespace DROWNINGLIU
 			socket_.async_read_some(boost::asio::buffer(data_),
 #else
 			boost::asio::async_read(socket_, boost::asio::buffer(data_),
-				std::bind(read_complete, boost::asio::buffer(data_), std::placeholders::_1, std::placeholders::_2),
+				std::bind(&VirtualScannerSession::read_complete, this, boost::asio::buffer(data_), std::placeholders::_1, std::placeholders::_2),
 #endif
 				make_custom_alloc_handler(allocator_,
 					[this, self](boost::system::error_code ec, std::size_t length)
@@ -1682,11 +1660,6 @@ namespace DROWNINGLIU
 							do_multiwrite(1);
 						else
 							do_read();
-					
-						//read完继续read？no
-						//if (!hasData)
-						//	do_read();
-						//do_multiwrite(1);
 					}
 #endif
 				}
@@ -1710,20 +1683,11 @@ namespace DROWNINGLIU
 						std::lock_guard<std::mutex> lock(_mtxData);
 
 						hasData = !_deqData.empty();
-						/*if (hasData)
-						{
-							do_multiwrite(std::get<1>(_deqData.front()));
-						}*/
 					}
 
 					if (!hasData)
 					{
-						//上一次写过数据，说明这是最后一次写
-						//if (length2 > 0)
-						{
-							do_read();
-						}
-						//do_multiwrite(0);
+						do_read();
 					}
 					else
 						do_multiwrite(1);
@@ -1744,16 +1708,95 @@ namespace DROWNINGLIU
 				else
 				{
 					std::cout << "do_multiwrite no data!\r\n";
-					//do_read();
 					return;
 				}
 			}
 		}
 
+		void VirtualScannerSession::do_readNonBlock()
+		{
+			//std::cout << "do_readNonBlock\r\n";
+
+			auto self(shared_from_this());
+
+			boost::asio::async_read(socket_, boost::asio::buffer(data_),
+				std::bind(&VirtualScannerSession::read_complete, this, boost::asio::buffer(data_), std::placeholders::_1, std::placeholders::_2),
+				make_custom_alloc_handler(allocator_,
+					[this, self](boost::system::error_code ec, std::size_t length)
+			{
+				if (!ec)
+				{
+					//std::cout << "on_readNonBlock\r\n";
+
+					int cmd = 0;
+					//解析包内容，并写入缓存。
+					//if (0 > find_whole_package(data_.data(), length, 0, cmd))
+					if (0 > find_whole_package2(_Content, _ContentLenth, 0, cmd))
+					{
+						_ContentLenth = 0;
+						memset(_Content, 0, sizeof(_Content));
+
+						std::cout << "find_whole_package failed\r\n";
+						//发送重连包。
+						return;
+						//do_read();
+					}
+					else
+					{
+						_ContentLenth = 0;
+						memset(_Content, 0, sizeof(_Content));
+
+						//std::cout << cmd;
+						//std::cout << "find_whole_package succeed\r\n";
+
+						do_readNonBlock();
+					}
+				}
+			}));
+		}
+
+		void VirtualScannerSession::do_multiwriteNonBlock(std::size_t length)
+		{
+			//std::cout << "do_multiwriteNonBlock\r\n";
+
+			auto self(shared_from_this());
+			auto func = [this, self](boost::system::error_code ec, std::size_t length2)
+			{
+				if (!ec)
+				{
+					//std::cout << "on_multiwriteNonBlock\r\n";
+
+					do_multiwriteNonBlock(0);
+				}
+			};
+
+			bool hasData = false;
+			{
+				std::lock_guard<std::mutex> lock(_mtxData);
+
+				hasData = !_deqData.empty();
+			}
+
+			if (hasData)
+			{
+				std::lock_guard<std::mutex> lock(_mtxData);
+
+				boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
+					make_custom_alloc_handler(allocator_, func));
+
+				_deqData.pop_front();
+				return;
+			}
+			else
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				boost::asio::async_write(socket_, boost::asio::buffer(data_, 0),
+					make_custom_alloc_handler(allocator_, func));
+			}
+		}
+
 		void VirtualScannerSession::do_write(std::size_t length)
 		{
-			assert(0);
-			return;
 			//boost::asio::async_write
 			auto self(shared_from_this());
 			boost::asio::async_write(socket_, boost::asio::buffer(data_, length),
@@ -1762,40 +1805,7 @@ namespace DROWNINGLIU
 			{
 				if (!ec)
 				{
-					//assert(typeid(socket_.get_io_service()) == typeid(boost::asio::stream_socket_service<tcp>));
-					if (/*length2 == 0 && */cmd_ == DOWNFILEREQ)
-					{
-						int nlen2write = 0;
-						std::lock_guard<std::mutex> lock(_mtxData);
 
-						//dowrite中，每写完一个再投递下一个，似乎还是无法保证顺序
-						//莫非要用其他方法
-
-						//这里投递多次无效吧？
-						//while (!_deqData.empty())
-						if (!_deqData.empty())
-						{
-							auto &t = _deqData.front();
-
-							int cmd = std::get<0>(t);
-							nlen2write = std::get<1>(t);
-							auto &data = std::get<2>(t);
-							data_.swap(data);
-
-							nLen2Write_ = nlen2write;
-
-							_deqData.pop_front();
-
-							do_write(nLen2Write_);
-						}
-						else
-						{
-							cmd_ = 0;
-							do_read();
-						}
-					}
-					else
-						do_read();
 				}
 			}));
 		}
@@ -1863,6 +1873,11 @@ namespace DROWNINGLIU
 
 		End:
 			return ret;
+		}
+
+		void VirtualScannerSession::Write_Thread()
+		{
+
 		}
 
 		void VirtualScannerSvr::find_directory_file()
@@ -1991,7 +2006,7 @@ namespace DROWNINGLIU
 						}
 					}
 				End:
-					;
+					return;
 				});
 
 				flag = true;
@@ -2016,8 +2031,8 @@ namespace DROWNINGLIU
 		{
 			while (!svr->_bStop)
 			{
-				timer_select(SCAN_TIME);
 				svr->find_directory_file();
+				timer_select(SCAN_TIME);
 			}
 		}
 
@@ -2050,8 +2065,7 @@ namespace DROWNINGLIU
 				
 				server.init();
 
-				std::vector<std::thread>	vctThreads;
-				int	nThreadCount = 1;
+				int	nThreadCount = 5;
 
 				auto handle_thread = [&]()
 				{
@@ -2059,12 +2073,17 @@ namespace DROWNINGLIU
 				};
 
 				for (int i = 0; i < nThreadCount; ++i)
-					vctThreads.push_back(std::thread(handle_thread));
+					server._vctThreads.push_back(std::thread(handle_thread));
+
+				for (auto &t : server._vctThreads)
+				{
+					SetThreadPriority(t.native_handle(), THREAD_PRIORITY_ABOVE_NORMAL);
+				}
 
 				//创建子线程， 去执行扫描目录业务, 进行信息推送
-				vctThreads.push_back(std::thread(child_scan_func, &server));
+				server._vctThreads.push_back(std::thread(child_scan_func, &server));
 
-				std::for_each(std::begin(vctThreads), std::end(vctThreads), [](auto &t) 
+				std::for_each(std::begin(server._vctThreads), std::end(server._vctThreads), [](auto &t)
 				{
 					t.join();
 				});

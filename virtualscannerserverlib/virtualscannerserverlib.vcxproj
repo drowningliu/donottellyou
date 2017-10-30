@@ -160,12 +160,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="chat_message.hpp" />
+    <ClInclude Include="Ga7Exception.h" />
     <ClInclude Include="virtualscannersvr.h" />
     <ClInclude Include="virtualscannersvrmain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="chat_client.cpp" />
     <ClCompile Include="chat_server.cpp" />
+    <ClCompile Include="Ga7Exception.cpp" />
     <ClCompile Include="virtualscannersvr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

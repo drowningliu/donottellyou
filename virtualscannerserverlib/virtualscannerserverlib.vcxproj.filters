@@ -24,6 +24,9 @@
     <ClInclude Include="virtualscannersvrmain.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Ga7Exception.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="virtualscannersvr.cpp">
@@ -33,6 +36,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="chat_client.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Ga7Exception.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

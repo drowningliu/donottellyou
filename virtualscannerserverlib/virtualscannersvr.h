@@ -40,7 +40,7 @@ namespace DROWNINGLIU
 #define	KEY				0x1234			//消息队列键�?
 #define FILEDIR			"d:\\home\\lsh\\share\\NH_1200\\soure"			//指定目录
 		//#define UPLOADDIRPATH	"/home/yyx/work/openssl-FTP-TCP/project/uploadTest"		//上传文件加目�?
-#define UPLOADDIRPATH	"d:\\uploadTest"		//上传文件加目�?
+#define UPLOADDIRPATH	"f:\\uploadTest"		//上传文件加目�?
 #define RMFILEPATH 		"d:\\home\\lsh\\share\\NH_1200\\Common_image"	
 #define FILEFORMAT 		".jpg"			//指定格式
 
@@ -143,7 +143,7 @@ namespace DROWNINGLIU
 		}reqTemplateErrHead_t;
 
 #define 	NUMBER		15											//同一时间可以接收的客户端数
-#define     SCAN_TIME 	15											//扫描间隔时间 15s
+#define     SCAN_TIME 	3600											//扫描间隔时间 15s
 
 
 		// Class to manage the memory to be used for handler-based custom allocation.
@@ -343,6 +343,7 @@ namespace DROWNINGLIU
 			//模板名称
 			std::string	_fileNameTemplate = "template.tmpl";
 
+			std::vector<std::thread>	_vctThreads;
 		private:
 			void do_accept()
 			{
@@ -398,11 +399,16 @@ namespace DROWNINGLIU
 			VirtualScannerSession(tcp::socket socket, server<VirtualScannerSession> &svr)
 				: session(std::move(socket)), _svr(svr)
 			{
-
+				/*_svr._vctThreads.push_back(
+					std::thread(
+						std::bind(&VirtualScannerSession::Write_Thread, this)
+					));*/
 			}
 			virtual void start() override
 			{
-				do_read();
+				//do_read();
+				do_multiwriteNonBlock(0);
+				do_readNonBlock();
 			}
 
 			//服务器 接收的 数据包流水号
@@ -412,9 +418,17 @@ namespace DROWNINGLIU
 
 			server<VirtualScannerSession> &_svr;
 
+			int  _ContentLenth = 0;			//转义后的数据长度
+												//比1400长一倍，以防溢出
+			char _Content[2800] = { 0 }; 		//转义后的数据
+
 			virtual void do_read() override;
 			virtual void do_write(std::size_t length) override;
 			void do_multiwrite(std::size_t length);
+			void do_multiwriteNonBlock(std::size_t length);
+			void do_readNonBlock();
+
+			size_t read_complete(const boost::asio::const_buffer &buffer, const boost::system::error_code & ec, size_t bytes);
 		public:
 			int getSocketFD()
 			{
@@ -431,6 +445,7 @@ namespace DROWNINGLIU
 			}
 
 			int	find_whole_package(const char *recvBuf, int recvLenth, int index, int &nCmd);
+			int	find_whole_package2(const char *recvBuf, int recvLenth, int index, int &nCmd);
 			int login_func_reply(char *recvBuf, int recvLen, int index);
 			int read_data_proce(char *recvBuf, int recvLen, int index, int &nCmd);
 
@@ -453,6 +468,7 @@ namespace DROWNINGLIU
 			void assign_serverSubPack_head(resSubPackHead_t *head, uint8_t cmd, int contentLenth, int currentIndex, int totalNumber);
 			void assign_comPack_head(resCommonHead_t *head, int cmd, int contentLenth, int isSubPack, int isFailPack, int failPackIndex, int isRespond);
 
+			void Write_Thread();
 		};
 
 		class VirtualScannerSvr : public server<VirtualScannerSession>
