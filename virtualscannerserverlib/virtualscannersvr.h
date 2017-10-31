@@ -40,7 +40,7 @@ namespace DROWNINGLIU
 #define	KEY				0x1234			//消息队列键�?
 #define FILEDIR			"d:\\home\\lsh\\share\\NH_1200\\soure"			//指定目录
 		//#define UPLOADDIRPATH	"/home/yyx/work/openssl-FTP-TCP/project/uploadTest"		//上传文件加目�?
-#define UPLOADDIRPATH	"f:\\uploadTest"		//上传文件加目�?
+#define UPLOADDIRPATH	"d:\\uploadTest"		//上传文件加目�?
 #define RMFILEPATH 		"d:\\home\\lsh\\share\\NH_1200\\Common_image"	
 #define FILEFORMAT 		".jpg"			//指定格式
 
@@ -341,7 +341,7 @@ namespace DROWNINGLIU
 			//数据库表名称
 			std::string	_fileNameTable = "database.db";
 			//模板名称
-			std::string	_fileNameTemplate = "template.tmpl";
+			std::string	_fileNameTemplate = "template.xml";
 
 			std::vector<std::thread>	_vctThreads;
 		private:

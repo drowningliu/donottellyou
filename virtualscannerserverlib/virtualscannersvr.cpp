@@ -1437,12 +1437,12 @@ namespace DROWNINGLIU
 					return -1;//myprint("Error: func delete_func_reply() ");
 				break;
 			case TEMPLATECMDREQ:		//上传模板
-				//std::cout << "template_extend_element_reply\r\n";
+				std::cout << "template_extend_element_reply\r\n";
 				if ((ret = template_extend_element_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func template_extend_element() ");
 				break;
 			case MUTIUPLOADCMDREQ:		//上传图片集
-				//std::cout << "upload_template_set_reply\r\n";
+				std::cout << "upload_template_set_reply\r\n";
 				if ((ret = upload_template_set_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func upload_template_set ");
 				break;
