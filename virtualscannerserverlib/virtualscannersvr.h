@@ -143,7 +143,7 @@ namespace DROWNINGLIU
 		}reqTemplateErrHead_t;
 
 #define 	NUMBER		15											//同一时间可以接收的客户端数
-#define     SCAN_TIME 	3600											//扫描间隔时间 15s
+#define     SCAN_TIME 	15											//扫描间隔时间 15s
 
 
 		// Class to manage the memory to be used for handler-based custom allocation.
