@@ -1755,6 +1755,113 @@ namespace DROWNINGLIU
 			}));
 		}
 
+		void VirtualScannerSession::do_readSomeNonBlock()
+		{
+			auto self(shared_from_this());
+
+			socket_.async_read_some(boost::asio::buffer(data_),
+				make_custom_alloc_handler(allocator_,
+					[this, self](boost::system::error_code ec, std::size_t length)
+			{
+				if (!ec)
+				{
+					int  tmpContentLenth = 0;			//转义后的数据长度
+					char tmpContent[1400] = { 0 }; 		//转义后的数据
+					int ret = 0, cmd = 0;
+
+					bool bFind = false;
+					//if (!_buffer.empty())
+					auto pos = _buffer.find(0x7e);
+					if (pos != std::string::npos)
+						bFind = true;
+
+					for (int i = 0; i < length; ++i)
+					{
+						char c = data_.data()[i];
+						if (0x7e == c && bFind == false)
+						{
+							bFind = true;
+							_buffer.push_back(c);
+							continue;
+						}
+						else if (0x7e == c)
+						{
+							auto on_finish = [&]()
+							{
+								memset(tmpContent, 0, sizeof(tmpContent));
+								tmpContentLenth = 0;
+								bFind = false;
+								_buffer.clear();
+							};
+
+							try
+							{
+								pos = _buffer.find(0x7e);
+								if (pos == std::string::npos || _buffer.size() == 1)
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
+								//2. 查找数据报尾, 获取到完整数据包, 将数据包进行反转义 
+								if ((ret = anti_escape(_buffer.c_str() + pos + 1, _buffer.length() - pos - 1, tmpContent, &tmpContentLenth)) < 0)
+								{
+									//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+								}
+
+								//3.将转义后的数据包进行处理
+								if ((ret = read_data_proce(tmpContent, tmpContentLenth, 0, cmd)) < 0)
+								{
+									//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+								}
+							}
+							catch (const GAFIS7::GA7BASE::Ga7Exception& e)
+							{
+								//4. 数据包处理成功, 清空临时变量
+								on_finish();
+
+								continue;
+							}
+							
+							on_finish();
+						}
+						else
+						{
+							//取出数据包内容, 去除起始标识符
+							_buffer.push_back(c);
+							continue;
+						}
+					}
+					
+					
+
+					//std::cout << "on_readNonBlock\r\n";
+					int cmd = 0;
+					//解析包内容，并写入缓存。
+					//if (0 > find_whole_package(data_.data(), length, 0, cmd))
+					if (0 > find_whole_package2(_Content, _ContentLenth, 0, cmd))
+					{
+						_ContentLenth = 0;
+						memset(_Content, 0, sizeof(_Content));
+
+						std::cout << "find_whole_package failed\r\n";
+						//发送重连包。
+						return;
+						//do_read();
+					}
+					else
+					{
+						_ContentLenth = 0;
+						memset(_Content, 0, sizeof(_Content));
+
+						//std::cout << cmd;
+						//std::cout << "find_whole_package succeed\r\n";
+
+						do_readNonBlock();
+					}
+				}
+			}));
+		}
+
 		void VirtualScannerSession::do_multiwriteNonBlock(std::size_t length)
 		{
 			//std::cout << "do_multiwriteNonBlock\r\n";

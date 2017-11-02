@@ -288,26 +288,9 @@ namespace DROWNINGLIU
 			tcp::socket socket_;
 
 			// Buffer used to store data received from the client.
-			
 			type_data_t data_;
 			int nLen2Write_ = 0;
 			int cmd_ = 0;
-			//cmd len data
-			typedef std::tuple<int, int, type_data_t> tuple_data_t;
-			typedef std::pair<int, type_data_t> pair_data_t;
-#if IF_USE_ASYNC
-			typedef std::deque<pair_data_t> deq_data_t;
-			std::unordered_map<boost::asio::detail::socket_type, deq_data_t> _mapSock2Data;
-#else
-			//每个socket对应的收/发数据
-			//std::unordered_map<boost::asio::detail::socket_type, pair_data_t> _mapSock2Data;
-			//typedef std::deque<pair_data_t> deq_data_t;
-			typedef std::deque<tuple_data_t> deq_data_t;
-			deq_data_t	_deqData;
-#endif
-			//std::lock_guard<std::mutex> lock(_mtxXLH);
-			//mutable std::mutex	_mtxSock2Data;	//consider using rwlock
-			mutable std::mutex	_mtxData;	//consider using rwlock
 
 			// The allocator to use for handler-based custom memory allocation.
 			handler_allocator allocator_;
@@ -329,7 +312,6 @@ namespace DROWNINGLIU
 
 			mutable std::mutex			_mtxFiles;
 			std::vector<_finddata_t>	_vctfiles;
-
 			
 			//服务器资源文件ID 
 			__int64	_fileTemplateID = 562;
@@ -422,11 +404,26 @@ namespace DROWNINGLIU
 												//比1400长一倍，以防溢出
 			char _Content[2800] = { 0 }; 		//转义后的数据
 
+			//cmd len data
+			typedef std::tuple<int, int, type_data_t> tuple_data_t;
+			typedef std::pair<int, type_data_t> pair_data_t;
+
+			//std::lock_guard<std::mutex> lock(_mtxData);
+			mutable std::mutex	_mtxData;	//consider using rwlock
+			typedef std::deque<tuple_data_t> deq_data_t;
+			deq_data_t	_deqData;
+
+			
+			std::string _buffer;
+
+
 			virtual void do_read() override;
 			virtual void do_write(std::size_t length) override;
 			void do_multiwrite(std::size_t length);
 			void do_multiwriteNonBlock(std::size_t length);
 			void do_readNonBlock();
+
+			void do_readSomeNonBlock();
 
 			size_t read_complete(const boost::asio::const_buffer &buffer, const boost::system::error_code & ec, size_t bytes);
 		public:
