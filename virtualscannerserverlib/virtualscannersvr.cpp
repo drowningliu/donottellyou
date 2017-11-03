@@ -1422,7 +1422,7 @@ namespace DROWNINGLIU
 					return -1;//myprint("Error: func client_request_func_reply() ");
 				break;
 			case UPLOADCMDREQ: 		//上传图片数据包
-				std::cout << "upload_func_reply\r\n";
+				//std::cout << "upload_func_reply\r\n";
 				if ((ret = upload_func_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func upload_func_reply() ");
 				break;
@@ -1442,7 +1442,7 @@ namespace DROWNINGLIU
 					return -1;//myprint("Error: func template_extend_element() ");
 				break;
 			case MUTIUPLOADCMDREQ:		//上传图片集
-				std::cout << "upload_template_set_reply\r\n";
+				//std::cout << "upload_template_set_reply\r\n";
 				if ((ret = upload_template_set_reply(recvBuf, recvLen, index)) < 0)
 					return -1;//myprint("Error: func upload_template_set ");
 				break;
@@ -1784,7 +1784,7 @@ namespace DROWNINGLIU
 							_buffer.push_back(c);
 							continue;
 						}
-						else if (0x7e == c)
+						else if (0x7e == c && bFind)
 						{
 							auto on_finish = [&]()
 							{
@@ -1810,9 +1810,13 @@ namespace DROWNINGLIU
 								//3.将转义后的数据包进行处理
 								if ((ret = read_data_proce(tmpContent, tmpContentLenth, 0, cmd)) < 0)
 								{
+									std::cout << "read_data_proce failed\r\n";
 									//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
 									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
 								}
+
+								//std::cout << cmd;
+								//std::cout << "read_data_proce succeed\r\n";
 							}
 							catch (const GAFIS7::GA7BASE::Ga7Exception& e)
 							{
@@ -1831,33 +1835,8 @@ namespace DROWNINGLIU
 							continue;
 						}
 					}
-					
-					
 
-					//std::cout << "on_readNonBlock\r\n";
-					int cmd = 0;
-					//解析包内容，并写入缓存。
-					//if (0 > find_whole_package(data_.data(), length, 0, cmd))
-					if (0 > find_whole_package2(_Content, _ContentLenth, 0, cmd))
-					{
-						_ContentLenth = 0;
-						memset(_Content, 0, sizeof(_Content));
-
-						std::cout << "find_whole_package failed\r\n";
-						//发送重连包。
-						return;
-						//do_read();
-					}
-					else
-					{
-						_ContentLenth = 0;
-						memset(_Content, 0, sizeof(_Content));
-
-						//std::cout << cmd;
-						//std::cout << "find_whole_package succeed\r\n";
-
-						do_readNonBlock();
-					}
+					do_readSomeNonBlock();
 				}
 			}));
 		}
@@ -2148,10 +2127,10 @@ namespace DROWNINGLIU
 			int	ret = 0;
 
 			//1.查看上传目录是否存在
-			if (_access(UPLOADDIRPATH, 0) < 0)
+			if (_access(_DirPath.c_str(), 0) < 0)
 			{
 				//2.不存在, 创建保存上传文件的目录
-				if ((ret = _mkdir(UPLOADDIRPATH/*, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH*/)) < 0)
+				if ((ret = _mkdir(_DirPath.c_str()/*, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH*/)) < 0)
 				{
 					//myprint("Error : func mkdir() : %s", uploadDirParh);
 					return ret;

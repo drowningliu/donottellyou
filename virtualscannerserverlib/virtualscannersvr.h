@@ -37,12 +37,6 @@ namespace DROWNINGLIU
 
 #define SERVER_IP		"127.0.0.1"	//服务器IP
 #define SERVER_PORT		8009			//服务器端�?
-#define	KEY				0x1234			//消息队列键�?
-#define FILEDIR			"d:\\home\\lsh\\share\\NH_1200\\soure"			//指定目录
-		//#define UPLOADDIRPATH	"/home/yyx/work/openssl-FTP-TCP/project/uploadTest"		//上传文件加目�?
-#define UPLOADDIRPATH	"d:\\uploadTest"		//上传文件加目�?
-#define RMFILEPATH 		"d:\\home\\lsh\\share\\NH_1200\\Common_image"	
-#define FILEFORMAT 		".jpg"			//指定格式
 
 #pragma pack(push)
 #pragma pack(1)
@@ -317,7 +311,7 @@ namespace DROWNINGLIU
 			__int64	_fileTemplateID = 562;
 			__int64	_fileTableID = 365;
 			//上传文件路径
-			std::string	_DirPath = UPLOADDIRPATH;
+			std::string	_DirPath = "d:\\uploadTest";
 			//服务器资源路径
 			std::string	_downLoadDir = "d:\\serversource";
 			//数据库表名称
@@ -390,7 +384,8 @@ namespace DROWNINGLIU
 			{
 				//do_read();
 				do_multiwriteNonBlock(0);
-				do_readNonBlock();
+				//do_readNonBlock();
+				do_readSomeNonBlock();
 			}
 
 			//服务器 接收的 数据包流水号
