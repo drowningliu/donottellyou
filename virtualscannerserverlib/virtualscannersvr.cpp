@@ -709,12 +709,16 @@ namespace DROWNINGLIU
 				{
 					//6.数据正确, 进行图片数据的存储, 记录本轮成功接收的子包数量
 					recvSuccessSubNumber += 1;
+#if FAST_IO == 1
+					//写入队列，用其它线程向硬盘写
+					ret = 0;
+#else
 					if ((ret = save_multiPicture_func(recvBuf, recvLen)) < 0)
 					{
 						printf("error: func save_picture_func() !!! [%d], [%s] \n", __LINE__, __FILE__);
 						goto End;
 					}
-		
+#endif
 					tmp = recvBuf + sizeof(reqPackHead_t);
 					if (tmpHead->currentIndex + 1 == tmpHead->totalPackage && *tmp + 1 == *(tmp + 1))
 					{
@@ -954,12 +958,16 @@ namespace DROWNINGLIU
 				{
 					//6.数据正确, 进行图片数据的存储, 记录本轮成功接收的子包数量
 					recvSuccessSubNumber += 1;
+#if FAST_IO == 1
+					//写入队列，用其它线程向硬盘写
+					ret = 0;
+#else
 					if ((ret = save_picture_func(recvBuf, recvLen)) < 0)
 					{
 						printf("error: func save_picture_func() !!! [%d], [%s] \n", __LINE__, __FILE__);
 						goto End;
 					}
-		
+#endif
 					if (tmpHead->currentIndex + 1 == tmpHead->totalPackage)
 					{
 						latePackFlag = true;
@@ -1221,7 +1229,9 @@ namespace DROWNINGLIU
 				//下载模板
 				fileName = _svr._downLoadDir + "\\" + _svr._fileNameTemplate;
 				fileType = FILE_TYPE::FILE_TEMPLATE;
-				sendFile(0);
+				//sendFile(0);
+
+				//先发图片，最后发模板
 			}
 			else if (*tmp == static_cast<int>(FILE_TYPE::FILE_TABLE))
 			{
@@ -1263,6 +1273,10 @@ namespace DROWNINGLIU
 					//1.jpg -> 2, 2.jpg -> 3
 					sendFile(mark + 1);
 				}
+
+				fileName = _svr._downLoadDir + "\\" + _svr._fileNameTemplate;
+				//fileType = FILE_TYPE::FILE_TEMPLATE;
+				sendFile(0);
 			}
 
 			return ret;
@@ -1861,19 +1875,17 @@ namespace DROWNINGLIU
 				std::lock_guard<std::mutex> lock(_mtxData);
 
 				hasData = !_deqData.empty();
+				if (hasData)
+				{
+					boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
+						make_custom_alloc_handler(allocator_, func));
+
+					_deqData.pop_front();
+					return;
+				}
 			}
 
-			if (hasData)
-			{
-				std::lock_guard<std::mutex> lock(_mtxData);
-
-				boost::asio::async_write(socket_, boost::asio::buffer(std::get<2>(_deqData.front()), std::get<1>(_deqData.front())),
-					make_custom_alloc_handler(allocator_, func));
-
-				_deqData.pop_front();
-				return;
-			}
-			else
+			if (!hasData)
 			{
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				boost::asio::async_write(socket_, boost::asio::buffer(data_, 0),
@@ -2033,7 +2045,7 @@ namespace DROWNINGLIU
 						bool bFind = false;
 						for (auto &_f : _vctfiles)
 						{
-							if (_f.name != f.name)
+							if (0 != strcmp(_f.name, f.name))
 								continue;
 
 							bFind = true;
@@ -2066,7 +2078,7 @@ namespace DROWNINGLIU
 							enum class FILE_TYPE filyType;
 							for (auto &_f : _vctfiles)
 							{
-								if (_f.name != f.name)
+								if (0 != strcmp(_f.name, f.name))
 									continue;
 
 								if (_f.time_access == f.time_access)

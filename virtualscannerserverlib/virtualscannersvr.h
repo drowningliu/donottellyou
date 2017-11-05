@@ -22,7 +22,7 @@ namespace DROWNINGLIU
 	{
 		using boost::asio::ip::tcp;
 #define IF_USE_ASYNC	0
-
+#define FAST_IO	1
 		enum class MSG_TYPE
 		{
 			Read_MSG = 1,
@@ -315,9 +315,9 @@ namespace DROWNINGLIU
 			//服务器资源路径
 			std::string	_downLoadDir = "d:\\serversource";
 			//数据库表名称
-			std::string	_fileNameTable = "database.db";
+			std::string	_fileNameTable = "NHi1200_database.db";
 			//模板名称
-			std::string	_fileNameTemplate = "template.xml";
+			std::string	_fileNameTemplate = "info.xml";
 
 			std::vector<std::thread>	_vctThreads;
 		private:
