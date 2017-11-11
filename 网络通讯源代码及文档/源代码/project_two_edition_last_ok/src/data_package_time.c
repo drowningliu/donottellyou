@@ -376,7 +376,7 @@ static int init_global_value()
 	int numsaw = PERROUNDNUMBER * COMREQDATABODYLENTH;
 	if((g_sendFileContent = malloc(numsaw)) == NULL)			assert(0);
 		
-g_downLoadPath = "/home/tirvideo/Desktop/网络通讯源代码及文档/源代码/project_two_edition_last_ok/download/";
+g_downLoadPath = "/home/tirvideo/Desktop/project_two_edition_last_ok/download/";
 fileName = "C_16_01_04_10_16_10_030_B_L.jpg";
 tableName = "downLoadTemplateNewestFromServer_17_05_08.pdf";
 /*

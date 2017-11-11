@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -38,7 +38,7 @@
 #include "template_scan_element_type.h"
 #include "func_compont.h"
 
-#define FILEDIR 	"/home/tirvideo/Desktop/网络通讯源代码及文档/源代码/project_two_edition_last_ok/"
+#define FILEDIR 	"/home/tirvideo/Desktop/project_two_edition_last_ok/"
 #define FILENAME 	"C_16_01_04_10_16_10_030_B_L.jpg"
 
 
@@ -151,7 +151,7 @@ void template_element_news(UitoNetExFrame *news)
 	int i = 0;
 	char *object = "AB~CB~CAB~ABCD~D~B~CBD~";
 	Coords tmpCoord = { 21, 45, 45, 45, 25 };
-	char *dir = "/home/tirvideo/Desktop/网络通讯源代码及文档/源代码/project_two_edition_last_ok";
+	char *dir = "/home/tirvideo/Desktop/project_two_edition_last_ok";
 	
 	memset(news, 0, sizeof(UitoNetExFrame));
 	memcpy(news->fileDir, dir, strlen(dir));
