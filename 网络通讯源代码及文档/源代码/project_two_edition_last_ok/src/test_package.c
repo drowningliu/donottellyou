@@ -215,8 +215,6 @@ int send_content_to_server()
 		}		
 		sem_wait(&g_sem_test);
 	}
-	
-sleep(100000);
 
 	//6.删除服务器指定图片
 	ret = recv_ui_data("9~C_16_01_04_10_16_10_030_B_L.jpg~");
