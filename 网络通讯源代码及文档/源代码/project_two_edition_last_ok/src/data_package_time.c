@@ -504,7 +504,7 @@ static int get_config_file_para()
 			myprint( "Error : func chose_setip_method() ");
 			goto End;
 		}*/
-		}
+		
 	}
 
  End:
