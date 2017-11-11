@@ -319,7 +319,7 @@ static int init_global_value()
 		goto End;
 	}
 	//4.接收服务器数据的队列,  使用线程: 接收线程和解包线程
-	if((g_fifo = fifo_init(CAPACITY * 1024 * 2)) == NULL)
+	if((g_fifo = fifo_init(CAPACITY * 1500 * 2)) == NULL)
 	{
 		ret = -1;
 		socket_log( SocketLevel[4], ret, "Error: func fifo_init()");
@@ -505,7 +505,7 @@ static int get_config_file_para()
 			goto End;
 		}*/
 		
-	}
+		}
 
  End:
  	return ret;
@@ -2023,7 +2023,7 @@ int	data_unpack_process(int recvLenth)
 	static int flag = 0, lenth = 0; 	//flag 标识找到标识符的数量;  lenth : 数据的长度
 	char buffer[2] = { 0 };
 	static char content[2800] = { 0 };	//
-	char tmpContent[1400] = { 0 }; 		//tmpBufFlag[15] = { 0 };		
+	char tmpContent[1500] = { 0 }; 		//tmpBufFlag[15] = { 0 };
 	char *tmp = NULL;
 	
 	tmp = content + lenth;

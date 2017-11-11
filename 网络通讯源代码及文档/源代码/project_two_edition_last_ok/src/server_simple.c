@@ -341,7 +341,7 @@ int push_info_toUi(int index, int fileType)
 	int ret = 0, outDataLenth = 0, checkNum = 0;
 	char *tmp = NULL, *sendBufStr = NULL;
 	resCommonHead_t head;
-	char tmpSendBuf[1400] = { 0 };
+	char tmpSendBuf[1500] = { 0 };
 
 	
 	//myprint("The queue have element number : %d ...", get_element_count_send_block(g_sendData_addrAndLenth_queue));
@@ -778,7 +778,7 @@ int	find_whole_package(char *recvBuf, int recvLenth, int index)
 {
 	int ret = 0, i = 0;
 	int  tmpContentLenth = 0;			//转义后的数据长度
-	char tmpContent[1400] = { 0 }; 		//转义后的数据
+	char tmpContent[1500] = { 0 }; 		//转义后的数据
 	static int flag = 0;				//flag 标识找到标识符的数量;
 	static int lenth = 0; 				//lenth : 缓存的数据包内容长度
 	static char content[2800] = { 0 };	//缓存完整包数据内容, 		
@@ -1156,7 +1156,7 @@ int downLoad_template_func_reply(char *recvBuf, int recvLen, int index)
 	char *tmp = NULL, *sendBufStr = NULL;
 	int contentLenth = 0;
 	int checkNum = 0, nRead = 0;				//校验码和 读取字节数
-	char tmpSendBuf[1400] = { 0 };				//临时缓冲区
+	char tmpSendBuf[1500] = { 0 };				//临时缓冲区
 	int  doucumentLenth = 0; 
 	FILE *fp = NULL;
 	char fileName[1024] = { 0 };

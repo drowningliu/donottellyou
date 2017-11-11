@@ -817,7 +817,7 @@ int downLoad_template_func_reply(char *recvBuf, int recvLen, int index)
 	int contentLenth = 0;
 	char *machine = "54454547871";
 	int checkNum = 0, nRead = 0;
-	char tmpSendBuf[1400] = { 0 };
+	char tmpSendBuf[1500] = { 0 };
 	int  doucumentLenth = 1400 - sizeof(packHead) - 3 * sizeof(char) - 2 * sizeof(char) - sizeof(int);
 	FILE *fp = NULL;
 	char *fileName = NULL;
@@ -1037,7 +1037,7 @@ int get_FileNewestID_reply(char *recvBuf, int recvLen, int index)
 	char *tmp = NULL, *sendBufStr = NULL;
 	int fileType = 0;
 	packHead  head;
-	char tmpSendBuf[1400] = { 0 };
+	char tmpSendBuf[1500] = { 0 };
 	char *machine = "54454547871";	
 
 	
@@ -1116,7 +1116,7 @@ int checkOut_fileID_newest_reply(char *recvBuf, int recvLen, int index)
 	char fileName[65] = { 0 };
 	int  comRet = 0;
 	packHead  head;
-	char tmpSendBuf[1400] = { 0 };
+	char tmpSendBuf[1500] = { 0 };
 	char *machine = "54454547871";
 
 	myprint("The queue have element number : %d ...", get_element_count_send_block(g_sendData_addrAndLenth_queue));
@@ -1741,7 +1741,7 @@ int push_info_toUi(int index)
 	char *tmp = NULL, *sendBufStr = NULL;
 	int fileType = 0;
 	packHead  head;
-	char tmpSendBuf[1400] = { 0 };
+	char tmpSendBuf[1500] = { 0 };
 	char *machine = "54454547871";
 
 	
@@ -1899,9 +1899,9 @@ int switch_cmd_data(char *actiBuf, int acatiLen, char **sendBuf, int *sendLen)
 int read_package(char *recvBuf, int dataLenth, char **sendBuf, int *sendLen)
 {
 	int ret = 0, i = 0;
-	char buf[1400] = { 0 };	
+	char buf[1500] = { 0 };
 	int  bufLen = 0;	
-	char actiBuf[1400] = { 0 };
+	char actiBuf[1500] = { 0 };
 	int  acatiLen = 0;
 	static int flag = 0;			// sign for the header and tailer identifier;  0: header; 1:tailer;
 	char *tmpBuf = buf;
