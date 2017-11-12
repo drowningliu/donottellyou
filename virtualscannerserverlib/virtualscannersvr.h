@@ -22,7 +22,7 @@ namespace DROWNINGLIU
 	{
 		using boost::asio::ip::tcp;
 #define IF_USE_ASYNC	0
-#define FAST_IO	1
+#define FAST_IO	0
 		enum class MSG_TYPE
 		{
 			Read_MSG = 1,
@@ -139,7 +139,8 @@ namespace DROWNINGLIU
 #define 	NUMBER		15											//同一时间可以接收的客户端数
 #define     SCAN_TIME 	15											//扫描间隔时间 15s
 
-
+#define	RECV_BUFFER 1500 * 10
+#define SEND_BUFFER 1500
 		// Class to manage the memory to be used for handler-based custom allocation.
 		// It contains a single block of memory which may be returned for allocation
 		// requests. If the memory is in use when an allocation request is made, the
@@ -182,7 +183,8 @@ namespace DROWNINGLIU
 
 		private:
 			// Storage space used for handler-based custom memory allocation.
-			typename std::aligned_storage<2804>::type storage_;
+			//typename std::aligned_storage<2804>::type storage_;
+			typename std::aligned_storage<RECV_BUFFER>::type storage_;
 
 			// Whether the handler-based custom allocation storage has been used.
 			bool in_use_;
@@ -246,7 +248,9 @@ namespace DROWNINGLIU
 				do_read();
 			}
 
-			typedef std::array<char, 2800>	type_data_t;
+			//typedef std::array<char, 2800>	type_data_t;
+			typedef std::array<char, SEND_BUFFER>	type_data_t;
+			typedef std::array<char, RECV_BUFFER>	type_data2_t;
 			//typedef std::string	type_data_t;
 
 		protected:
@@ -283,6 +287,9 @@ namespace DROWNINGLIU
 
 			// Buffer used to store data received from the client.
 			type_data_t data_;
+
+			type_data2_t data_recv_;
+
 			int nLen2Write_ = 0;
 			int cmd_ = 0;
 
@@ -311,7 +318,7 @@ namespace DROWNINGLIU
 			__int64	_fileTemplateID = 562;
 			__int64	_fileTableID = 365;
 			//上传文件路径
-			std::string	_DirPath = "d:\\uploadTest";
+			std::string	_DirPath = "D:\\uploadTest";
 			//服务器资源路径
 			std::string	_downLoadDir = "d:\\serversource";
 			//数据库表名称
@@ -379,13 +386,16 @@ namespace DROWNINGLIU
 					std::thread(
 						std::bind(&VirtualScannerSession::Write_Thread, this)
 					));*/
+
+				_buffer.resize(SEND_BUFFER);
 			}
 			virtual void start() override
 			{
 				//do_read();
 				do_multiwriteNonBlock(0);
 				//do_readNonBlock();
-				do_readSomeNonBlock();
+				//do_readSomeNonBlock();
+				do_readMulti();
 			}
 
 			//服务器 接收的 数据包流水号
@@ -419,6 +429,7 @@ namespace DROWNINGLIU
 			void do_readNonBlock();
 
 			void do_readSomeNonBlock();
+			void do_readMulti();
 
 			size_t read_complete(const boost::asio::const_buffer &buffer, const boost::system::error_code & ec, size_t bytes);
 		public:

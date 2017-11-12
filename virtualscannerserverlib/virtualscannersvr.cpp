@@ -160,6 +160,12 @@ namespace DROWNINGLIU
 					//3.查看文件是否存在, 存在即删除	
 					if (if_file_exist(fileName.c_str()))
 					{
+						if (fp)
+						{
+							fclose(fp);
+							fp = NULL;
+						}
+
 						if (!DeleteFileA(fileName.c_str()))
 						{
 							//myprint("Err : func pox_system()");
@@ -280,6 +286,11 @@ namespace DROWNINGLIU
 				//3.查看文件是否存在, 存在即删除	
 				if (if_file_exist(fileName.c_str()))
 				{
+					if (fp)
+					{
+						fclose(fp);
+						fp = NULL;
+					}
 					if(!DeleteFileA(fileName.c_str()))
 					{
 						//myprint("Err : func pox_system()");
@@ -634,7 +645,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0; 				//发送数据的长度
 			int		checkNum = 0;							//校验码
-			char	tmpSendBuf[1500] = { 0 };				//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };				//临时数据缓冲区
 			char	*sendBufStr = NULL;						//发送数据地址
 			char	*tmp = NULL;
 			
@@ -667,6 +678,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -683,7 +697,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0; 				//发送数据的长度
 			int		checkNum = 0;							//校验码
-			char	tmpSendBuf[1500] = { 0 };				//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };				//临时数据缓冲区
 			char	*sendBufStr = NULL;						//发送数据地址
 			char	*tmp = NULL;
 
@@ -789,6 +803,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -813,7 +830,7 @@ namespace DROWNINGLIU
 			int		ret = 0, outDataLenth = 0;			//发送数据包长度
 			char	*tmp = NULL, *sendBufStr = NULL;	//发送地址
 			int		checkNum = 0;						//校验码
-			char	tmpSendBuf[1500] = { 0 };			//临时缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };			//临时缓冲区
 
 			type_data_t	data;
 			sendBufStr = data.data();
@@ -845,6 +862,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 			
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -861,7 +881,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0;					//发送数据包长度
 			int		checkNum = 48848748;						//校验码
-			char	tmpSendBuf[1500] = { 0 };					//临时缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };					//临时缓冲区
 			char	*tmp = NULL, *sendBufStr = NULL;			//发送数据包地址
 			std::string		fileName;							//文件名称
 			resCommonHead_t	head = { 0 };						//应答数据报头
@@ -910,6 +930,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -932,7 +955,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0;					//发送数据的长度
 			int		checkNum = 0;								//校验码
-			char	tmpSendBuf[1500] = { 0 };					//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };					//临时数据缓冲区
 			char	*sendBufStr = NULL;							//发送数据地址
 			char	*tmp = NULL;
 			
@@ -1037,6 +1060,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -1053,7 +1079,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0; 				//发送数据的长度
 			int		checkNum = 0;							//校验码
-			char	tmpSendBuf[1500] = { 0 };				//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };				//临时数据缓冲区
 			char	*sendBufStr = NULL;						//发送数据地址
 			char	*tmp = NULL;
 			int		fileType = 0;							//请求的文件类型
@@ -1110,6 +1136,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -1142,7 +1171,7 @@ namespace DROWNINGLIU
 				int		tmpLenth = 0;
 				char	*tmp = NULL, *sendBufStr = NULL;		// data_.data();
 				int		checkNum = 0, nRead = 0;				//校验码和 读取字节数
-				char	tmpSendBuf[1400] = { 0 };				//临时缓冲区
+				char	tmpSendBuf[SEND_BUFFER] = { 0 };				//临时缓冲区
 				resSubPackHead_t 	head = { 0 };				//应答数据包报头
 
 																//3. open The template file
@@ -1203,6 +1232,9 @@ namespace DROWNINGLIU
 					}
 
 					*(sendBufStr + outDataLenth + 1) = PACKSIGN; 	 //flag 
+
+					if (outDataLenth > SEND_BUFFER)
+						throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
 
 					{
 						std::lock_guard<std::mutex> lock(_mtxData);
@@ -1288,7 +1320,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0;					//发送数据的长度
 			int		checkNum = 0;								//校验码
-			char	tmpSendBuf[1500] = { 0 };					//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };					//临时数据缓冲区
 			char	*sendBufStr = NULL;							//发送数据地址
 			char	*tmp = NULL;
 
@@ -1324,6 +1356,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 			
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -1340,7 +1375,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0;					//发送数据的长度
 			int		checkNum = 0;								//校验码
-			char	tmpSendBuf[1500] = { 0 };					//临时数据缓冲区
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };					//临时数据缓冲区
 			char	*sendBufStr = NULL;
 			char	*tmp = NULL;
 			char	*userName = "WuKong";						//返回账户的用户名
@@ -1387,6 +1422,9 @@ namespace DROWNINGLIU
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
 			
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
 
@@ -1769,6 +1807,98 @@ namespace DROWNINGLIU
 			}));
 		}
 
+		void VirtualScannerSession::do_readMulti()
+		{
+			auto self(shared_from_this());
+			socket_.async_receive(boost::asio::buffer(data_recv_),
+			//boost::asio::async_read(socket_, boost::asio::buffer(data_recv_),
+				make_custom_alloc_handler(allocator_,
+					[this, self](boost::system::error_code ec, std::size_t length)
+			{
+				if (!ec)
+				{
+					//std::cout << length << std::endl;
+
+					int  tmpContentLenth = 0;			//转义后的数据长度
+					char tmpContent[SEND_BUFFER] = { 0 }; 		//转义后的数据
+					int ret = 0, cmd = 0;
+
+					bool bFind = false;
+					//if (!_buffer.empty())
+					auto pos = _buffer.find(0x7e);
+					if (pos != std::string::npos)
+						bFind = true;
+
+					for (int i = 0; i < length; ++i)
+					{
+						char c = data_recv_.data()[i];
+						if (0x7e == c && bFind == false)
+						{
+							bFind = true;
+							_buffer.push_back(c);
+							continue;
+						}
+						else if (0x7e == c && bFind)
+						{
+							auto on_finish = [&]()
+							{
+								memset(tmpContent, 0, sizeof(tmpContent));
+								tmpContentLenth = 0;
+								bFind = false;
+								_buffer.clear();
+							};
+
+							try
+							{
+								pos = _buffer.find(0x7e);
+								if (pos == std::string::npos || _buffer.size() == 1)
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
+								//2. 查找数据报尾, 获取到完整数据包, 将数据包进行反转义 
+								if ((ret = anti_escape(_buffer.c_str() + pos + 1, _buffer.length() - pos - 1, tmpContent, &tmpContentLenth)) < 0)
+								{
+									//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+								}
+
+								if(tmpContentLenth > SEND_BUFFER)
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+
+								//3.将转义后的数据包进行处理
+								if ((ret = read_data_proce(tmpContent, tmpContentLenth, 0, cmd)) < 0)
+								{
+									std::cout << "read_data_proce failed\r\n";
+									//myprint("Err : func read_data_proce(), dataLenth : %d", tmpContentLenth);
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
+								}
+
+								//std::cout << cmd;
+								//std::cout << "read_data_proce succeed\r\n";
+							}
+							catch (const GAFIS7::GA7BASE::Ga7Exception& e)
+							{
+								//4. 数据包处理成功, 清空临时变量
+								on_finish();
+
+								continue;
+							}
+
+							on_finish();
+						}
+						else
+						{
+							//取出数据包内容, 去除起始标识符
+							_buffer.push_back(c);
+							continue;
+						}
+					}
+
+					do_readMulti();
+				}
+			}));
+
+		}
+
 		void VirtualScannerSession::do_readSomeNonBlock()
 		{
 			auto self(shared_from_this());
@@ -1779,8 +1909,10 @@ namespace DROWNINGLIU
 			{
 				if (!ec)
 				{
+					//std::cout << length << std::endl;
+
 					int  tmpContentLenth = 0;			//转义后的数据长度
-					char tmpContent[1400] = { 0 }; 		//转义后的数据
+					char tmpContent[SEND_BUFFER] = { 0 }; 		//转义后的数据
 					int ret = 0, cmd = 0;
 
 					bool bFind = false;
@@ -1820,6 +1952,9 @@ namespace DROWNINGLIU
 									//myprint("Err : func anti_escape(), srcLenth : %d, dstLenth : %d", lenth, tmpContentLenth);
 									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
 								}
+
+								if (tmpContentLenth > SEND_BUFFER)
+									throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
 
 								//3.将转义后的数据包进行处理
 								if ((ret = read_data_proce(tmpContent, tmpContentLenth, 0, cmd)) < 0)
@@ -1912,7 +2047,7 @@ namespace DROWNINGLIU
 		{
 			int		ret = 0, outDataLenth = 0, checkNum = 0;
 			char	*tmp = NULL, *sendBufStr = NULL;
-			char	tmpSendBuf[1400] = { 0 };
+			char	tmpSendBuf[SEND_BUFFER] = { 0 };
 
 			resCommonHead_t	head = { 0 };
 
@@ -1959,6 +2094,9 @@ namespace DROWNINGLIU
 			//7. 组合发送的内容
 			*sendBufStr = 0x7e;
 			*(sendBufStr + 1 + outDataLenth) = 0x7e;
+
+			if (outDataLenth > SEND_BUFFER)
+				throw GAFIS7::GA7BASE::Ga7Exception(__FILE__, __LINE__);
 
 			{
 				std::lock_guard<std::mutex> lock(_mtxData);
