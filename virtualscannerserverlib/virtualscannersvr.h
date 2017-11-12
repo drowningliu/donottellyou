@@ -22,7 +22,7 @@ namespace DROWNINGLIU
 	{
 		using boost::asio::ip::tcp;
 #define IF_USE_ASYNC	0
-#define FAST_IO	0
+#define FAST_IO	1
 		enum class MSG_TYPE
 		{
 			Read_MSG = 1,
@@ -295,6 +295,7 @@ namespace DROWNINGLIU
 
 			// The allocator to use for handler-based custom memory allocation.
 			handler_allocator allocator_;
+			handler_allocator allocator2_;
 		};
 
 		template<class T>

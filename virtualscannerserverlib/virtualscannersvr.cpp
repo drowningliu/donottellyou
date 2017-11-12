@@ -2000,6 +2000,8 @@ namespace DROWNINGLIU
 				if (!ec)
 				{
 					//std::cout << "on_multiwriteNonBlock\r\n";
+					//if (length2 > 0)
+					//	std::cout << "write:" << length2 << std::endl;
 
 					do_multiwriteNonBlock(0);
 				}
@@ -2305,16 +2307,17 @@ namespace DROWNINGLIU
 
 				auto handle_thread = [&]()
 				{
+					SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 					io_service.run();
 				};
 
 				for (int i = 0; i < nThreadCount; ++i)
 					server._vctThreads.push_back(std::thread(handle_thread));
 
-				for (auto &t : server._vctThreads)
+				/*for (auto &t : server._vctThreads)
 				{
 					SetThreadPriority(t.native_handle(), THREAD_PRIORITY_ABOVE_NORMAL);
-				}
+				}*/
 
 				//创建子线程， 去执行扫描目录业务, 进行信息推送
 				server._vctThreads.push_back(std::thread(child_scan_func, &server));
