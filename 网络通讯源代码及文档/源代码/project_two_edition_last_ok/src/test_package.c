@@ -266,7 +266,7 @@ int send_content_to_server()
 	printf("-------------------------------\n\n");
 
 	//3. 上传图片
-	for( i= 0;  i < 3; i++)
+	for( i= 0;  i < 300; i++)
 	{
 		ret = recv_ui_data("6~./C_16_01_04_10_16_10_030_B_L.jpg~");
 		if(ret)
@@ -291,7 +291,7 @@ int send_content_to_server()
 	printf("-------------------------------\n\n");
 
 	//5. 上传模板
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 300; i++)
 	{
 		template_element_news(&sendNews);
 		sprintf(buf, "12~%p~", &sendNews);

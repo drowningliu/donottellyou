@@ -312,14 +312,14 @@ static int init_global_value()
 		goto End;
 	}
 	//3.内存池, 内存块为 将要发送给服务器的数据或从服务器接收的数据
-	if((g_memPool = mem_pool_init(CAPACITY, PACKMAXLENTH * 2, &g_mutex_memPool)) == NULL)
+	if((g_memPool = mem_pool_init(CAPACITY, 1500 * 2, &g_mutex_memPool)) == NULL)
 	{
 		ret = -1;
 		myprint(  "Error: func mem_pool_init()");
 		goto End;
 	}
 	//4.接收服务器数据的队列,  使用线程: 接收线程和解包线程
-	if((g_fifo = fifo_init(CAPACITY * 1500 * 2)) == NULL)
+	if((g_fifo = fifo_init(CAPACITY * 1024 * 2)) == NULL)
 	{
 		ret = -1;
 		socket_log( SocketLevel[4], ret, "Error: func fifo_init()");
@@ -2022,7 +2022,7 @@ int	data_unpack_process(int recvLenth)
 	int ret = 0, tmpContentLenth = 0;
 	static int flag = 0, lenth = 0; 	//flag 标识找到标识符的数量;  lenth : 数据的长度
 	char buffer[2] = { 0 };
-	static char content[2800] = { 0 };	//
+	static char content[3000] = { 0 };	//
 	char tmpContent[1500] = { 0 }; 		//tmpBufFlag[15] = { 0 };
 	char *tmp = NULL;
 	
