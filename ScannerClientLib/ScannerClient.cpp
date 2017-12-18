@@ -1,3 +1,4 @@
+#include <WinSock2.h>
 #include <winbase.h>
 #include "ScannerClient.h"
 #include "TEMPLATE_SCAN_ELEMENT_TYPE.h"
@@ -23,6 +24,10 @@ namespace DROWNINGLIU
 #define CIPHER_LIST	 			"AES128-SHA"
 #define	MY_MIN(x, y)			((x) < (y) ? (x) : (y))	
 #define TIMEOUTRETURNFLAG		-5							//超时返回值
+
+		char 				*g_machine = "21212111233";			//机器码
+		unsigned int 		g_seriaNumber = 0;					//发送数据包的序列号
+		unsigned int	 	g_recvSerial = 0;					//当前接收服务器主动发送数据包的序列号
 
 		//散列算法 : crc32 校验
 		static const int crc32tab[] = {
@@ -116,9 +121,59 @@ namespace DROWNINGLIU
 			head->totalPackage = totalNumber;
 			head->currentIndex = currentIndex;
 			head->perRoundNumber = perRoundNumber;
-			pthread_mutex_lock(&g_mutex_serial);
+			//pthread_mutex_lock(&g_mutex_serial);
 			head->seriaNumber = g_seriaNumber++;
-			pthread_mutex_unlock(&g_mutex_serial);
+			//pthread_mutex_unlock(&g_mutex_serial);
+		}
+
+		//对输入的数据进行转义
+		int  escape(char sign, char *inData, int inDataLenth, char *outData, int *outDataLenth)
+		{
+			int  ret = 0, i = 0;
+			//socket_log( SocketLevel[2], ret, "func escape() begin");
+			if (NULL == inData || inDataLenth <= 0)
+			{
+				//socket_log(SocketLevel[4], ret, "Error: NULL == inData || inDataLenth <= 0");
+				ret = -1;
+				goto End;
+			}
+
+			//printf("log------------------------1------------------\r\n");
+			char *tmpInData = inData;
+			char *tmpOutData = outData;
+			int  lenth = 0;
+
+			for (i = 0; i < inDataLenth; i++)
+			{
+				if (*tmpInData == sign)
+				{
+					*tmpOutData = 0x7d;
+					tmpOutData += 1;
+					*tmpOutData = 0x02;
+					lenth += 2;
+				}
+				else if (*tmpInData == 0x7d)
+				{
+					*tmpOutData = 0x7d;
+					tmpOutData += 1;
+					*tmpOutData = 0x01;
+					lenth += 2;
+				}
+				else
+				{
+					*tmpOutData = *tmpInData;
+					lenth += 1;
+				}
+				tmpOutData += 1;
+				tmpInData++;
+
+			}
+
+			*outDataLenth = lenth;
+
+		End:
+			//socket_log( SocketLevel[2], ret, "func escape() end");
+			return ret;
 		}
 
 		ScannerClient::ScannerClient()
@@ -253,8 +308,6 @@ namespace DROWNINGLIU
 			return 0;
 		}
 
-		
-
 		//登录数据包
 		//"1~15934098456~121544~"
 		int ScannerClient::login_func(const std::string &msg)
@@ -262,9 +315,9 @@ namespace DROWNINGLIU
 			int ret = 0;
 			char *tmp = NULL;
 			
-			uint8_t passWdSize;
-			reqPackHead_t head;
-			char *tmpSendPackDataOne = NULL, *sendPackData = NULL;
+			uint8_t passWdSize = 0;
+			reqPackHead_t head = { 0 };
+			//char *tmpSendPackDataOne = NULL, *sendPackData = NULL;
 			int  checkCode = 0, contenLenth = 0;
 			int outDataLenth = 0;
 
@@ -278,6 +331,7 @@ namespace DROWNINGLIU
 			if(3 != sscanf(msg.c_str(), "%d~%s~%s~", &cmd, szAccount, szPassword))
 				return -1;
 
+			passWdSize = strlen(szPassword);
 		//	size_t pos = msg.find(DIVISIONSIGN);
 		//	if (pos == std::string::npos)
 		//		return -1;
@@ -298,17 +352,22 @@ namespace DROWNINGLIU
 		//	memcpy(passWd, tmp + 1, strlen(tmp) - 2);				//获取密码
 		//	passWdSize = strlen(passWd);
 
+			type_data_t data;
+			char	*sendPackData = data.data();
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+
 			//2.申请内存
-			if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
-			{
-				//myprint("Error: func mem_pool_alloc()");
-				//assert(0);
-			}
-			if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
-			{
-				//myprint("Error: func mem_pool_alloc()");
-				//assert(0);
-			}
+			//if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+			//{
+			//	//myprint("Error: func mem_pool_alloc()");
+			//	//assert(0);
+			//}
+			//if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
+			//{
+			//	//myprint("Error: func mem_pool_alloc()");
+			//	//assert(0);
+			//}
 
 			//3.计算数据包总长度, 并组装报头
 			contenLenth = sizeof(reqPackHead_t) + ACCOUTLENTH + sizeof(char) + passWdSize;
@@ -318,10 +377,10 @@ namespace DROWNINGLIU
 			tmp = tmpSendPackDataOne;
 			memcpy(tmp, (char *)&head, sizeof(reqPackHead_t));
 			tmp += sizeof(reqPackHead_t);
-			memcpy(tmp, accout, ACCOUTLENTH);
+			memcpy(tmp, szAccount, ACCOUTLENTH);
 			tmp += ACCOUTLENTH;
 			*tmp++ = passWdSize;
-			memcpy(tmp, passWd, passWdSize);
+			memcpy(tmp, szPassword, passWdSize);
 
 			//5.计算校验码
 			checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
@@ -332,18 +391,21 @@ namespace DROWNINGLIU
 			*sendPackData = PACKSIGN;
 			if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData + 1, &outDataLenth)) < 0)
 			{
-				myprint("Error: func escape()");
-				assert(0);
+				//myprint("Error: func escape()");
+				//assert(0);
 			}
+
 			*(sendPackData + outDataLenth + sizeof(char)) = PACKSIGN;
 
 			//7.释放内存至内存池
-			if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
+			/*if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
 			{
 				myprint("Error: func mem_pool_free()");
 				assert(0);
-			}
-			if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, LOGINCMDREQ)) < 0)
+			}*/
+
+			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, LOGINCMDREQ)) < 0)
 			{
 				myprint("Error: func push_queue_send_block()");
 				assert(0);
@@ -352,13 +414,185 @@ namespace DROWNINGLIU
 			{
 				myprint("Error: func Pushback_node_index_listSendInfo()");
 				assert(0);
-			}
+			}*/
 
-			sem_post(&g_sem_cur_write);	//发送信号量, 通知发送线程
-			sem_wait(&g_sem_send);
+			//sem_post(&g_sem_cur_write);	//发送信号量, 通知发送线程
+			//sem_wait(&g_sem_send);
 
 			//socket_log(SocketLevel[2], ret, "func login_func() end: [%s] %p", news, sendPackData);
 
+
+			return ret;
+		}
+
+		//登出
+		int ScannerClient::exit_program(const std::string &msg)
+		{
+			int ret = 0;
+			reqPackHead_t head = { 0 };
+			//char *tmpSendPackDataOne = NULL, *sendPackData = NULL;
+			int	checkCode = 0;
+			int	outDataLenth = 0;
+
+			//1.组报头
+			assign_reqPack_head(&head, LOGOUTCMDREQ, sizeof(reqPackHead_t), NOSUBPACK, 0, 1, 1);
+
+			type_data_t data;
+			char	*sendPackData = data.data();
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+			//2.申请内存
+			/*if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}
+			if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}*/
+
+			//3.计算校验码
+			memcpy(tmpSendPackDataOne, (char *)&head, sizeof(reqPackHead_t));
+			checkCode = crc326((const  char*)tmpSendPackDataOne, head.contentLenth);
+			memcpy(tmpSendPackDataOne + sizeof(reqPackHead_t), (char *)&checkCode, sizeof(uint32_t));
+
+			//4.转义数据内容
+			*sendPackData = PACKSIGN;
+			if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData + 1, &outDataLenth)) < 0)
+			{
+				//myprint("Error: func escape()");
+				//assert(0);
+			}
+			
+			*(sendPackData + outDataLenth + 1) = PACKSIGN;
+
+			//5.释放临时内存, 并将发送地址和数据长度放入队列
+			/*if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
+			{
+				myprint("Error: func mem_pool_free()");
+				assert(0);
+			}*/
+
+			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, LOGOUTCMDREQ)) < 0)
+			{
+				myprint("Error: func push_queue_send_block()");
+				assert(0);
+			}
+			if ((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, 0, sendPackData, outDataLenth + sizeof(char) * 2, LOGOUTCMDREQ)) < 0)
+			{
+				myprint("Error: func Pushback_node_index_listSendInfo()");
+				assert(0);
+			}*/
+
+			//sem_post(&g_sem_cur_write);	//发送信号量, 通知发送线程
+			//sem_wait(&g_sem_send);
+
+
+			return ret;
+		}
+
+		//下载模板文件, cmd~type~ID~
+		int ScannerClient::download_file_fromServer(const std::string &msg)
+		{
+			int ret = 0;
+			reqPackHead_t head = { 0 };
+			//char *tmpSendPackDataOne = NULL, *sendPackData = NULL;
+			int  checkCode = 0;
+			int outDataLenth = 0, contentLenth = 0;
+			char *tmp = NULL, *tmpOut = NULL;
+			char IdBuf[65] = { 0 };
+			long long int fileid = 0;
+
+			//1.find The selected content
+			size_t pos = msg.find(DIVISIONSIGN);
+			if (pos == std::string::npos)
+				return -1;
+
+			std::string news = msg.substr(pos);
+			if (news.size() < 1)
+				return -1;
+			//if ((tmp = strchr(news, DIVISIONSIGN)) == NULL)
+			//{
+			//	//myprint("Error: func strstr() No find");
+			//	//assert(0);
+			//}
+			tmp = (char *)news.c_str();
+			tmp++;
+
+			type_data_t data;
+			char	*sendPackData = data.data();
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+			//2.alloc The memory block
+			/*if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}
+			if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}*/
+
+			//3.get The downLoad FileType And FileID
+			tmpOut = tmpSendPackDataOne + sizeof(reqPackHead_t);
+			if (*tmp == '0') 			
+				*tmpOut++ = 0;
+			else if (*tmp == '1')		
+				*tmpOut++ = 1;
+			else
+				return -1;//assert(0);
+
+			tmp += 2;
+			memcpy(IdBuf, tmp, strlen(tmp) - 1);
+			fileid = atoll(IdBuf);
+			memcpy(tmpOut, &fileid, sizeof(long long int));
+			contentLenth = sizeof(reqPackHead_t) + sizeof(char) * 65;
+
+			//5. package The head news
+			assign_reqPack_head(&head, DOWNFILEREQ, contentLenth, NOSUBPACK, 0, 1, 1);
+			memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
+
+			//6. calculation The checkCode
+			checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
+			tmp = tmpSendPackDataOne + head.contentLenth;
+			memcpy(tmp, (char *)&checkCode, sizeof(int));
+
+
+			//7. escape The origin Data
+			*sendPackData = PACKSIGN;
+			if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData + 1, &outDataLenth)) < 0)
+			{
+				//myprint("Error: func escape()");
+				//assert(0);
+			}
+			*(sendPackData + outDataLenth + 1) = PACKSIGN;
+
+			//8.free The tmp mempool block And push The sendData Addr and lenth in queue
+			/*if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
+			{
+				myprint("Error: func mem_pool_free()");
+				assert(0);
+			}*/
+
+			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, DOWNFILEREQ)) < 0)
+			{
+				myprint("Error: func push_queue_send_block()");
+				assert(0);
+			}*/
+			/*if ((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, 0, sendPackData, outDataLenth + sizeof(char) * 2, DOWNFILEREQ)) < 0)
+			{
+				myprint("Error: func Pushback_node_index_listSendInfo()");
+				assert(0);
+			}
+
+			sem_post(&g_sem_cur_write);
+			sem_wait(&g_sem_send);*/
 
 			return ret;
 		}
@@ -382,7 +616,7 @@ namespace DROWNINGLIU
 			while (1)
 			{
 				//sem_wait(&g_sem_business);			//等待信号量通知	
-				sem_wait(&g_sem_sequence);			//进行命令处理控制,必须一条命令处理完,返回结果给UI后, 再处理下一条命令
+				//sem_wait(&g_sem_sequence);			//进行命令处理控制,必须一条命令处理完,返回结果给UI后, 再处理下一条命令
 
 				//char 	cmdBuffer[BUFSIZE] = { 0 };	//取出队列中的命令
 				int		num = 0;
@@ -411,21 +645,21 @@ namespace DROWNINGLIU
 					//3.进行命令选择
 					switch (cmd) {
 					case 0x01:		//登录		
-						if ((ret = client.login_func(msg.c_str())) < 0)
-							//socket_log(SocketLevel[4], ret, "Error: data_packge() login_func");
+						if ((ret = client.login_func(msg)) < 0)
+							;//socket_log(SocketLevel[4], ret, "Error: data_packge() login_func");
 						break;
-//					case 0x02:		//登出
-//						if ((ret = data_packge(exit_program, cmdBuffer)) < 0)
-//							socket_log(SocketLevel[4], ret, "Error: data_packge() exit_program");
-//						break;
+					case 0x02:		//登出
+						if ((ret = client.exit_program(msg)) < 0)
+							;//socket_log(SocketLevel[4], ret, "Error: data_packge() exit_program");
+						break;
 //					case 0x03:		//心跳
 //						if ((ret = data_packge(heart_beat_program, cmdBuffer)) < 0)
 //							socket_log(SocketLevel[4], ret, "Error: data_packge() heart_beat_program");
 //						break;
-//					case 0x04:		//从服务器下载文件
-//						if ((ret = data_packge(download_file_fromServer, cmdBuffer)) < 0)
-//							socket_log(SocketLevel[4], ret, "Error: data_packge() download_template");
-//						break;
+					case 0x04:		//从服务器下载文件
+						if ((ret = client.download_file_fromServer(msg)) < 0)
+							;// socket_log(SocketLevel[4], ret, "Error: data_packge() download_template");
+						break;
 //					case 0x05:		//获取文件最新ID 
 //						if ((ret = data_packge(get_FileNewestID, cmdBuffer)) < 0)
 //							socket_log(SocketLevel[4], ret, "Error: data_packge() get_FileNewestID");

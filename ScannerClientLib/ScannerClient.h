@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <deque>
+#include <array>
 
 namespace DROWNINGLIU
 {
@@ -94,6 +95,8 @@ namespace DROWNINGLIU
 
 #pragma pack(pop)
 
+#define SEND_BUFFER 1500
+
 		class ScannerClient
 		{
 		public:
@@ -115,11 +118,16 @@ namespace DROWNINGLIU
 			*/
 			int  send_ui_data(char **buf);
 
+			typedef std::array<char, SEND_BUFFER>	type_data_t;
+
 			std::deque<std::string> _deqMsg;
+			std::deque<std::string> _deqSendData;
 
 			int copy_the_ui_cmd_news(const std::string &msg, std::string &news);
 
 			int  login_func(const std::string &msg);
+			int  exit_program(const std::string &msg);
+			int download_file_fromServer(const std::string &msg);
 		};
 
 	}
