@@ -2,6 +2,9 @@
 #include <string>
 #include <deque>
 #include <array>
+#include <vector>
+#include <thread>
+#include <mutex>
 
 namespace DROWNINGLIU
 {
@@ -100,8 +103,21 @@ namespace DROWNINGLIU
 		class ScannerClient
 		{
 		public:
-			ScannerClient();
-			virtual ~ScannerClient();
+			ScannerClient(bool &bStop) : _bStop(bStop)
+			{
+				_sendFileContent = NULL;
+			}
+
+			virtual ~ScannerClient()
+			{
+				if (_sendFileContent)
+					delete[] _sendFileContent;
+			}
+
+			bool &_bStop;
+			std::vector<std::thread>	_vctThreads;
+
+			int init();
 
 			/*从UI界面接收消息
 			*参数：news:接收的消息;  包含内容：1.该条消息的命令字，unsigned char型
@@ -121,13 +137,19 @@ namespace DROWNINGLIU
 			typedef std::array<char, SEND_BUFFER>	type_data_t;
 
 			std::deque<std::string> _deqMsg;
+
+			mutable std::mutex		_mtxSendData;	//consider using rwlock
 			std::deque<std::string> _deqSendData;
 
+			char	*_sendFileContent;
 			int copy_the_ui_cmd_news(const std::string &msg, std::string &news);
 
-			int  login_func(const std::string &msg);
-			int  exit_program(const std::string &msg);
+			int login_func(const std::string &msg);
+			int exit_program(const std::string &msg);
 			int download_file_fromServer(const std::string &msg);
+			int get_FileNewestID(const std::string &msg);
+			int upload_picture(const std::string &msg);
+			int send_perRounc_begin(int cmd, int totalPacka, int sendPackNumber);
 		};
 
 	}

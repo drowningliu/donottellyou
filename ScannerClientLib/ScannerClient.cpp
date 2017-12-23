@@ -176,13 +176,56 @@ namespace DROWNINGLIU
 			return ret;
 		}
 
-		ScannerClient::ScannerClient()
+		int ScannerClient::init()
 		{
-		}
+			auto do_write = [this]()
+			{
+				while (!_bStop)
+				{
+					bool hasData = false;
+					{
+						std::lock_guard<std::mutex> lock(_mtxSendData);
 
+						hasData = !_deqSendData.empty();
+						if (hasData)
+						{
+							//send data
+							Sleep(100);
 
-		ScannerClient::~ScannerClient()
-		{
+							std::string &data = _deqSendData.front();
+							data.size();
+							data.c_str();
+
+							_deqSendData.pop_front();
+#if 0
+							if (nSendLen == tmpSendLenth)
+							{
+								//3.发送成功, 缓存当前发送的数据包信息, (主要缓存最后一包)
+								g_lateSendPackNews.cmd = *sendCmd;
+								g_lateSendPackNews.sendAddr = tmpSend;
+								g_lateSendPackNews.sendLenth = tmpSendLenth;
+								time(&(g_lateSendPackNews.sendTime));
+
+								if (g_send_package_cmd == PUSHINFOREQ)
+								{
+									remove_senddataserver_addr();
+									sem_post(&g_sem_send);	//服务器推送消息成功应答后,通知进行下一包数据的发送 
+									goto End;
+								}
+							}
+#endif
+						}
+					}
+				}
+			};
+
+			_vctThreads.push_back(std::thread(do_write));
+
+			int numsaw = PERROUNDNUMBER * COMREQDATABODYLENTH;
+			if ((_sendFileContent = new char[numsaw]) == NULL)
+				return -1;
+
+			return 0;
 		}
 
 		unsigned int power(int x, int y)
@@ -403,8 +446,10 @@ namespace DROWNINGLIU
 				myprint("Error: func mem_pool_free()");
 				assert(0);
 			}*/
-
-			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			{
+				std::lock_guard<std::mutex> lock(_mtxSendData);
+				_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			}
 			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, LOGINCMDREQ)) < 0)
 			{
 				myprint("Error: func push_queue_send_block()");
@@ -474,8 +519,10 @@ namespace DROWNINGLIU
 				myprint("Error: func mem_pool_free()");
 				assert(0);
 			}*/
-
-			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			{
+				std::lock_guard<std::mutex> lock(_mtxSendData);
+				_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			}
 			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, LOGOUTCMDREQ)) < 0)
 			{
 				myprint("Error: func push_queue_send_block()");
@@ -578,8 +625,10 @@ namespace DROWNINGLIU
 				myprint("Error: func mem_pool_free()");
 				assert(0);
 			}*/
-
-			_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			{
+				std::lock_guard<std::mutex> lock(_mtxSendData);
+				_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			}
 			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, DOWNFILEREQ)) < 0)
 			{
 				myprint("Error: func push_queue_send_block()");
@@ -593,6 +642,437 @@ namespace DROWNINGLIU
 
 			sem_post(&g_sem_cur_write);
 			sem_wait(&g_sem_send);*/
+
+			return ret;
+		}
+
+		//Get The specify File type NewEst ID, cmd~type~
+		int ScannerClient::get_FileNewestID(const std::string &msg)
+		{
+			int ret = 0;
+			reqPackHead_t head = { 0 };
+			//char *tmpSendPackDataOne = NULL, *sendPackData = NULL;
+			int  checkCode = 0;
+			int outDataLenth = 0, contentLenth = 0;
+			char *tmp = NULL, *tmpOut = NULL;
+
+			//1.find The selected content
+			size_t pos = msg.find(DIVISIONSIGN);
+			if (pos == std::string::npos)
+				return -1;
+
+			std::string news = msg.substr(pos);
+			if (news.size() < 1)
+				return -1;
+			/*if ((tmp = strchr(news, DIVISIONSIGN)) == NULL)
+			{
+				myprint("Error: func strstr() No find");
+				assert(0);
+			}*/
+			tmp = (char *)news.c_str();
+			tmp++;
+
+			type_data_t data;
+			char	*sendPackData = data.data();
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+
+			//2.alloc The memory block
+			/*if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}
+			if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error: func mem_pool_alloc()");
+				assert(0);
+			}*/
+
+			//3.get The downLoad FileType
+			tmpOut = tmpSendPackDataOne + sizeof(reqPackHead_t);
+			if (*tmp == '0')
+				*tmpOut++ = 0;
+			else if (*tmp == '1')
+				*tmpOut++ = 1;
+			else
+				return -1;
+
+			contentLenth = sizeof(reqPackHead_t) + sizeof(char) * 1;
+
+			//4. package The head news
+			assign_reqPack_head(&head, NEWESCMDREQ, contentLenth, NOSUBPACK, 0, 1, 1);
+			memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
+
+			//6. calculation The checkCode
+			checkCode = crc326((const char*)tmpSendPackDataOne, head.contentLenth);
+			tmp = tmpSendPackDataOne + head.contentLenth;
+			memcpy(tmp, (char *)&checkCode, sizeof(int));
+
+			//7. escape The origin Data
+			*sendPackData = PACKSIGN;
+			if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(int), sendPackData + 1, &outDataLenth)) < 0)
+			{
+				//myprint("Error: func escape()");
+				//assert(0);
+			}
+
+			*(sendPackData + outDataLenth + 1) = PACKSIGN;
+
+			//8.free The tmp mempool block And push The sendData Addr and lenth in queue
+			/*if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
+			{
+				myprint("Error: func mem_pool_free()");
+				assert(0);
+			}*/
+			{
+				std::lock_guard<std::mutex> lock(_mtxSendData);
+				_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			}
+			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, NEWESCMDREQ)) < 0)
+			{
+				myprint("Error: func push_queue_send_block()");
+				assert(0);
+			}*/
+			/*if ((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, 0, sendPackData, outDataLenth + sizeof(char) * 2, NEWESCMDREQ)) < 0)
+			{
+				myprint("Error: func Pushback_node_index_listSendInfo()");
+				assert(0);
+			}*/
+
+			//sem_post(&g_sem_cur_write);
+			//sem_wait(&g_sem_send);
+
+			return ret;
+		}
+
+		/*获取文件分包的总包数和文件总大小
+		*@param : filePath 文件路径
+		*@param : number 计算出的分包数
+		*@param : contentLenth 分包的标准大小
+		*@param : fileSizeSrc 文件总大小
+		*@retval: 成功 0; 失败 -1;
+		*/
+		int get_file_size(const char *filePath, int *number, int contentLenth, unsigned long *fileSizeSrc)
+		{
+			int			ret = 0;
+			struct stat	statbuff;
+			unsigned long filesize = 0;
+			int remainder = 0;			//余数
+
+			if (!filePath)
+			{
+				ret = -1;
+				//socket_log(SocketLevel[4], ret, "Error: filePath == NULL");
+				return -1;
+			}
+
+			//1.获取文件大小
+			if (stat(filePath, &statbuff) < 0)
+			{
+				ret = -1;
+				//socket_log(SocketLevel[4], ret, "Error: func stat() %s", strerror(errno));
+				return -1;
+			}
+			else
+				filesize = statbuff.st_size;
+
+			//2.计算分包大小
+			if (number)
+			{
+				if ((remainder = filesize % contentLenth) > 0)
+					*number = filesize / contentLenth + 1;
+				else
+					*number = filesize / contentLenth;
+			}
+
+			//3.获取文件大小
+			if (fileSizeSrc)
+				*fileSizeSrc = filesize;
+
+			return ret;
+		}
+
+		//find The file name in The Absolute filepath
+		int find_file_name(char *fileName, int desLenth, const char *filePath)
+		{
+			int ret = 0;
+			const char *tmp = NULL;
+
+			tmp = filePath + strlen(filePath);
+
+			//linux : /
+			while (*tmp != '/' && *tmp != '\\')
+				--tmp;
+
+			tmp += 1;
+			desLenth > strlen(tmp) ? memcpy(fileName, tmp, strlen(tmp)) : memcpy(fileName, tmp, desLenth);
+
+			return ret;
+		}
+
+		//每轮数据开始发送之前 的总包(不携带具体数据)
+		int ScannerClient::send_perRounc_begin(int cmd, int totalPacka, int sendPackNumber)
+		{
+			reqPackHead_t  head;								//请求信息的报头
+			//char *sendPackData = NULL;							//发送数据包地址
+			//char tmpSendPackDataOne[PACKMAXLENTH] = { 0 };		//临时数据包地址长度
+			int checkCode = 0;									//校验码
+			char *tmp = NULL;
+			int ret = 0, outDataLenth = 0;
+
+			//1.组装报头
+			assign_reqPack_head(&head, cmd, sizeof(reqPackHead_t), NOSUBPACK, 0, totalPacka, sendPackNumber);
+
+			//2. 申请内存, 储存发送数据包
+			/*if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				myprint("Error : func mem_pool_alloc()");
+				assert(0);
+			}*/
+
+			type_data_t data;
+			char	*sendPackData = data.data();
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+
+			//3.计算数据校验码,
+			memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
+			checkCode = crc326((const char *)tmpSendPackDataOne, head.contentLenth);
+			tmp = tmpSendPackDataOne + head.contentLenth;
+			memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
+
+			//4. 转义数据包内容
+			*sendPackData = PACKSIGN;							 //flag 
+			if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData + 1, &outDataLenth)) < 0)
+			{
+				//myprint("Error : func escape()");
+				//assert(0);
+			}
+			*(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //flag 
+
+			//5. 将发送数据包放入队列, 通知发送线程
+			/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, cmd)) < 0)
+			{
+				myprint("Error : func push_queue_send_block()");
+				assert(0);
+			}*/
+
+			{
+				std::lock_guard<std::mutex> lock(_mtxSendData);
+				_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+			}
+
+			//6. 将发送数据放入链表			 
+			/*if ((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, 0, sendPackData, outDataLenth + sizeof(char) * 2, cmd)) < 0)
+			{
+				myprint("Error: func Pushback_node_index_listSendInfo()");
+				assert(0);
+			}*/
+
+			//sem_post(&g_sem_cur_write);
+			//sem_wait(&g_sem_send);
+
+			return ret;
+		}
+
+		//upload file content  6~liunx.c~	   The package cmd : 6
+		int ScannerClient::upload_picture(const std::string &msg)
+		{
+			int ret = 0, index = 0, i = 0;			//index : 当前文件包的序号
+			uint16_t  tmpTotalPack = 0, totalPacka = 0;				//发送文件所需要的总包数
+			char *tmp = NULL;
+			char filepath[250] = { 0 };				//发送文件的绝对路径
+			char fileName[100] = { 0 };				//发送的文件名
+			int  checkCode = 0;						//校验码	
+			int doucumentLenth = 0;				//每个包储存文件数据内容的最大字节数
+			int lenth = 0, packContenLenth = 0;		//lenth : 读取文件内容的长度, packContenLenth : 数据包的原始长度
+			//char *sendPackData = NULL;				//发送数据包的地址
+			//char *tmpSendPackDataOne = NULL;		//临时缓冲区的地址
+			int outDataLenth = 0;					//每个数据包的发送长度
+			FILE *fp = NULL;						//打开的文件句柄
+			reqPackHead_t  head = { 0 };					//请求信息的报头
+			int   sendPackNumber = 0;				//每轮发送数据的包数
+			int   nRead = 0;						//已经拷贝的数据总长度
+			int   copyLenth = 0;					//每次拷贝的数据长度
+			int  tmpLenth = 0;
+
+			//1. calculate The package store fileContent Max Lenth;  1369 - 46 = 1323
+			doucumentLenth = COMREQDATABODYLENTH - FILENAMELENTH;
+
+			//2.check The news style and find '~' position, copy The filePath
+			size_t pos = msg.find(DIVISIONSIGN);
+			if (pos == std::string::npos)
+				return -1;
+
+			std::string news = msg.substr(pos);
+			if (news.size() < 1)
+				return -1;
+			
+			tmp = (char *)news.c_str();
+			/*if ((tmp = strchr(news, '~')) == NULL)
+			{
+				myprint("Error : The content style is err : %s", news);
+				assert(0);
+			}*/
+			memcpy(filepath, tmp + 1, strlen(tmp) - 2);
+
+			//3.get The filepath totalPacka by doucumentLenth of part of the filecontent	
+			if ((ret = get_file_size(filepath, (int *)&totalPacka, doucumentLenth, NULL)) < 0)
+			{
+				//myprint("Error: func get_file_size()");
+				//assert(0);
+			}
+			tmpTotalPack = totalPacka;
+
+			//4.find The fileName and open The file
+			if ((ret = find_file_name(fileName, sizeof(fileName), filepath)) < 0)
+			{
+				//myprint("Error: func find_file_name()");
+				//assert(0);
+			}
+			if ((fp = fopen(filepath, "rb")) == NULL)
+			{
+				//myprint("Error: func fopen() : %s", filepath);
+				//assert(0);
+			}
+
+			char	tmpSendPackDataOne[SEND_BUFFER] = { 0 };
+			//5.allock The block buffer in memory Pool
+			/*if ((tmpSendPackDataOne = mem_pool_alloc(g_memPool)) == NULL)
+			{
+				ret = -1;
+				myprint("Error: func mem_pool_alloc() ");
+				assert(0);
+			}*/
+
+			//6. operation The file content and package
+			while (!feof(fp))
+			{
+				//7.计算每轮发送的总包数
+				if (tmpTotalPack > PERROUNDNUMBER)
+					sendPackNumber = PERROUNDNUMBER;
+				else
+					sendPackNumber = tmpTotalPack;
+
+				//8.读取每轮发送文件的所有内容
+				
+				memset(_sendFileContent, 0, PERROUNDNUMBER * COMREQDATABODYLENTH);
+				while (lenth < sendPackNumber * doucumentLenth && !feof(fp))
+				{
+					if ((tmpLenth = fread(_sendFileContent + lenth, 1, sendPackNumber * doucumentLenth - lenth, fp)) < 0)
+					{
+						//myprint("Error : func fread() : %s", filepath);
+						//assert(0);
+					}
+
+					lenth += tmpLenth;
+				}
+
+				send_perRounc_begin(UPLOADCMDREQ, totalPacka, sendPackNumber);
+				if (g_residuePackNoNeedSend)
+				{
+					g_residuePackNoNeedSend = false;
+					goto End;
+				}
+				if (g_err_flag)
+				{
+					goto End;
+				}
+
+				//9.对本轮的数据进行组包
+				for (i = 0; i < sendPackNumber; i++)
+				{
+					//10.拷贝文件名称
+					tmp = tmpSendPackDataOne + sizeof(reqPackHead_t);
+					memcpy(tmp, fileName, FILENAMELENTH);
+					tmp += FILENAMELENTH;
+
+					//11.拷文件数据
+					copyLenth = MY_MIN(lenth, doucumentLenth);
+					memcpy(tmp, _sendFileContent + nRead, copyLenth);
+					nRead += copyLenth;
+					lenth -= copyLenth;
+
+					//12. 计算数据包原始长度, 并初始化报头
+					packContenLenth = sizeof(reqPackHead_t) + FILENAMELENTH + copyLenth;
+					assign_reqPack_head(&head, UPLOADCMDREQ, packContenLenth, SUBPACK, index, totalPacka, sendPackNumber);
+
+					//13. 申请内存, 储存发送数据包
+					type_data_t data;
+					char	*sendPackData = data.data();
+					/*if ((sendPackData = mem_pool_alloc(g_memPool)) == NULL)
+					{
+						myprint("Error : func mem_pool_alloc()");
+						assert(0);
+					}*/
+
+					//14.计算数据校验码,
+					memcpy(tmpSendPackDataOne, &head, sizeof(reqPackHead_t));
+					checkCode = crc326((const char *)tmpSendPackDataOne, head.contentLenth);
+					tmp = tmpSendPackDataOne + head.contentLenth;
+					memcpy(tmp, (char *)&checkCode, sizeof(uint32_t));
+
+					//15. 转义数据包内容
+					*sendPackData = PACKSIGN;							 //flag 
+					if ((ret = escape(PACKSIGN, tmpSendPackDataOne, head.contentLenth + sizeof(uint32_t), sendPackData + 1, &outDataLenth)) < 0)
+					{
+						//myprint("Error : func escape()");
+						//assert(0);
+					}
+					*(sendPackData + outDataLenth + 1) = PACKSIGN; 	 //flag 
+
+					//16. 将发送数据包放入队列, 通知发送线程
+					{
+						std::lock_guard<std::mutex> lock(_mtxSendData);
+						_deqSendData.push_back(std::string(sendPackData, outDataLenth + sizeof(char) * 2));
+					}
+					/*if ((ret = push_queue_send_block(g_queue_sendDataBlock, sendPackData, outDataLenth + sizeof(char) * 2, UPLOADCMDREQ)) < 0)
+					{
+						myprint("Error : func push_queue_send_block()");
+						assert(0);
+					}*/
+
+					/*if ((ret = Pushback_node_index_listSendInfo(g_list_send_dataInfo, index, sendPackData, outDataLenth + sizeof(char) * 2, UPLOADCMDREQ)) < 0)
+					{
+						myprint("Error: func Pushback_node_index_listSendInfo()");
+						assert(0);
+					}*/
+
+					index += 1;
+					//sem_post(&g_sem_cur_write);
+				}
+
+				//17.一轮数据发送完毕, 进行全局数据的计算
+				nRead = 0;
+				tmpTotalPack -= sendPackNumber;
+				lenth = 0;
+
+				//18.等待信号通知, 并检查是否还需要下一轮的组包
+				//sem_wait(&g_sem_send);
+				if (g_residuePackNoNeedSend)
+				{
+					g_residuePackNoNeedSend = false;
+					goto End;
+				}
+				if (g_err_flag)
+				{
+					goto End;
+				}
+			}
+
+		End:
+			//19. 情况资源, 释放临时内存和文件描述符
+			/*if ((ret = mem_pool_free(g_memPool, tmpSendPackDataOne)) < 0)
+			{
+				myprint("Error : func mem_pool_free()");
+				assert(0);
+			}*/
+			if (fp)
+			{
+				fclose(fp);
+				fp = NULL;
+			}
 
 			return ret;
 		}
@@ -722,6 +1202,280 @@ namespace DROWNINGLIU
 		//	socket_log(SocketLevel[3], ret, "func thid_business() end");
 
 			return	NULL;
+		}
+
+		//function: find  the whole packet; retval maybe error
+		int	data_unpack_process(int recvLenth)
+		{
+			int ret = 0, tmpContentLenth = 0;
+			static int flag = 0, lenth = 0; 	//flag 标识找到标识符的数量;  lenth : 数据的长度
+			char buffer[2] = { 0 };
+			static char content[3000] = { 0 };	//
+			char tmpContent[1500] = { 0 }; 		//tmpBufFlag[15] = { 0 };
+			char *tmp = NULL;
+
+			tmp = content + lenth;
+			while (recvLenth > 0)
+			{
+				while (1)
+				{
+
+					//1. jurge current fifo is empty
+					if (get_fifo_element_count(g_fifo) == 0)
+					{
+						goto End;
+					}
+					//2. get The fifo element
+					if ((ret = pop_fifo(g_fifo, (char *)buffer, 1)) < 0)
+					{
+						myprint("Error: func pop_fifo() ");
+						assert(0);
+					}
+					//3.flag : have find The whole package head 
+					if (*buffer == 0x7e && flag == 0)
+					{
+						flag = 1;
+						continue;
+					}
+					else if (*buffer == 0x7e && flag == 1)	//4. flag : have find The whole package 
+					{
+						//4. anti escape recv data
+						if ((ret = anti_escape(content, lenth, tmpContent, &tmpContentLenth)) < 0)
+						{
+							myprint("Error: func anti_escape() no have data");
+							goto End;
+						}
+
+						if ((ret = compare_recvData_Correct(tmpContent, tmpContentLenth)) == 0)
+						{
+							//5. 数据包正确,处理数据包
+							//socket_log(SocketLevel[2], ret, "------ func compare_recvData_Correct() OK ------");
+
+							if ((deal_with_pack(tmpContent, tmpContentLenth)) < 0)
+							{
+								myprint("Error: func deal_with_pack()");
+								assert(0);
+							}
+
+							//6.清空临时变量
+							memset(content, 0, sizeof(content));
+							memset(tmpContent, 0, sizeof(tmpContent));
+							recvLenth -= (lenth + 2);
+							lenth = 0;
+							flag = 0;
+							tmp = content + lenth;
+							break;
+						}
+						else if (ret == -1)
+						{
+							//接收的数据包校验码出错, 需要服务器重新发送数据
+							myprint("Error: func compare_recvData_Correct()");
+							//7. clear the variable
+							memset(content, 0, sizeof(content));
+							memset(tmpContent, 0, sizeof(tmpContent));
+							recvLenth -= (lenth + 2);
+							lenth = 0;
+							flag = 0;
+							tmp = content + lenth;
+
+							//8.遍历整个链表, 修改流水号, 重新所有发送数据				
+							trave_LinkListSendInfo(g_list_send_dataInfo, modify_listNodeNews);
+							ret = 0;			//此处被修改, 增加, 很重要  2017.04.21
+							break;
+						}
+						else if (ret == -2)
+						{
+							//socket_log(SocketLevel[2], ret, "compare_recvData_Correct() ret : %d", ret);
+							//9.接收的数据包 长度和流水号不正确, 不需要重新发送数据
+							//clear the variable
+							memset(content, 0, sizeof(content));
+							memset(tmpContent, 0, sizeof(tmpContent));
+							recvLenth -= (lenth + 2);
+							lenth = 0;
+							flag = 0;
+							tmp = content + lenth;
+							break;
+						}
+					}
+					else if (*buffer != 0x7e && flag == 1)
+					{
+						//10. training in rotation
+						*tmp++ = *buffer;
+						lenth += 1;
+						continue;
+					}
+					else
+					{
+						*tmp++ = *buffer;
+						lenth += 1;
+						continue;
+					}
+				}
+
+			}
+
+		End:
+			return ret;
+		}
+
+		/*unpack The data */
+		int thid_unpack_thread(void *arg)
+		{
+			int   ret = 0;
+			//pthread_detach(pthread_self());
+
+			while (1)
+			{
+				//1. wait The semaphore
+				//sem_wait(&g_sem_unpack);
+
+				//2. unpack The Queue Data
+				if ((ret = data_unpack_process(get_fifo_element_count(g_fifo))) < 0)
+				{
+					//myprint("Error: func data_unpack_process()");
+				}
+
+			}
+			//pthread_exit(NULL);
+			return 0;
+		}
+
+
+		//接收数据; success 0;  fail -1;
+		int recv_data(int sockfd)
+		{
+			int ret = 0, recvLenth = 0, number = 0;
+			char buf[PACKMAXLENTH * 2] = { 0 };
+			static int nRead = 0;
+
+			while (1)
+			{
+				//1.选择接收数据的方式
+				if (g_encrypt == false)
+				{
+					recvLenth = read(g_sockfd, buf, sizeof(buf));
+				}
+				else if (g_encrypt)
+				{
+					//			recvLenth = SSL_read(g_sslHandle, buf, sizeof(buf));
+				}
+				nRead += recvLenth;;
+				if (recvLenth < 0)
+				{
+					//2.接收数据失败
+					if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+					{
+						continue;
+					}
+					else
+					{
+						ret = -1;
+						myprint("Err : func recv() from server !!!");
+						goto End;
+					}
+				}
+				else if (recvLenth == 0)
+				{
+					//3.服务器已关闭
+					ret = -1;
+					myprint("The server has closed !!!");
+					goto End;
+				}
+				else if (recvLenth > 0)
+				{
+					//4.接收数据成功
+					do {
+						//5.将数据放入队列中
+						ret = push_fifo(g_fifo, buf, recvLenth);
+						if (ret == -1)
+						{
+							myprint("err : func push_fifo()");
+							goto End;
+						}
+						else if (ret == -2)
+						{
+							number += 1;
+							sleep(1);
+						}
+
+					} while (ret == -2 && number < 3);
+
+					if (ret == -2)
+					{
+						ret = -1;
+						myprint("err : func push_fifo() full");
+						goto End;
+					}
+
+					//6.释放信号量, 通知解包线程
+					sem_post(&g_sem_unpack);
+
+					goto End;
+				}
+			}
+
+		End:
+			return ret;
+		}
+
+		//接收数据线程
+		int thid_server_func_read(void *arg)
+		{
+			int ret = 0;
+			int num = 0;
+
+			//1.分离线程
+			//pthread_detach(pthread_self());
+
+			while (1)
+			{
+				//2.等待信号量通知, 已链接上服务器, 可以进行数据接收
+				//sem_wait(&g_sem_read_open);
+
+				while (1)
+				{
+					//3.接收数据
+					if ((ret = recv_data(g_sockfd)) < 0)
+					{
+						//4.接收数据出错
+						if (g_sockfd > 0)
+						{
+							close(g_sockfd);
+							g_sockfd = 0;
+						}
+
+						//5.主动关闭或销毁网络, 不需要进行出错回复
+						if (g_close_net == 1 || g_close_net == 2)
+						{
+							clear_global(1);
+							myprint("The UI active shutdown NET in read thread");
+							break;
+						}
+						else if (g_close_net == 0)
+						{
+
+							//6.进行出错回复				
+							do {
+								if ((ret = error_net(1)) < 0)		//网络出错后, 给UI 端回复
+								{
+									myprint("Error: func error_net()");
+									sleep(1);
+									num++;			//继续进行发送
+								}
+								else				//发送成功,
+								{
+									num = 0;
+									break;
+								}
+							} while (num < 2);
+
+							break;
+						}
+					}
+				}
+			}
+
+			//pthread_exit(NULL);
 		}
 	}
 }
