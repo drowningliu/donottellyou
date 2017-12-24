@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testVirtualTwain", "testVir
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScannerClientLib", "ScannerClientLib\ScannerClientLib.vcxproj", "{12D3878E-D5F4-4D98-87F7-CAFB767392BD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bluevp2psvrlib", "..\..\svn\bluevision\bluevp2psvrlib_demo1.0\bluevp2psvrlib.vcxproj", "{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -71,6 +73,12 @@ Global
 		{12D3878E-D5F4-4D98-87F7-CAFB767392BD}.Release|x64.Build.0 = Release|x64
 		{12D3878E-D5F4-4D98-87F7-CAFB767392BD}.Release|x86.ActiveCfg = Release|Win32
 		{12D3878E-D5F4-4D98-87F7-CAFB767392BD}.Release|x86.Build.0 = Release|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Debug|x64.ActiveCfg = Debug|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Debug|x86.ActiveCfg = Debug|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Debug|x86.Build.0 = Debug|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Release|x64.ActiveCfg = Release|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Release|x86.ActiveCfg = Release|Win32
+		{C15D6181-BF25-4C8C-B5A6-336D4D067C4A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

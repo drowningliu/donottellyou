@@ -106,6 +106,7 @@ namespace DROWNINGLIU
 			ScannerClient(bool &bStop) : _bStop(bStop)
 			{
 				_sendFileContent = NULL;
+				_sockfd = INVALID_SOCKET;
 			}
 
 			virtual ~ScannerClient()
@@ -136,12 +137,17 @@ namespace DROWNINGLIU
 
 			typedef std::array<char, SEND_BUFFER>	type_data_t;
 
+			//ui命令队列
 			std::deque<std::string> _deqMsg;
 
+			//发送数据队列
 			mutable std::mutex		_mtxSendData;	//consider using rwlock
 			std::deque<std::string> _deqSendData;
 
+			//upload_picture file buf
 			char	*_sendFileContent;
+
+
 			int copy_the_ui_cmd_news(const std::string &msg, std::string &news);
 
 			int login_func(const std::string &msg);
@@ -150,6 +156,13 @@ namespace DROWNINGLIU
 			int get_FileNewestID(const std::string &msg);
 			int upload_picture(const std::string &msg);
 			int send_perRounc_begin(int cmd, int totalPacka, int sendPackNumber);
+
+			//接收数据队列
+			mutable std::mutex		_mtxRecvData;	//consider using rwlock
+			std::deque<std::string> _deqRecvData;
+			SOCKET	_sockfd;
+
+			int recv_data();
 		};
 
 	}

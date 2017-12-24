@@ -178,6 +178,7 @@ namespace DROWNINGLIU
 
 		int ScannerClient::init()
 		{
+			//发送线程
 			auto do_write = [this]()
 			{
 				while (!_bStop)
@@ -219,7 +220,69 @@ namespace DROWNINGLIU
 				}
 			};
 
+			//接收线程
+			//接收数据线程
+			auto do_read = [this]()
+			{
+				int ret = 0;
+				int num = 0;
+
+				//1.分离线程
+				//pthread_detach(pthread_self());
+
+				while (1)
+				{
+					//2.等待信号量通知, 已链接上服务器, 可以进行数据接收
+					//sem_wait(&g_sem_read_open);
+
+					while (1)
+					{
+						//3.接收数据
+						if ((ret = recv_data()) < 0)
+						{
+							//4.接收数据出错
+							if (_sockfd != INVALID_SOCKET)
+							{
+								closesocket(_sockfd);
+								_sockfd = INVALID_SOCKET;
+							}
+
+							//5.主动关闭或销毁网络, 不需要进行出错回复
+							if (g_close_net == 1 || g_close_net == 2)
+							{
+								clear_global(1);
+								myprint("The UI active shutdown NET in read thread");
+								break;
+							}
+							else if (g_close_net == 0)
+							{
+
+								//6.进行出错回复				
+								do {
+									if ((ret = error_net(1)) < 0)		//网络出错后, 给UI 端回复
+									{
+										//myprint("Error: func error_net()");
+										Sleep(1000);
+										num++;			//继续进行发送
+									}
+									else				//发送成功,
+									{
+										num = 0;
+										break;
+									}
+								} while (num < 2);
+
+								break;
+							}
+						}
+					}
+				}
+
+				//pthread_exit(NULL);
+			};
+
 			_vctThreads.push_back(std::thread(do_write));
+			_vctThreads.push_back(std::thread(do_read));
 
 			int numsaw = PERROUNDNUMBER * COMREQDATABODYLENTH;
 			if ((_sendFileContent = new char[numsaw]) == NULL)
@@ -1140,15 +1203,14 @@ namespace DROWNINGLIU
 						if ((ret = client.download_file_fromServer(msg)) < 0)
 							;// socket_log(SocketLevel[4], ret, "Error: data_packge() download_template");
 						break;
-//					case 0x05:		//获取文件最新ID 
-//						if ((ret = data_packge(get_FileNewestID, cmdBuffer)) < 0)
-//							socket_log(SocketLevel[4], ret, "Error: data_packge() get_FileNewestID");
-//						break;
-//
-//					case 0x06:		//上传图片
-//						if ((ret = data_packge(upload_picture, cmdBuffer)) < 0)
-//							socket_log(SocketLevel[4], ret, "Error: data_packge() upload_picture");
-//						break;
+					case 0x05:		//获取文件最新ID 
+						if ((ret = client.get_FileNewestID(msg)) < 0)
+							;//socket_log(SocketLevel[4], ret, "Error: data_packge() get_FileNewestID");
+						break;
+					case 0x06:		//上传图片
+						if ((ret = client.upload_picture(msg)) < 0)
+							;// socket_log(SocketLevel[4], ret, "Error: data_packge() upload_picture");
+						break;
 //#if 1					
 //					case 0x07:		//消息推送
 //						if ((ret = data_packge(push_info_from_server_reply, cmdBuffer)) < 0)
@@ -1330,7 +1392,7 @@ namespace DROWNINGLIU
 				//sem_wait(&g_sem_unpack);
 
 				//2. unpack The Queue Data
-				if ((ret = data_unpack_process(get_fifo_element_count(g_fifo))) < 0)
+				if ((ret = data_unpack_process()) < 0)
 				{
 					//myprint("Error: func data_unpack_process()");
 				}
@@ -1342,23 +1404,17 @@ namespace DROWNINGLIU
 
 
 		//接收数据; success 0;  fail -1;
-		int recv_data(int sockfd)
+		int ScannerClient::recv_data()
 		{
-			int ret = 0, recvLenth = 0, number = 0;
-			char buf[PACKMAXLENTH * 2] = { 0 };
+			int ret = 0, recvLenth = 0;
+			char buf[SEND_BUFFER * 2] = { 0 };
 			static int nRead = 0;
 
-			while (1)
+			while (!_bStop)
 			{
 				//1.选择接收数据的方式
-				if (g_encrypt == false)
-				{
-					recvLenth = read(g_sockfd, buf, sizeof(buf));
-				}
-				else if (g_encrypt)
-				{
-					//			recvLenth = SSL_read(g_sslHandle, buf, sizeof(buf));
-				}
+				recvLenth = recv(_sockfd, buf, sizeof(buf), 0);
+				
 				nRead += recvLenth;;
 				if (recvLenth < 0)
 				{
@@ -1370,7 +1426,7 @@ namespace DROWNINGLIU
 					else
 					{
 						ret = -1;
-						myprint("Err : func recv() from server !!!");
+						//myprint("Err : func recv() from server !!!");
 						goto End;
 					}
 				}
@@ -1378,38 +1434,23 @@ namespace DROWNINGLIU
 				{
 					//3.服务器已关闭
 					ret = -1;
-					myprint("The server has closed !!!");
+					//myprint("The server has closed !!!");
 					goto End;
 				}
 				else if (recvLenth > 0)
 				{
 					//4.接收数据成功
-					do {
-						//5.将数据放入队列中
-						ret = push_fifo(g_fifo, buf, recvLenth);
-						if (ret == -1)
-						{
-							myprint("err : func push_fifo()");
-							goto End;
-						}
-						else if (ret == -2)
-						{
-							number += 1;
-							sleep(1);
-						}
 
-					} while (ret == -2 && number < 3);
-
-					if (ret == -2)
+					//5.将数据放入队列中
 					{
-						ret = -1;
-						myprint("err : func push_fifo() full");
-						goto End;
+						std::lock_guard<std::mutex> lock(_mtxRecvData);
+						_deqRecvData.push_back(std::string(buf, recvLenth));
 					}
+					//ret = push_fifo(g_fifo, buf, recvLenth);
 
 					//6.释放信号量, 通知解包线程
-					sem_post(&g_sem_unpack);
-
+					//sem_post(&g_sem_unpack);
+					ret = 0;
 					goto End;
 				}
 			}
@@ -1418,64 +1459,6 @@ namespace DROWNINGLIU
 			return ret;
 		}
 
-		//接收数据线程
-		int thid_server_func_read(void *arg)
-		{
-			int ret = 0;
-			int num = 0;
-
-			//1.分离线程
-			//pthread_detach(pthread_self());
-
-			while (1)
-			{
-				//2.等待信号量通知, 已链接上服务器, 可以进行数据接收
-				//sem_wait(&g_sem_read_open);
-
-				while (1)
-				{
-					//3.接收数据
-					if ((ret = recv_data(g_sockfd)) < 0)
-					{
-						//4.接收数据出错
-						if (g_sockfd > 0)
-						{
-							close(g_sockfd);
-							g_sockfd = 0;
-						}
-
-						//5.主动关闭或销毁网络, 不需要进行出错回复
-						if (g_close_net == 1 || g_close_net == 2)
-						{
-							clear_global(1);
-							myprint("The UI active shutdown NET in read thread");
-							break;
-						}
-						else if (g_close_net == 0)
-						{
-
-							//6.进行出错回复				
-							do {
-								if ((ret = error_net(1)) < 0)		//网络出错后, 给UI 端回复
-								{
-									myprint("Error: func error_net()");
-									sleep(1);
-									num++;			//继续进行发送
-								}
-								else				//发送成功,
-								{
-									num = 0;
-									break;
-								}
-							} while (num < 2);
-
-							break;
-						}
-					}
-				}
-			}
-
-			//pthread_exit(NULL);
-		}
+		
 	}
 }
