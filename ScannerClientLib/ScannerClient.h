@@ -163,6 +163,7 @@ namespace DROWNINGLIU
 			SOCKET	_sockfd;
 
 			int recv_data();
+			int	data_unpack_process(int recvLenth);
 		};
 
 	}

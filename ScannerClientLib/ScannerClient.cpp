@@ -1266,33 +1266,342 @@ namespace DROWNINGLIU
 			return	NULL;
 		}
 
+		//对输入的数据进行解转义,  该函数中都是主调函数分配内存
+		int	anti_escape(char *inData, int inDataLenth, char *outData, int *outDataLenth)
+		{
+			int  ret = 0, i = 0;
+
+			//socket_log( SocketLevel[2], ret, "func anti_escape() begin");
+			if (NULL == inData || inDataLenth <= 0)
+			{
+				//socket_log(SocketLevel[4], ret, "Error: inData : %p, || inDataLenth : %d", inData, inDataLenth);
+				ret = -1;
+				goto End;
+			}
+
+			char *tmpInData = inData;
+			char *tmp = ++inData;
+			char *tmpOutData = outData;
+			int  lenth = 0;
+
+			for (i = 0; i < inDataLenth; i++)
+			{
+				if (*tmpInData == 0x7d && *tmp == 0x01)
+				{
+					*tmpOutData = 0x7d;
+					++tmpInData;
+					++tmp;
+					lenth += 1;
+					i++;
+				}
+				else if (*tmpInData == 0x7d && *tmp == 0x02)
+				{
+					*tmpOutData = 0x7e;
+					++tmpInData;
+					++tmp;
+					lenth += 1;
+					i++;
+				}
+				else
+				{
+					*tmpOutData = *tmpInData;
+					lenth += 1;
+				}
+
+				++tmpOutData;
+				++tmpInData;
+				++tmp;
+			}
+			
+			*outDataLenth = lenth;
+		End:
+			//socket_log( SocketLevel[2], ret, "func anti_escape() end");
+			return ret;
+		}
+
+		/*比较数据包接收是否正确
+		*@param : tmpContent		数据包转义后的数据
+		*@param : tmpContentLenth	转义后数据的长度, 包含: 报头 + 信息 + 校验码
+		*@retval: success 0, repeat : -1, Noreapt : -2
+		*/
+		int compare_recvData_Correct(char *tmpContent, int tmpContentLenth)
+		{
+			int ret = 0;
+			int checkCode = 0;					//本地计算校验码
+			int *tmpCheckCode = NULL;			//缓存服务器的校验码
+			uint8_t cmd = 0;					//接收数据包命令
+			resCommonHead_t		*comHead = NULL;	//普通应答报头
+			resSubPackHead_t	*subHead = NULL;	//下载服务器文件的报头
+
+			//1.获取接收数据包的命令字
+			cmd = *((uint8_t *)tmpContent);
+
+			//2.进行命令字的选择
+			if (cmd != DOWNFILEZRESPON)
+			{
+				//3. 获取接收数据的报头信息
+				comHead = (resCommonHead_t *)tmpContent;
+
+				//4. 数据包长度比较
+				if (comHead->contentLenth + sizeof(int) == tmpContentLenth)
+				{
+					if (cmd == LOGINCMDRESPON)
+					{
+						g_recvSerial = comHead->seriaNumber;  //第一次接收数据, 获取服务器的流水号储存
+					}
+
+					//5.长度正确, 进行流水号比较, 去除重包			
+					if (comHead->seriaNumber >= g_recvSerial)
+					{
+						//6.流水号正确,进行校验码比较
+						tmpCheckCode = (int *)(tmpContent + tmpContentLenth - sizeof(uint32_t));
+						checkCode = crc326(tmpContent, tmpContentLenth - sizeof(uint32_t));
+						if (checkCode == *tmpCheckCode)
+						{
+							//7.校验码正确, 整个数据包正确
+							g_recvSerial = comHead->seriaNumber + 1;		//流水号往下移动					
+							ret = 0;
+						}
+						else
+						{
+							//8.校验码错误, 数据包需要重发
+							//myprint("Error: cmd : %d, contentLenth : %d, package serial : %u checkCode : %u != *tmpCheckCode : %u",
+							//	cmd, comHead->contentLenth, comHead->seriaNumber, checkCode, *tmpCheckCode);
+							ret = -1;
+						}
+					}
+					else
+					{
+						//9.流水号出错, 不需要重发
+						//socket_log(SocketLevel[3], ret, "Err : cmd : %d, package serial : %u, loacl ServerSerial : %u",
+						//	cmd, comHead->seriaNumber, g_recvSerial);
+						ret = -2;
+					}
+				}
+				else
+				{
+					//10.数据长度出错, 不需要重发
+					//socket_log(SocketLevel[3], ret, "Err : cmd : %d, package Lenth : %d != recvLenth : %d, package serial : %u",
+					//	cmd, comHead->contentLenth + sizeof(int), tmpContentLenth, comHead->seriaNumber);
+					ret = -2;
+				}
+			}
+			else	//从服务器下载文件
+			{
+				subHead = (resSubPackHead_t *)tmpContent;
+
+				//11.数据包长度比较
+				if (subHead->contentLenth + sizeof(int) == tmpContentLenth)
+				{
+					//12.数据包长度正确, 比较流水号, 去除重包
+					if (g_recvSerial <= subHead->seriaNumber)
+					{
+
+						//14.流水号正确,进行校验码比较
+						tmpCheckCode = (int *)(tmpContent + tmpContentLenth - sizeof(uint32_t));
+						checkCode = crc326(tmpContent, tmpContentLenth - sizeof(uint32_t));
+						if (*tmpCheckCode == checkCode)
+						{
+							//15.校验码正确, 这个数据包正确
+							g_recvSerial = subHead->seriaNumber + 1;		//流水号往下移动					
+							ret = 0;
+						}
+						else
+						{
+							//16.校验码出错, 需要重发数据包						
+							//myprint("Error: cmd : %d, package serial : %u checkCode : %u != *tmpCheckCode : %u",
+							//	cmd, subHead->seriaNumber, checkCode, *tmpCheckCode);
+							ret = -1;
+						}
+					}
+					else
+					{
+						//17.流水号出错, 不需要重发
+						//socket_log(SocketLevel[3], ret, "Err : cmd : %d, package serial : %u, loacl ServerSerial : %u",
+						//	cmd, subHead->seriaNumber, g_seriaNumber);
+						ret = -2;
+					}
+				}
+				else
+				{
+					//18.数据长度出错, 不需要重发
+					//socket_log(SocketLevel[3], ret, "Err : cmd : %d, package Lenth : %d != recvLenth : %d, package serial : %u",
+					//	cmd, subHead->contentLenth + sizeof(int), tmpContentLenth, subHead->seriaNumber);
+					ret = -2;
+				}
+			}
+
+			return ret;
+		}
+
+		void repeat_latePack()
+		{
+			int newSendLenth = 0;
+
+			//1.需要重发最后一包数据, 修改它的流水号
+			//modify_repeatPackSerialNews(g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, &newSendLenth);
+
+			////2.重新赋值数据包长度, 并加入队列
+			//g_lateSendPackNews.sendLenth = newSendLenth;
+			//if ((push_queue_send_block(g_queue_sendDataBlock, g_lateSendPackNews.sendAddr, g_lateSendPackNews.sendLenth, g_lateSendPackNews.cmd)) < 0)
+			//{
+			//	myprint("Error : func push_queue_send_block()");
+			//	assert(0);
+			//}
+
+			//3.释放信号量,通知发送数据线程继续发送
+			//sem_post(&g_sem_cur_write);
+		}
+
+		/*普通命令的 应答包处理,(此处指: 客户端的一个命令 只对应 服务器的一个应答包)
+		*@param : tmpContent		数据包转义后的数据
+		*@param : tmpContentLenth	转义后数据的长度, 包含: 报头 + 信息 + 校验码
+		*@retval: success 0,
+		*/
+		int commom_respcommand_func(char *tmpContent, int tmpContentLenth)
+		{
+			int ret = 0;
+			resCommonHead_t  *comHead = NULL;	//普通应答报头
+			char *tmpPool = NULL;				//内存块
+
+			//1.获取应答的报头信息
+			comHead = (resCommonHead_t*)tmpContent;
+
+			//2.判断数据包是否发送过程中, 信息出错
+			if (comHead->isFailPack == 1)
+			{
+				//3.发送过程中, 信息出错, 指校验码信息, 重发该数据包, 相当于最后一包
+				repeat_latePack();
+			}
+			else
+			{
+				//5.申请内存
+				if ((tmpPool = mem_pool_alloc(g_memPool)) == NULL)
+				{
+					ret = -1;
+					myprint("Error: func mem_pool_alloc() ");
+					assert(0);
+				}
+				memcpy(tmpPool, tmpContent, tmpContentLenth);
+
+				//6.将内容储存进 队列,通知给UI回复
+				if ((ret = push_queue(g_queueRecv, tmpPool)) < 0)
+				{
+					myprint("Error: func push_queue() ");
+					mem_pool_free(g_memPool, tmpPool);
+					assert(0);
+				}
+				sem_post(&g_sem_cur_read);
+
+				//7.将发送内容从链表中清除(因为本函数中, 所有的客户端命令都只对应一个应答包, 所以直接清空链表就可以)
+				trave_LinkListSendInfo(g_list_send_dataInfo, freeMapToMemPool);
+				if ((ret = clear_LinkListSendInfo(g_list_send_dataInfo)) < 0)
+				{
+					myprint("Error: func clear_LinkListSendInfo() ");
+					assert(0);
+				}
+
+				//8.修改标识符, 标识接收到该数据包的应答
+				g_isSendPackCurrent = false;
+
+				//9.通知组包线程进行下一个任务
+				sem_post(&g_sem_send);
+			}
+
+			return ret;
+		}
+
+		/*对服务器的应答数据包, 进行选择处理
+		*@param : tmpContent		数据包转义后的数据
+		*@param : tmpContentLenth	转义后数据的长度, 包含: 报头 + 信息 + 校验码
+		*@retval: success 0,
+		*/
+		int deal_with_pack(char *tmpContent, int tmpContentLenth)
+		{
+			int ret = 0;
+			uint8_t cmd = 0;					//接收数据包命令
+
+			//1.获取接收数据包的命令字
+			cmd = *((uint8_t *)tmpContent);
+
+			//2.单包回复命令
+			if (cmd == LOGINCMDRESPON || cmd == LOGOUTCMDRESPON || cmd == HEARTCMDRESPON || cmd == NEWESCMDRESPON
+				|| cmd == DELETECMDRESPON || cmd == ENCRYCMDRESPON)
+			{
+				ret = commom_respcommand_func(tmpContent, tmpContentLenth);
+			}
+			else
+			{
+				switch (cmd) {
+				case DOWNFILEZRESPON:
+					if ((ret = downFile_respon_func(tmpContent, tmpContentLenth)) < 0)
+						myprint("Error : func downFile_respon_func()");
+					break;
+				case UPLOADCMDRESPON:
+					if ((ret = upload_respon_func(tmpContent, tmpContentLenth)) < 0)
+						myprint("Error : func upload_respon_func()");
+					break;
+				case TEMPLATECMDRESPON:
+					if ((ret = template_respon_func(tmpContent, tmpContentLenth)) < 0)
+						myprint("Error : func template_respon_func()");
+					break;
+				case MUTIUPLOADCMDRESPON:
+					if ((ret = mutiUpload_respon_func(tmpContent, tmpContentLenth)) < 0)
+						myprint("Error : func mutiUpload_respon_func()");
+					break;
+				case PUSHINFORESPON:
+					if ((ret = pushInfo_func(tmpContent, tmpContentLenth)) < 0)
+						myprint("Error : func mutiUpload_respon_func()");
+					break;
+				default:
+					myprint("recv from server cmd : %d Not found", cmd);
+					assert(0);
+				}
+			}
+
+			return ret;
+		}
+
 		//function: find  the whole packet; retval maybe error
-		int	data_unpack_process(int recvLenth)
+		int	ScannerClient::data_unpack_process(int recvLenth)
 		{
 			int ret = 0, tmpContentLenth = 0;
 			static int flag = 0, lenth = 0; 	//flag 标识找到标识符的数量;  lenth : 数据的长度
 			char buffer[2] = { 0 };
 			static char content[3000] = { 0 };	//
-			char tmpContent[1500] = { 0 }; 		//tmpBufFlag[15] = { 0 };
+			char tmpContent[SEND_BUFFER] = { 0 }; 		//tmpBufFlag[15] = { 0 };
 			char *tmp = NULL;
 
 			tmp = content + lenth;
 			while (recvLenth > 0)
 			{
-				while (1)
+				while (!_bStop)
 				{
-
 					//1. jurge current fifo is empty
-					if (get_fifo_element_count(g_fifo) == 0)
+					bool hasData = false;
+					std::string data;
 					{
-						goto End;
+						std::lock_guard<std::mutex> lock(_mtxSendData);
+						hasData = !_deqRecvData.empty();
+						if (hasData)
+						{
+							//2. get The fifo element
+							/*if ((ret = pop_fifo(g_fifo, (char *)buffer, 1)) < 0)
+							{
+								myprint("Error: func pop_fifo() ");
+								assert(0);
+							}*/
+							data = _deqRecvData.front();
+							_deqRecvData.pop_front();
+						}
 					}
-					//2. get The fifo element
-					if ((ret = pop_fifo(g_fifo, (char *)buffer, 1)) < 0)
+
+					if (!hasData)
 					{
-						myprint("Error: func pop_fifo() ");
-						assert(0);
+						std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						continue;
 					}
+
 					//3.flag : have find The whole package head 
 					if (*buffer == 0x7e && flag == 0)
 					{
@@ -1304,7 +1613,7 @@ namespace DROWNINGLIU
 						//4. anti escape recv data
 						if ((ret = anti_escape(content, lenth, tmpContent, &tmpContentLenth)) < 0)
 						{
-							myprint("Error: func anti_escape() no have data");
+							//myprint("Error: func anti_escape() no have data");
 							goto End;
 						}
 
@@ -1315,8 +1624,8 @@ namespace DROWNINGLIU
 
 							if ((deal_with_pack(tmpContent, tmpContentLenth)) < 0)
 							{
-								myprint("Error: func deal_with_pack()");
-								assert(0);
+								//myprint("Error: func deal_with_pack()");
+								//assert(0);
 							}
 
 							//6.清空临时变量
@@ -1331,7 +1640,7 @@ namespace DROWNINGLIU
 						else if (ret == -1)
 						{
 							//接收的数据包校验码出错, 需要服务器重新发送数据
-							myprint("Error: func compare_recvData_Correct()");
+							//myprint("Error: func compare_recvData_Correct()");
 							//7. clear the variable
 							memset(content, 0, sizeof(content));
 							memset(tmpContent, 0, sizeof(tmpContent));
@@ -1381,8 +1690,13 @@ namespace DROWNINGLIU
 		}
 
 		/*unpack The data */
-		int thid_unpack_thread(void *arg)
+		int thid_unpack_thread(void *param)
 		{
+			if (param == NULL)
+				return -1;
+
+			ScannerClient &client = *(ScannerClient *)param;
+
 			int   ret = 0;
 			//pthread_detach(pthread_self());
 
